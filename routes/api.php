@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyTypeController;
+use App\Http\Controllers\MiscController;
 
 
 /*
@@ -33,4 +34,9 @@ Route::group([
 Route::group(['middleware'=>'api', 'prefix'=>'companies'], function($router){
     // Route::post('/companies', [App\Http\Controllers\CompnayController::class, 'create']);
     Route::get('/types', [CompanyTypeController::class, 'findCompany']);
+});
+
+Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
+    Route::get('/city_town', [MiscController::class, 'cityTown']);
+    Route::get('/bank_code', [MiscController::class, 'bankCode']);
 });
