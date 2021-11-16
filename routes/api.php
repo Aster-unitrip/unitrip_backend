@@ -33,7 +33,7 @@ Route::group([
 
 Route::group(['middleware'=>'api', 'prefix'=>'companies'], function($router){
     // Route::post('/companies', [App\Http\Controllers\CompnayController::class, 'create']);
-    Route::get('/types', [CompanyTypeController::class, 'findCompany']);
+    Route::get('/types', [CompanyTypeController::class, 'index']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){

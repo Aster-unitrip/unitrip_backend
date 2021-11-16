@@ -6,9 +6,7 @@ RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/lo
 RUN apt update && apt install unzip
 RUN composer install --ignore-platform-reqs
 RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
-RUN php artisan jwt:secret
-RUN php artisan cache:clear
-RUN php artisan config:clear
+
 
 
 CMD ["php", "artisan", "serve", "--host", "0.0.0.0", "--port", "8080"]
