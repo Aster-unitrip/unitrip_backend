@@ -24,4 +24,9 @@ class MiscController extends Controller
     {
         return $this->miscService->getBankCode();
     }
+
+    public function historicLevel()
+    {
+        return $this->miscService->getHistoricLevel();
+    }
 }

@@ -39,4 +39,5 @@ Route::group(['middleware'=>'api', 'prefix'=>'companies'], function($router){
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/city_town', [MiscController::class, 'cityTown']);
     Route::get('/bank_code', [MiscController::class, 'bankCode']);
+    Route::get('historic_level', [MiscController::class, 'historicLevel']);
 });
