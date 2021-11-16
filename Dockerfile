@@ -7,6 +7,8 @@ RUN apt update && apt install unzip
 RUN composer install --ignore-platform-reqs
 RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
 RUN php artisan config:clear
+RUN php artisan key:generate
+RUN php artisan jwt:secret
 
 
 CMD ["php", "artisan", "serve", "--host", "0.0.0.0", "--port", "8080"]
