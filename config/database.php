@@ -51,7 +51,7 @@ return [
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
-            'unix_socket' => env('DB_SOCKET', '/cloudsql/unitrip:asia-east-1:unitrip'),
+            'unix_socket' => env('DB_SOCKET', '/cloudsql/unitrip-331501:asia-east-1:unitrip'),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
