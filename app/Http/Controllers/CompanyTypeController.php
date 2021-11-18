@@ -6,43 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\CompanyType;
 
 
-/**
- * @OA\Post(
- *     path="/api/companies/types",
- *     tags={"company"},
- *     summary="List all company types",
- *     operationId="",
- *     @OA\Parameter(
- *         name="petId",
- *         in="path",
- *         description="ID of pet to update",
- *         required=true,
- *         @OA\Schema(
- *             type="integer",
- *             format="int64",
- *             example=1
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="successful operation",
- *         @OA\JsonContent(ref="#/components/schemas/ApiResponse")
- *     ),
- *     security={
- *         {"petstore_auth": {"write:pets", "read:pets"}}
- *     },
- *     @OA\RequestBody(
- *         description="Upload images request body",
- *         @OA\MediaType(
- *             mediaType="application/octet-stream",
- *             @OA\Schema(
- *                 type="string",
- *                 format="binary"
- *             )
- *         )
- *     )
- * )
- */
+
 class CompanyTypeController extends Controller
 {
     public function __construct()
@@ -51,9 +15,37 @@ class CompanyTypeController extends Controller
     }
     
     /**
-     * List all company types.
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/api/companies/types",
+     *     tags={"company"},
+     *     summary="List all company types",
+     *     operationId="",
+     *     @OA\Parameter(
+     *         name="petId",
+     *         in="path",
+     *         description="ID of pet to update",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer",
+     *             format="int64",
+     *             example=1
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="successful operation",
+     *         @OA\JsonContent(
+     *              @OA\AdditionalProperties(
+     *                  type="integer",
+     *                  format="int32"
+     *              )
+     *          )
+     *     ),
+     *     security={
+     *         {"petstore_auth": {"write:pets", "read:pets"}}
+     *     },
+
+     * )
      */
     public function index(){
         $companyTypes = CompanyType::all();

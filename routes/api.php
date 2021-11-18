@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyTypeController;
+use App\Http\Controllers\ComponentCategoryController;
 use App\Http\Controllers\MiscController;
 
 
@@ -36,8 +37,12 @@ Route::group(['middleware'=>'api', 'prefix'=>'companies'], function($router){
     Route::get('/types', [CompanyTypeController::class, 'index']);
 });
 
+Route::group(['middleware'=>'api', 'prefix'=>'components'], function($router){
+    Route::get('/types', [ComponentCategoryController::class, 'index']);
+});
+
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/city_town', [MiscController::class, 'cityTown']);
     Route::get('/bank_code', [MiscController::class, 'bankCode']);
-    Route::get('historic_level', [MiscController::class, 'historicLevel']);
+    Route::get('/historic_level', [MiscController::class, 'historicLevel']);
 });
