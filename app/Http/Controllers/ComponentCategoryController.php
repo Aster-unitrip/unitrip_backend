@@ -23,7 +23,7 @@ class ComponentCategoryController extends Controller
     public function childCategories(Request $request)
     {
         if ($request->has('parent_category')) {
-            return $this->componentCategoryService->getChildCategories($request->input('parentCategory')); 
+            return $this->componentCategoryService->getChildCategories($request->input('parent_category')); 
         }
     }
 
