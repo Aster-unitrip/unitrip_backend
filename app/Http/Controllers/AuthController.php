@@ -7,6 +7,7 @@ use App\Models\CompanyUser;
 use Illuminate\Http\Request;
 use App\Services\CompanyService;
 use App\Services\UserService;
+use App\Services\CompanyUserService;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -17,16 +18,18 @@ class AuthController extends Controller
 {
     private $companyService;
     private $userService;
+    private $companyUserService;
     /**
      * Create a new AuthController instance.
      *
      * @return void
      */
-    public function __construct(CompanyService $companyService, UserService $userService) 
+    public function __construct(CompanyService $companyService, UserService $userService, CompanyUserService $companyUserService) 
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
         $this->companyService = $companyService;
         $this->userService = $userService;
+        $this->companyUserService = $companyUserService;
     }
 
     /**
@@ -171,11 +174,13 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function findCompany(Request $request)
+    public function updateProfile(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make(json_decode($request->getContent(), true), [
+            'user_id' => 'required|integer',
+            'company_id' => 'required|integer',
             'contact_name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:users',
+            'email' => 'required|string|email|max:100',
             'password' => 'required|string|confirmed|min:6',
             'contact_tel' => 'required|string|min:8,12',
             'role_id' => 'required|string|min:1',
@@ -197,23 +202,28 @@ class AuthController extends Controller
         if($validator->fails()){
             return response()->json($validator->errors()->toJson(), 400);
         }
+        $validated = $validator->validated();
+        unset($validated['password']);
+        unset($validated['bank_code']);
+        unset($validated['password_confirmation']);
+        
+        // Make sure the user is the owner of the company
+        $currectCompanyId = $this->companyUserService->getCompanyByUserId($validated['user_id']);
+        if ($currectCompanyId != $validated['company_id']) {
+            return response()->json(['error' => 'You are not the owner of this company'], 400);
+        }
+
         try{
+            // 總共兩個表要更新
+            // User, Company
             $user = $this->userService->update(
-            // $user = User::update(array_merge(
-                $validator->validated(),
-                ['password' => bcrypt($request->password)]
+                // $validator->validated(),
+                $validated
             );
 
             $company = $this->companyService->update(
-                $validator->validated()
-            );
-
-            // $company = Company::update(
-            //     $validator->validated()
-            // );
-
-            $companyUser = CompanyUser::create(
-                    ['user_id' => $user->id, 'company_id' => $company->id]
+                // $validator->validated()
+                $validated
             );
         }
         catch(\Exception $e){
@@ -223,15 +233,12 @@ class AuthController extends Controller
             if ($company) {
                 $company->delete();
             }
-            if ($companyUser) {
-                $companyUser->delete();
-            }
+
             return response()->json(['error' => $e->getMessage()], 400);
         }
         
         return response()->json([
-            'message' => 'User successfully registered',
-            // 'user' => array_merge($user, $company) 
+            'message' => 'User successfully updated',
         ], 201);
     }
 

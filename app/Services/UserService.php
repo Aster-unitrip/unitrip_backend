@@ -13,8 +13,9 @@ class UserService
 
     public function update($request)
     {
-        $user = $this->user->find($request->id);
-        $user->update($request->all());
+        $user = $this->user->find($request['user_id']);
+        unset($user['user_id']);
+        $user->update($request);
 
         return $user;
     }

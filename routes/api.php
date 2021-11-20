@@ -29,7 +29,7 @@ Route::group([
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::get('/user-profile', [AuthController::class, 'userProfile']);
-    Route::patch('/update-profile', [AuthController::class, 'updateProfile']);
+    Route::post('/update-profile', [AuthController::class, 'updateProfile']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'companies'], function($router){

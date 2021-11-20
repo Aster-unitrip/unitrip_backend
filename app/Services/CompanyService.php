@@ -26,9 +26,10 @@ class CompanyService
         return $this->model->create($request);
     }
 
-    public function update($request, $id)
+    public function update($request)
     {
-        $company = $this->model->find($id);
+        $company = $this->model->find($request['company_id']);
+        unset($request['company_id']);
         $company->update($request);
         return $company;
     }
