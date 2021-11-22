@@ -62,12 +62,12 @@ class AuthController extends Controller
     public function register(Request $request) {
         $validator = Validator::make($request->all(), [
             'contact_name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:users',
+            'email' => 'required|string|email|max:100',
             'password' => 'required|string|confirmed|min:6',
             'contact_tel' => 'required|string|min:8,12',
             'role_id' => 'required|string|min:1',
             'title' => 'required|string|max:20',
-            'tax_id' => 'required|string|max:12',
+            'tax_id' => 'required|string|max:12|unique:companies',
             'tel' => 'required|string|max:15',
             'address_city' => 'required|string|max:5',
             'address_town' => 'required|string|max:5',
@@ -100,6 +100,7 @@ class AuthController extends Controller
             );
         }
         catch(\Exception $e){
+            dd($e);
             if ($user) {
                 $user->delete();
             }

@@ -10,7 +10,7 @@ class MiscController extends Controller
 
     public function __construct(MiscService $miscService)
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
         $this->miscService = $miscService;
 
     }
