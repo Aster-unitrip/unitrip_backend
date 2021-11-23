@@ -40,7 +40,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'companies'], function($router){
 
 Route::group(['middleware'=>'api', 'prefix'=>'components'], function($router){
     Route::get('/parent_types', [ComponentCategoryController::class, 'parentCategories']);
-    Route::get('/types', [ImgCon::class, 'childCategories']);
+    Route::get('/types', [ComponentCategoryController::class, 'childCategories']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'img'], function($router){
