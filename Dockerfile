@@ -4,7 +4,8 @@ WORKDIR /app
 COPY . /app
 RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 RUN apt update && apt install unzip
-RUN composer install --ignore-platform-reqs
+RUN composer update
+RUN composer install
 RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
 
 

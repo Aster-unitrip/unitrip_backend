@@ -178,27 +178,26 @@ class AuthController extends Controller
     public function updateProfile(Request $request)
     {
         $validator = Validator::make(json_decode($request->getContent(), true), [
-            'user_id' => 'required|integer',
-            'company_id' => 'required|integer',
+            'id' => 'required|integer',
             'contact_name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100',
-            'password' => 'required|string|confirmed|min:6',
             'contact_tel' => 'required|string|min:8,12',
             'role_id' => 'required|string|min:1',
-            'title' => 'required|string|max:20',
-            'tax_id' => 'required|string|max:12',
-            'tel' => 'required|string|max:15',
-            'address_city' => 'required|string|max:5',
-            'address_town' => 'required|string|max:5',
-            'address' => 'required|string|max:30',
-            'logo_path' => 'required|string|max:100',
-            'website' => 'required|string|max:150',
-            'owner' => 'required|string|max:10',
-            'intro' => 'required|string|max:255',
-            'bank_name' => 'required|string|max:20',
-            'bank_code' => 'required|string|max:5',
-            'account_name' => 'required|string|max:10',
-            'account_number' => 'required|string|max:20',
+            'email' => 'required|string|email|max:100',
+            'company.id' => 'required|integer',
+            'company.title' => 'required|string|max:20',
+            'company.tax_id' => 'required|string|max:12',
+            'company.tel' => 'required|string|max:15',
+            'company.address_city' => 'required|string|max:5',
+            'company.address_town' => 'required|string|max:5',
+            'company.address' => 'required|string|max:30',
+            'company.logo_path' => 'required|string|max:100',
+            'company.website' => 'required|string|max:150',
+            'company.owner' => 'required|string|max:10',
+            'company.intro' => 'required|string|max:255',
+            'company.bank_name' => 'required|string|max:20',
+            'company.bank_code' => 'required|string|max:5',
+            'company.account_name' => 'required|string|max:10',
+            'company.account_number' => 'required|string|max:20',
         ]);
         if($validator->fails()){
             return response()->json($validator->errors()->toJson(), 400);
@@ -209,8 +208,8 @@ class AuthController extends Controller
         unset($validated['password_confirmation']);
         
         // Make sure the user is the owner of the company
-        $currectCompanyId = $this->companyUserService->getCompanyByUserId($validated['user_id']);
-        if ($currectCompanyId != $validated['company_id']) {
+        $currectCompanyId = $this->companyUserService->getCompanyByUserId($validated['id']);
+        if ($currectCompanyId != $validated['company']['id']) {
             return response()->json(['error' => 'You are not the owner of this company'], 400);
         }
 
@@ -224,10 +223,11 @@ class AuthController extends Controller
 
             $company = $this->companyService->update(
                 // $validator->validated()
-                $validated
+                $validated['company']
             );
         }
         catch(\Exception $e){
+            dd($e);
             if ($user) {
                 $user->delete();
             }

@@ -28,8 +28,8 @@ class CompanyService
 
     public function update($request)
     {
-        $company = $this->model->find($request['company_id']);
-        unset($request['company_id']);
+        $company = $this->model->find($request['id']);
+        unset($request['id']);
         $company->update($request);
         return $company;
     }
