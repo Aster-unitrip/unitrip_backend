@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\GCloudService;
 use Illuminate\Http\Request;
 
-class ImageController extends Controller
+class ImgController extends Controller
 {
     private $gCloudService;
 
