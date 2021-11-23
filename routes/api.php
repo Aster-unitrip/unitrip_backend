@@ -42,6 +42,10 @@ Route::group(['middleware'=>'api', 'prefix'=>'components'], function($router){
     Route::get('/types', [ComponentCategoryController::class, 'childCategories']);
 });
 
+Route::group(['middleware'=>'api', 'prefix'=>'img'], function($router){
+    Route::post('/upload', [ComponentCategoryController::class, 'parentCategories']);
+});
+
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/city_town', [MiscController::class, 'cityTown']);
     Route::get('/bank_code', [MiscController::class, 'bankCode']);
