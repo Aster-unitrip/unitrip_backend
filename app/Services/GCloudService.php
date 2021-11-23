@@ -17,7 +17,6 @@ class GCloudService
         $googleCloudStoragePath = $foldername.'/'.'raw'.'/'.$img->getClientOriginalName();
         $bucket->upload(file_get_contents($img), [
             'name' => $googleCloudStoragePath,
-            'predefinedAcl' => 'publicRead'
         ]);
 
         return response()->json([
