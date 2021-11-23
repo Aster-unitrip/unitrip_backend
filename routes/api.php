@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyTypeController;
 use App\Http\Controllers\ComponentCategoryController;
 use App\Http\Controllers\MiscController;
+use App\Http\Controllers\ImgController;
 
 
 /*
@@ -39,11 +40,11 @@ Route::group(['middleware'=>'api', 'prefix'=>'companies'], function($router){
 
 Route::group(['middleware'=>'api', 'prefix'=>'components'], function($router){
     Route::get('/parent_types', [ComponentCategoryController::class, 'parentCategories']);
-    Route::get('/types', [ImgController::class, 'index']);
+    Route::get('/types', [ImgCon::class, 'childCategories']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'img'], function($router){
-    Route::post('/upload', [ComponentCategoryController::class, 'parentCategories']);
+    Route::post('/upload', [ImgController::class, 'index']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
