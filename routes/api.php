@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyTypeController;
+use App\Http\Controllers\ComponentAttractionController;
 use App\Http\Controllers\ComponentCategoryController;
 use App\Http\Controllers\MiscController;
 use App\Http\Controllers\ImgController;
@@ -34,7 +35,6 @@ Route::group([
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'companies'], function($router){
-    // Route::post('/companies', [App\Http\Controllers\CompnayController::class, 'create']);
     Route::get('/types', [CompanyTypeController::class, 'index']);
 });
 
@@ -45,6 +45,13 @@ Route::group(['middleware'=>'api', 'prefix'=>'components'], function($router){
 
 Route::group(['middleware'=>'api', 'prefix'=>'img'], function($router){
     Route::post('/upload', [ImgController::class, 'index']);
+});
+
+Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router){
+    Route::post('/', [ComponentAttractionController::class, 'add2']);
+    Route::get('/', [ComponentAttractionController::class, 'list']);
+    Route::get('/{id}', [ComponentAttractionController::class, 'get_by_id']);
+    Route::post('/update', [ComponentAttractionController::class, 'edit']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){

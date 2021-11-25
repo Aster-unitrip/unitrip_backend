@@ -16,19 +16,18 @@ class CreateComponentAttractionsTable extends Migration
         Schema::create('component_attractions', function (Blueprint $table) {
             $table->id();
             $table->char('data_id', 20)->nullable()->index()->comment('觀光局資料ID');
-            $table->string('name', 100)->comment('名稱');
+            $table->string('name', 30)->comment('名稱');
             $table->string('website', 100)->nullable()->comment('網站');
-            $table->char('tel', 100)->nullable()->comment('電話');
-            $table->string('historic_level', 6)->comment('古蹟等級');
+            $table->char('tel', 20)->nullable()->comment('電話');
+            $table->string('historic_level', 6)->nullable()->comment('古蹟等級');
             $table->string('org_id', 20)->comment('管理機關單位');
-            $table->string('category', 10)->comment('地址');
             $table->json('categories')->comment('景點分類');
-            $table->string('address_city')->index()->comment('縣市');
-            $table->string('address_town')->index()->comment('鄉鎮市區');
-            $table->string('address')->comment('地址');
+            $table->string('address_city', 4)->index()->comment('縣市');
+            $table->string('address_town', 10)->index()->comment('鄉鎮市區');
+            $table->string('address', 30)->comment('地址');
             $table->double('lng')->nullable()->comment('經度');
             $table->double('lat')->nullable()->comment('緯度');
-            $table->json('bussiness_time')->comment('營業時間');
+            $table->json('bussiness_time')->nullable()->comment('營業時間');
             $table->integer('stay_time')->nullable()->comment('建議停留時間');
             // 圖片另存一張表多對多
             $table->string("intro_summary", 150)->nullable()->comment('簡介');

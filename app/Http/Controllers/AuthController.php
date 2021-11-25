@@ -100,7 +100,6 @@ class AuthController extends Controller
             );
         }
         catch(\Exception $e){
-            dd($e);
             if ($user) {
                 $user->delete();
             }
@@ -115,7 +114,6 @@ class AuthController extends Controller
         
         return response()->json([
             'message' => 'User successfully registered',
-            // 'user' => array_merge($user, $company) 
         ], 201);
     }
 
