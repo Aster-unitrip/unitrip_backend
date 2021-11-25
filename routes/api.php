@@ -49,7 +49,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'img'], function($router){
 
 Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router){
     Route::post('/', [ComponentAttractionController::class, 'add2']);
-    Route::get('/', [ComponentAttractionController::class, 'list']);
+    Route::post('/list', [ComponentAttractionController::class, 'list']);
     Route::get('/{id}', [ComponentAttractionController::class, 'get_by_id']);
     Route::post('/update', [ComponentAttractionController::class, 'edit']);
 });

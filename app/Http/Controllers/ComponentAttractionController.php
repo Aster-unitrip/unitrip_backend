@@ -27,7 +27,7 @@ class ComponentAttractionController extends Controller
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
             'historic_level' => 'nullable|string|max:6',
-            'org_id' => 'required|string|max:20',
+            'org_name' => 'required|string|max:20',
             'categories' => 'required',   // 要拿掉，改為用表來存
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',
@@ -82,7 +82,7 @@ class ComponentAttractionController extends Controller
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
             'historic_level' => 'nullable|string|max:6',
-            'org_id' => 'required|string|max:20',
+            'org_name' => 'required|string|max:20',
             'categories' => 'required',   // 要拿掉，改為用表來存
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',
@@ -114,14 +114,20 @@ class ComponentAttractionController extends Controller
 
     public function list(Request $request)
     {
-        $address_city = $request->address_city;
-        $address_town = $request->address_town;
-        $name = $request->name;
-        $categories = $request->categories;
-        $is_display = $request->is_display;
-
-        $result = $this->requestService->get_all();
-        return response()->json($result);
+        $filter = json_decode($request->getContent(), true);
+        if (array_key_exists('page', $filter)) {
+            $page = $filter['page'];
+            unset($filter['page']);
+            if ($page <= 0) {
+                return response()->json(['error' => 'page must be greater than 0'], 400);
+            }
+            else{
+                $page = $page - 1;
+            }
+        }
+        
+        $result = $this->requestService->get_all($filter, $page);
+        return response()->json($result[0], $result[1]);
     }
 
     public function get_by_id($id)
@@ -138,7 +144,7 @@ class ComponentAttractionController extends Controller
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
             'historic_level' => 'nullable|string|max:6',
-            'org_id' => 'required|string|max:20',
+            'org_name' => 'required|string|max:20',
             'categories' => 'required',   // 要拿掉，改為用表來存
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',

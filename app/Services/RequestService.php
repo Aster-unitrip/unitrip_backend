@@ -6,7 +6,7 @@ namespace App\Services;
 
 class RequestService
 {
-    public static function get_all($filter=null, $page=0)
+    public static function get_all($filter=[], $page=0)
     {
         $url = "https://data.mongodb-api.com/app/data-ruata/endpoint/data/beta/action/find";
         $limit = 10;
@@ -14,7 +14,6 @@ class RequestService
             "collection" => "attractions",
             "database" => "unitrip",
             "dataSource" => "RealmCluster",
-            "filter" => $filter,
             "projection" => array(
                 "_id" => 1,
                 "address_city" => 1,
@@ -25,6 +24,9 @@ class RequestService
             "limit" => 10,
             "skip" => $page * $limit,
         );
+        if ($filter != []) {
+            $data['filter'] = $filter;
+        }
         $postdata = json_encode($data);
         $options = array(
             'http' => array(
@@ -32,7 +34,7 @@ class RequestService
                 'header' => array(
                     'Content-type:application/json',
                     'Access-Control-Request-Headers: *',
-                    'api-key:4OTqpMbl4we6jdEQVGorUjwjzMIv4U68ACLM7LouZNXRVUV6DH6A6IPJ5DrtKD1Q',
+                    'api-key:'.config('app.mongo_key'),
                 ),
                 'content' => $postdata,
                 'timeout' => 10 // 超時時間（單位:s）
@@ -41,11 +43,18 @@ class RequestService
         try{
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
-            $result = json_decode($result, true);
-            return $result['documents'];
+            $http_code = explode(' ', $http_response_header[0])[1];
+
+            if ($http_code == "200") {
+                $result = json_decode($result, true);
+                return array($result['documents'], 200);
+            } else {
+                return array($result, 400);
+            }
+            
         }
         catch(\Exception $e) {
-            return $e->getMessage();
+            return array($e->getMessage(), 400);
         }
     }
 
@@ -70,7 +79,7 @@ class RequestService
                 'header' => array(
                     'Content-type:application/json',
                     'Access-Control-Request-Headers: *',
-                    'api-key:4OTqpMbl4we6jdEQVGorUjwjzMIv4U68ACLM7LouZNXRVUV6DH6A6IPJ5DrtKD1Q',
+                    'api-key:'.config('app.mongo_key'),
                 ),
                 'content' => $postdata,
                 'timeout' => 10 // 超時時間（單位:s）
@@ -79,11 +88,18 @@ class RequestService
         try{
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
-            $result = json_decode($result, true);
-            return $result['documents'];
+            $http_code = explode(' ', $http_response_header[0])[1];
+
+            if ($http_code == "200") {
+                $result = json_decode($result, true);
+                return array($result['documents'], 200);
+            } else {
+                return array($result, 400);
+            }
+            
         }
         catch(\Exception $e) {
-            return $e->getMessage();
+            return array($e->getMessage(), 400);
         }
         
     }
@@ -106,7 +122,7 @@ class RequestService
                 'header' => array(
                     'Content-type:application/json',
                     'Access-Control-Request-Headers: *',
-                    'api-key:4OTqpMbl4we6jdEQVGorUjwjzMIv4U68ACLM7LouZNXRVUV6DH6A6IPJ5DrtKD1Q',
+                    'api-key:'.config('app.mongo_key'),
                 ),
                 'content' => $postdata,
                 'timeout' => 10 // 超時時間（單位:s）
@@ -115,11 +131,18 @@ class RequestService
         try{
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
-            $result = json_decode($result, true);
-            return $result['document'];
+            $http_code = explode(' ', $http_response_header[0])[1];
+
+            if ($http_code == "200") {
+                $result = json_decode($result, true);
+                return array($result['document'], 200);
+            } else {
+                return array($result, 400);
+            }
+            
         }
         catch(\Exception $e) {
-            return $e->getMessage();
+            return array($e->getMessage(), 400);
         }
     }
 
@@ -145,7 +168,7 @@ class RequestService
                 'header' => array(
                     'Content-type:application/json',
                     'Access-Control-Request-Headers: *',
-                    'api-key:4OTqpMbl4we6jdEQVGorUjwjzMIv4U68ACLM7LouZNXRVUV6DH6A6IPJ5DrtKD1Q',
+                    'api-key:'.config('app.mongo_key'),
                 ),
                 'content' => $postdata,
                 'timeout' => 10 // 超時時間（單位:s）
@@ -154,11 +177,18 @@ class RequestService
         try{
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
-            $result = json_decode($result, true);
-            return $result['documents'];
+            $http_code = explode(' ', $http_response_header[0])[1];
+
+            if ($http_code == "200") {
+                $result = json_decode($result, true);
+                return array("Modified ID: ".$id, 200);
+            } else {
+                return array($result, 400);
+            }
+            
         }
         catch(\Exception $e) {
-            return $e->getMessage();
+            return array($e->getMessage(), 400);
         }
     }
 }
