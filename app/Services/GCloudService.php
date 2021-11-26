@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Http\Request;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Validation\Rule;
+use Validator;
 
 class GCloudService
 {
@@ -16,13 +17,18 @@ class GCloudService
             // Validate the request
             $rule = [
                 'type' => ['required', 'string', Rule::in(['attraction', 'hotel', 'play', 'restaurant', 'staff', 'transportation', 'room', 'meal'])],
-                'img' => 'required|image|mimes:jpeg,png,jpg|size:3072',
+                'img' => 'required|image|mimes:jpeg,png,jpg|max:3072',
             ];
+            
             $validator = Validator::make($request->all(), $rule);
+            if($validator->fails()){
+                return response()->json($validator->errors()->toJson(), 400);
+            }
 
-            $img = $validator->safe()->file('img');
-            $foldername = $validator->safe()->input('type');
-            $sub_filename = explode('.', $img->getClientOriginalName());
+            $img = $request->file('img');
+            $foldername = $validator->safe()->only('type');
+            $foldername = $foldername['type'];
+            $sub_filename = $img->getClientOriginalExtension();
             $file_name = uniqid().'.'.$sub_filename[1];
 
             
