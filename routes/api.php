@@ -45,6 +45,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'components'], function($router){
 
 Route::group(['middleware'=>'api', 'prefix'=>'img'], function($router){
     Route::post('/upload', [ImgController::class, 'index']);
+    Route::post('/remove', [ImgController::class, 'remove']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router){
