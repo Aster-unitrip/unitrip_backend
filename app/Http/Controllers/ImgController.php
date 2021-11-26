@@ -30,6 +30,6 @@ class ImgController extends Controller
 
     public function remove(Request $request)
     {
-        return $this->gCloudService->removeImg($request, 'attractions');
+        return $this->gCloudService->removeImg($request);
     }
 }
