@@ -61,8 +61,8 @@ class GCloudService
         //     'type': 'attraction',
         //     'filename': 'xxxxxxxx'
         // }
-        $imgData = $request->getContent();
-
+        $imgData = json_decode($request->getContent(), true);
+        dd($imgData);
         // Delete object
         $storage = new StorageClient();
         $bucket = $storage->bucket('unitrip_components');
