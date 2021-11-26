@@ -16,7 +16,7 @@ class GCloudService
         {
             // Validate the request
             $rule = [
-                'type' => ['required', 'string', Rule::in(['attraction', 'hotel', 'play', 'restaurant', 'staff', 'transportation', 'room', 'meal'])],
+                'type' => ['required', 'string', Rule::in(['attractions', 'hotels', 'plays', 'restaurants', 'staffs', 'transportations', 'rooms', 'meals'])],
                 'img' => 'required|image|mimes:jpeg,png,jpg|max:3072',
             ];
             
@@ -29,7 +29,7 @@ class GCloudService
             $foldername = $validator->safe()->only('type');
             $foldername = $foldername['type'];
             $sub_filename = $img->getClientOriginalExtension();
-            $file_name = uniqid().'.'.$sub_filename[1];
+            $file_name = uniqid().'.'.$sub_filename;
 
             
             // Upload images to Google Cloud Storage
