@@ -98,7 +98,7 @@ class ComponentAttractionController extends Controller
             'parking' => 'nullable|string|max:500',
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|string|max:500',
-            'is_display' => 'required|integer',
+            'is_display' => 'required|boolean',
 
         ];
         $data = json_decode($request->getContent(), true);
@@ -107,8 +107,8 @@ class ComponentAttractionController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
         $validated = $validator->validated();
-        $attraction = $this->requestService->insert_one($validated);
-        return response()->json($attraction);
+        $attraction = $this->requestService->insert_one('attractions', $validated);
+        return $attraction;
 
     }
 
@@ -125,15 +125,24 @@ class ComponentAttractionController extends Controller
                 $page = $page - 1;
             }
         }
+        else{
+            $page = 0;
+        }
         
-        $result = $this->requestService->get_all($filter, $page);
-        return response()->json($result[0], $result[1]);
+        $projection = array(
+                "_id" => 1,
+                "address_city" => 1,
+                "address_town" => 1,
+                "name" => 1,
+            );
+        $result = $this->requestService->get_all('attractions', $projection, $filter, $page);
+        return $result;
     }
 
     public function get_by_id($id)
     {
-        $result = $this->requestService->get_one($id);
-        return response()->json($result);
+        $result = $this->requestService->get_one('attractions', $id);
+        return $result;
     }
 
     public function edit(Request $request)
@@ -170,8 +179,8 @@ class ComponentAttractionController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
         $validated = $validator->validated();
-        $attraction = $this->requestService->update($validated);
-        return response()->json($attraction);
+        $attraction = $this->requestService->update('attractions', $validated);
+        return $attraction;
 
     }
 }

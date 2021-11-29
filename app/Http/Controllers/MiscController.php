@@ -31,4 +31,9 @@ class MiscController extends Controller
     {
         return $this->miscService->getHistoricLevel();
     }
+
+    public function organization()
+    {
+        return $this->miscService->getOrganization();
+    }
 }

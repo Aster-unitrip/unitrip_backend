@@ -72,10 +72,7 @@ class GCloudService
             $object->delete();
             return response()->json([
                 "status" => "success",
-                "message" => "image successfully deleted. ",
-                "data" => [
-                    'url' => 'https://storage.googleapis.com/unitrip_components/'.$googleCloudStoragePath,
-                ]
+                "message" => "image successfully deleted.",
             ]);
         }
         catch (\Exception $e)
