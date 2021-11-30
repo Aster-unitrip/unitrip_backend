@@ -21,10 +21,6 @@ class GCloudService
                 'component_name' => 'required|string|size:20',
                 'img' => 'requiredimage|mimes:jpeg,png,jpg|size:3072',
                 'description' => 'nullable|string|max:50',
-                'img2' => 'requiredimage|mimes:jpeg,png,jpg|size:3072',
-                'description2' => 'nullable|string|max:50',
-                'img3' => 'requiredimage|mimes:jpeg,png,jpg|size:3072',
-                'description3' => 'nullable|string|max:50',
             ];
             $validator = Validator::make();
 
