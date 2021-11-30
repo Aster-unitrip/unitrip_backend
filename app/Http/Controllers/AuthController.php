@@ -234,7 +234,7 @@ class AuthController extends Controller
             $rule['company']['ta_register_num'] = 'required|string|max:6';
             $rule['company']['ta_category'] = 'required|string|max:2';
         }
-+
+
         $validator = Validator::make(json_decode($request->getContent(), true), rule);
         if($validator->fails()){
             return response()->json($validator->errors(), 400);
