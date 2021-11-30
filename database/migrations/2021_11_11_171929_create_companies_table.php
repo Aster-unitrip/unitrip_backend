@@ -32,6 +32,28 @@ class CreateCompaniesTable extends Migration
             $table->integer('parent_id')->nullable();
             $table->timestamps();
         });
+
+        DB::table('companies')->insert(
+            [
+                [ 
+                    "title" => "樂多",
+                    "tax_id" => "99999999",
+                    "tel" => "02-111111111",
+                    "address_city" => "台北市",
+                    "address_town" => "萬華區",
+                    "address" => "林森路一段1號",
+                    "logo_path" => "https://cdn.unitrip",
+                    "website" => "https://unitrip.asia",
+                    "owner" => "小馬",
+                    "intro" => "zzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+                    "bank_name" => "國泰",
+                    "bank_code" => "013",
+                    "account_name" => "小馬",
+                    "account_number" => "99999999999",
+                    "parent_id" => null,
+                ],
+            ]
+        );
     }
 
     /**

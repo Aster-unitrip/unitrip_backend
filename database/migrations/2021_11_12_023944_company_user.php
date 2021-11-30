@@ -19,6 +19,15 @@ class CompanyUser extends Migration
             $table->integer('company_id');
             $table->timestamps();
         });
+
+        DB::table('company_user')->insert(
+            [
+                [ 
+                    'user_id' => '1', 
+                    'company_id' => '1',
+                ],
+            ]
+        );
     }
 
     /**

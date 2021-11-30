@@ -61,6 +61,12 @@ class RequestService
     */
     public function insert_one($collection, $post_data) {
         $url = "https://data.mongodb-api.com/app/data-ruata/endpoint/data/beta/action/insertOne";
+        $post_data['attraction_id'] = array(
+            "_id" => array("\$oid" => $post_data['attraction_id'])
+        );
+        $post_data['updated_at'] = date('Y-m-d H:i:s');
+        $post_data['created_at'] = date('Y-m-d H:i:s');
+        
         $data = array(
             "collection" => $collection,
             "database" => "unitrip",
@@ -146,6 +152,7 @@ class RequestService
         $url = "https://data.mongodb-api.com/app/data-ruata/endpoint/data/beta/action/replaceOne";
         $id = $update_data['_id'];
         unset($update_data['_id']);
+        $update_data['updated_at'] = date('Y-m-d H:i:s');
         $data = array(
             "collection" => $collection,
             "database" => "unitrip",

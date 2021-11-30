@@ -57,10 +57,10 @@ Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router){
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'activities'], function($router){
-    // Route::post('/', [ActivityController::class, 'add']);
+    Route::post('/', [ActivityController::class, 'add']);
     Route::post('/list', [ActivityController::class, 'list']);
-    // Route::get('/{id}', [ActivityController::class, 'get_by_id']);
-    // Route::post('/update', [ActivityController::class, 'edit']);
+    Route::get('/{id}', [ActivityController::class, 'get_by_id']);
+    Route::post('/update', [ActivityController::class, 'edit']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){

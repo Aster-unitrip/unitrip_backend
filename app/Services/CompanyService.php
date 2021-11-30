@@ -21,6 +21,11 @@ class CompanyService
         return $this->model->find($id);
     }
 
+    public function getCompanyByTaxId($taxId)
+    {
+        return $this->model->where('tax_id', $taxId)->first();
+    }
+
     public function create($request)
     {
         return $this->model->create($request);

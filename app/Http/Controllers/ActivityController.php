@@ -83,12 +83,49 @@ class ActivityController extends Controller
 
     public function get_by_id($id)
     {
-        // $result = $this->requestService->get_one($id);
-        // return response()->json($result);
+        $result = $this->requestService->get_one('activities', $id);
+        return $result;
     }
 
     public function edit(Request $request)
     {
+        $rule = [
+            '_id' => 'required|string|max:24',
+            'attraction_name' => 'string|max:20',
+            'attraction_id' => 'array',
+            'name' => 'required|max:30',
+            'tel' => 'required|max:15',
+            'fax' => 'max:15',
+            'categories' => 'required',
+            'language' => 'required',
+            'gather_at' => 'required',
+            'dismiss_at' => 'required',
+            'activity_location' => 'string|max:300',
+            'imgs' => 'required',
+            'intro_summary' => 'string|max:150',
+            'description' => 'string|max:300',
+            'activity_items' => 'required',
+            'price_include' => 'required',
+            'price_exclude' => 'required',
+            'attention' => 'required',
+            'detail_before_buy' => 'string|max:300',
+            'additional_fee' => 'string|max:300',
+            'refund' => 'string|max:300',
+            'note' => 'string|max:300',
+            'is_display' => 'required|boolean',
+            'created_at' => 'required|string'
+        ];
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $rule);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validated = $validator->validated();
+        $validated['attraction_id'] = array(
+            "_id" => array("\$oid" => $validated['attraction_id']['_id'])
+        );
+        $activity = $this->requestService->update('activities', $validated);
+        return $activity;
 
     }
 }
