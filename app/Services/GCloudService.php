@@ -40,13 +40,7 @@ class GCloudService
                 'name' => $googleCloudStoragePath,
             ]);
 
-            return array(
-                'status' => 'success',
-                'message' => 'image successfully saved. ',
-                'data' => [
-                    'url' => 'https://storage.googleapis.com/unitrip_components/'.$googleCloudStoragePath,
-                ]
-                );
+            return 'https://storage.googleapis.com/unitrip_components/'.$googleCloudStoragePath;
         }
         catch (\Exception $e)
         {

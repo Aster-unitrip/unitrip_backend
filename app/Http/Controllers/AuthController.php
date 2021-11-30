@@ -7,7 +7,6 @@ use App\Models\CompanyUser;
 use Illuminate\Http\Request;
 use App\Services\CompanyService;
 use App\Services\UserService;
-use App\Services\CompanyUserService;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -18,18 +17,16 @@ class AuthController extends Controller
 {
     private $companyService;
     private $userService;
-    private $companyUserService;
     /**
      * Create a new AuthController instance.
      *
      * @return void
      */
-    public function __construct(CompanyService $companyService, UserService $userService, CompanyUserService $companyUserService) 
+    public function __construct(CompanyService $companyService, UserService $userService) 
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
         $this->companyService = $companyService;
         $this->userService = $userService;
-        $this->companyUserService = $companyUserService;
     }
 
     /**
@@ -98,15 +95,6 @@ class AuthController extends Controller
         $input_user['address'] = $validator->validated()['address'];
 
         try{
-            $if_user_exist = $this->userService->getUserByEmail($validator->validated()['email']);
-            if ($if_user_exist) {
-                return response()->json(['error' => 'User already exists'], 400);
-            }
-            $user = User::create(array_merge(
-                $input_user,
-                ['password' => bcrypt($request->password)]
-            ));
-
             $if_company_exists = $this->companyService->getCompanyByTaxId($validator->validated()['tax_id']);
             if(!$if_company_exists){
                 $company = $this->companyService->create($validator->validated());
@@ -114,7 +102,17 @@ class AuthController extends Controller
             }else{
                 $company_id = $if_company_exists->id;
             }
-            $companyUser = $this->companyUserService->create($company_id, $user->id);
+
+            $if_user_exist = $this->userService->getUserByEmail($validator->validated()['email']);
+            if ($if_user_exist) {
+                return response()->json(['error' => 'User already exists'], 400);
+            }
+            $input_user['company_id'] = $company_id;
+            $user = User::create(array_merge(
+                $input_user,
+                ['password' => bcrypt($request->password)]
+            ));
+
         }
         catch(\Exception $e){
             // if ($user) {
@@ -122,9 +120,6 @@ class AuthController extends Controller
             // }
             // if ($company) {
             //     $company->delete();
-            // }
-            // if ($companyUser) {
-            //     $companyUser->delete();
             // }
             return response()->json(['error' => $e->getMessage()], 400);
         }
@@ -162,7 +157,7 @@ class AuthController extends Controller
      */
     public function userProfile() {
         $profile = auth()->user();
-        $company_id = $this->companyUserService->getCompanyByUserId($profile->id);
+        $company_id = $profile->company_id;
         $profile['company'] = $this->companyService->getById($company_id);
         return response()->json($profile);
     }
@@ -203,6 +198,7 @@ class AuthController extends Controller
             'contact_address_city' => 'string|max:5',
             'contact_address_town' => 'string|max:5',
             'contact_address' => 'string|max:30',
+            'company_id' => 'required|integer',
             'company.id' => 'required|integer',
             'company.title' => 'required|string|max:20',
             'company.tax_id' => 'required|string|max:12',
@@ -227,7 +223,7 @@ class AuthController extends Controller
         // unset($validated['password']);
         
         // Make sure the user is the owner of the company
-        $currectCompanyId = $this->companyUserService->getCompanyByUserId($validated['id']);
+        $currectCompanyId = $validated['company_id'];
         if ($currectCompanyId != $validated['company']['id']) {
             return response()->json(['error' => 'You are not the owner of this company'], 400);
         }
