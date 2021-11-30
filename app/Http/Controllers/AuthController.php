@@ -65,9 +65,12 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:100',
             'password' => 'required|string|confirmed|min:6',
             'contact_tel' => 'required|string|min:8,12',
+            'contact_address_city' => 'string|max:5',
+            'contact_address_town' => 'string|max:5',
+            'contact_address' => 'string|max:30',
             'role_id' => 'required|string|min:1',
             'title' => 'required|string|max:20',
-            'tax_id' => 'required|string|max:12|unique:companies',
+            'tax_id' => 'required|string|max:12',
             'tel' => 'required|string|max:15',
             'address_city' => 'required|string|max:5',
             'address_town' => 'required|string|max:5',
@@ -83,32 +86,46 @@ class AuthController extends Controller
         ]);
 
         if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
+            return response()->json($validator->errors(), 400);
         }
+        $input_user['contact_name'] = $validator->validated()['contact_name'];
+        $input_user['role_id'] = $validator->validated()['role_id'];
+        $input_user['email'] = $validator->validated()['email'];
+        $input_user['password'] = $validator->validated()['password'];
+        $input_user['contact_tel'] = $validator->validated()['contact_tel'];
+        $input_user['address_city'] = $validator->validated()['address_city'];
+        $input_user['address_town'] = $validator->validated()['address_town'];
+        $input_user['address'] = $validator->validated()['address'];
+
         try{
+            $if_user_exist = $this->userService->getUserByEmail($validator->validated()['email']);
+            if ($if_user_exist) {
+                return response()->json(['error' => 'User already exists'], 400);
+            }
             $user = User::create(array_merge(
-                $validator->validated(),
+                $input_user,
                 ['password' => bcrypt($request->password)]
             ));
 
-            $company = Company::create(
-                $validator->validated()
-            );
-
-            $companyUser = CompanyUser::create(
-                    ['user_id' => $user->id, 'company_id' => $company->id]
-            );
+            $if_company_exists = $this->companyService->getCompanyByTaxId($validator->validated()['tax_id']);
+            if(!$if_company_exists){
+                $company = $this->companyService->create($validator->validated());
+                $company_id = $company->id;
+            }else{
+                $company_id = $if_company_exists->id;
+            }
+            $companyUser = $this->companyUserService->create($company_id, $user->id);
         }
         catch(\Exception $e){
-            if ($user) {
-                $user->delete();
-            }
-            if ($company) {
-                $company->delete();
-            }
-            if ($companyUser) {
-                $companyUser->delete();
-            }
+            // if ($user) {
+            //     $user->delete();
+            // }
+            // if ($company) {
+            //     $company->delete();
+            // }
+            // if ($companyUser) {
+            //     $companyUser->delete();
+            // }
             return response()->json(['error' => $e->getMessage()], 400);
         }
         
@@ -145,7 +162,8 @@ class AuthController extends Controller
      */
     public function userProfile() {
         $profile = auth()->user();
-        $profile['company'] = $this->companyService->getById($profile->id);
+        $company_id = $this->companyUserService->getCompanyByUserId($profile->id);
+        $profile['company'] = $this->companyService->getById($company_id);
         return response()->json($profile);
     }
 
@@ -181,6 +199,10 @@ class AuthController extends Controller
             'contact_tel' => 'required|string|min:8,12',
             'role_id' => 'required|string|min:1',
             'email' => 'required|string|email|max:100',
+            'password' => 'required|string|confirmed|min:6',
+            'contact_address_city' => 'string|max:5',
+            'contact_address_town' => 'string|max:5',
+            'contact_address' => 'string|max:30',
             'company.id' => 'required|integer',
             'company.title' => 'required|string|max:20',
             'company.tax_id' => 'required|string|max:12',
@@ -198,12 +220,11 @@ class AuthController extends Controller
             'company.account_number' => 'required|string|max:20',
         ]);
         if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
+            return response()->json($validator->errors(), 400);
         }
         $validated = $validator->validated();
-        unset($validated['password']);
-        unset($validated['bank_code']);
-        unset($validated['password_confirmation']);
+        $validated['password'] = bcrypt($request->password);
+        // unset($validated['password']);
         
         // Make sure the user is the owner of the company
         $currectCompanyId = $this->companyUserService->getCompanyByUserId($validated['id']);
@@ -225,7 +246,6 @@ class AuthController extends Controller
             );
         }
         catch(\Exception $e){
-            dd($e);
             if ($user) {
                 $user->delete();
             }

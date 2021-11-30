@@ -21,13 +21,28 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->integer('company_id')->comment('所屬公司');
+            $table->string('address_city')->comment('城市');
+            $table->string('address_town')->comment('區域');
+            $table->string('address')->comment('地址');
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
         });
         DB::table('users')->insert(
             [
-                [ 'contact_name' => 'parker', 'contact_tel' => '02-1111111', 'role_id' => "[1, 2]", 'email' => 'parker@gmail.com', 'email_verified_at' => null, 'password' => '$2y$10$rEqaE6/FR6ch3hXpOITUouB3pn03xFC96lM96Vbk7s8lpnxrB0Ju.', 'remember_token' => null, 'company_id' => 1],
+                [ 
+                    'contact_name' => 'parker', 
+                    'contact_tel' => '02-1111111',
+                    'role_id' => "[1, 2]",
+                    'email' => 'parker@gmail.com',
+                    'email_verified_at' => null,
+                    'password' => '$2y$10$rEqaE6/FR6ch3hXpOITUouB3pn03xFC96lM96Vbk7s8lpnxrB0Ju.',
+                    'remember_token' => null,
+                    'address_city' => '台北市',
+                    'address_town' => '中正區',
+                    'address' => '重慶南路一段1號',
+                    'company_id' => 1
+                ],
             ]
         );
     }

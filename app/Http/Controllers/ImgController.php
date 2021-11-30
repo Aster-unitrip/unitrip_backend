@@ -18,14 +18,18 @@ class ImgController extends Controller
 
     public function index(Request $request)
     {
-        $img_url = $this->gCloudService->index($request, 'attractions');
+        $img_url = $this->gCloudService->index($request);
         return response()->json([
             "status" => "success",
             "message" => "image successfully saved. ",
             "data" => [
                 "url" => $img_url
-
                 ]
             ]);
+    }
+
+    public function remove(Request $request)
+    {
+        return $this->gCloudService->removeImg($request);
     }
 }

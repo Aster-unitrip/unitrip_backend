@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Services\RequestService;
+
+use Validator;
+
+class ActivityController extends Controller
+{
+    private $requestService;
+
+    public function __construct(RequestService $requestService)
+    {
+        $this->middleware('auth');
+        $this->requestService = $requestService;
+    }
+
+    public function add(Request $request)
+    {
+        $rule = [
+            'attraction_name' => 'string|max:20',
+            'attraction_id' => 'string',
+            'name' => 'required|max:30',
+            'tel' => 'required|max:15',
+            'fax' => 'max:15',
+            'categories' => 'required',
+            'language' => 'required',
+            'gather_at' => 'required',
+            'dismiss_at' => 'required',
+            'activity_location' => 'string|max:300',
+            'imgs' => 'required',
+            'intro_summary' => 'string|max:150',
+            'description' => 'string|max:300',
+            'activity_items' => 'required',
+            'price_include' => 'required',
+            'price_exclude' => 'required',
+            'attention' => 'required',
+            'detail_before_buy' => 'string|max:300',
+            'additional_fee' => 'string|max:300',
+            'refund' => 'string|max:300',
+            'note' => 'string|max:300',
+            'is_display' => 'required|boolean'
+        ];
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $rule);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validated = $validator->validated();
+        $activity = $this->requestService->insert_one('activities', $validated);
+        return $activity;
+ 
+    }
+
+    public function list(Request $request)
+    {
+        $filter = json_decode($request->getContent(), true);
+        if (array_key_exists('page', $filter)) {
+            $page = $filter['page'];
+            unset($filter['page']);
+            if ($page <= 0) {
+                return response()->json(['error' => 'page must be greater than 0'], 400);
+            }
+            else{
+                $page = $page - 1;
+            }
+        }
+        else{
+            $page = 0;
+        }
+        $projection = array(
+            "_id" => 1,
+            "address_city" => 1,
+            "address_town" => 1,
+            "name" => 1,
+            "attraction_name" => 1
+        );
+        $result = $this->requestService->get_all('activities', $projection, $filter, $page);
+        return $result;
+    }
+
+    public function get_by_id($id)
+    {
+        $result = $this->requestService->get_one('activities', $id);
+        return $result;
+    }
+
+    public function edit(Request $request)
+    {
+        $rule = [
+            '_id' => 'required|string|max:24',
+            'attraction_name' => 'string|max:20',
+            'attraction_id' => 'array',
+            'name' => 'required|max:30',
+            'tel' => 'required|max:15',
+            'fax' => 'max:15',
+            'categories' => 'required',
+            'language' => 'required',
+            'gather_at' => 'required',
+            'dismiss_at' => 'required',
+            'activity_location' => 'string|max:300',
+            'imgs' => 'required',
+            'intro_summary' => 'string|max:150',
+            'description' => 'string|max:300',
+            'activity_items' => 'required',
+            'price_include' => 'required',
+            'price_exclude' => 'required',
+            'attention' => 'required',
+            'detail_before_buy' => 'string|max:300',
+            'additional_fee' => 'string|max:300',
+            'refund' => 'string|max:300',
+            'note' => 'string|max:300',
+            'is_display' => 'required|boolean',
+            'created_at' => 'required|string'
+        ];
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $rule);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validated = $validator->validated();
+        $validated['attraction_id'] = array(
+            "_id" => array("\$oid" => $validated['attraction_id']['_id'])
+        );
+        $activity = $this->requestService->update('activities', $validated);
+        return $activity;
+
+    }
+}

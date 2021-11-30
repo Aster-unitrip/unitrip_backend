@@ -13,6 +13,7 @@ class MiscService
         $this->cityTownFile = storage_path('misc/cityTown.json');
         $this->bankCodeFile = storage_path('misc/bankCode.json');
         $this->historicLevelFile = storage_path('misc/historicLevel.json');
+        $this->organizations = storage_path('misc/organizations.json');
     }
 
     public function getCityTown()
@@ -30,6 +31,12 @@ class MiscService
     public function getHistoricLevel()
     {
         $jsonString = file_get_contents($this->historicLevelFile);
+        return json_decode($jsonString, true);
+    }
+
+    public function getOrganization()
+    {
+        $jsonString = file_get_contents($this->organizations);
         return json_decode($jsonString, true);
     }
 }

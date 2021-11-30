@@ -20,4 +20,9 @@ class UserService
         return $user;
     }
 
+    public function getUserByEmail($email)
+    {
+        return $this->user->where('email', $email)->first();
+    }
+
 }

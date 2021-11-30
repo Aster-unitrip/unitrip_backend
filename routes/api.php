@@ -8,6 +8,7 @@ use App\Http\Controllers\ComponentAttractionController;
 use App\Http\Controllers\ComponentCategoryController;
 use App\Http\Controllers\MiscController;
 use App\Http\Controllers\ImgController;
+use App\Http\Controllers\ActivityController;
 
 
 /*
@@ -45,6 +46,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'components'], function($router){
 
 Route::group(['middleware'=>'api', 'prefix'=>'img'], function($router){
     Route::post('/upload', [ImgController::class, 'index']);
+    Route::post('/remove', [ImgController::class, 'remove']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router){
@@ -54,8 +56,16 @@ Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router){
     Route::post('/update', [ComponentAttractionController::class, 'edit']);
 });
 
+Route::group(['middleware'=>'api', 'prefix'=>'activities'], function($router){
+    Route::post('/', [ActivityController::class, 'add']);
+    Route::post('/list', [ActivityController::class, 'list']);
+    Route::get('/{id}', [ActivityController::class, 'get_by_id']);
+    Route::post('/update', [ActivityController::class, 'edit']);
+});
+
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/city_town', [MiscController::class, 'cityTown']);
     Route::get('/bank_code', [MiscController::class, 'bankCode']);
     Route::get('/historic_level', [MiscController::class, 'historicLevel']);
+    Route::get('/organizations', [MiscController::class, 'organization']);
 });
