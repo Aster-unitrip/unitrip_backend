@@ -7,7 +7,6 @@ RUN apt update && apt install unzip
 RUN composer update
 RUN composer install
 RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
-RUN php artisan key:generate
 RUN php artisan migrate:fresh
 
 
