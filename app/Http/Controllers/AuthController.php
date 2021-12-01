@@ -28,7 +28,7 @@ class AuthController extends Controller
         $this->companyService = $companyService;
         $this->userService = $userService;
         $this->registerRule = [
-            'commpany_type' => ['required', 'integer', Rule::in([1,2])],
+            'company_type' => ['required', 'integer', Rule::in([1,2])],
             'contact_name' => 'required|string|between:2,100',
             'email' => 'required|string|email|max:100',
             'password' => 'required|string|confirmed|min:6',
@@ -59,9 +59,9 @@ class AuthController extends Controller
             'role_id' => 'required|string|min:1',
             'email' => 'required|string|email|max:100',
             'password' => 'required|string|confirmed|min:6',
-            'contact_address_city' => 'string|max:5',
-            'contact_address_town' => 'string|max:5',
-            'contact_address' => 'string|max:30',
+            'address_city' => 'string|max:5',
+            'address_town' => 'string|max:5',
+            'address' => 'string|max:30',
             'company_id' => 'required|integer',
             'company.id' => 'required|integer',
             'company.title' => 'required|string|max:20',
@@ -114,7 +114,7 @@ class AuthController extends Controller
         
         if ($company_type == 2)
         {
-            $rule = $this->updateRule;
+            $rule = $this->registerRule;
             $rule['ta_register_num'] = 'required|string|max:6';
             $rule['ta_category'] = 'required|string|max:2';
         }
@@ -226,16 +226,15 @@ class AuthController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        $company_type = $request->all()['company_type'];
+        $company_type = $request->all()['company']['company_type'];
         $rule = $this->updateRule;
         if ($company_type == 2)
         {
-            $rule = $this->updateRule;
-            $rule['company']['ta_register_num'] = 'required|string|max:6';
-            $rule['company']['ta_category'] = 'required|string|max:2';
+            $rule['company.ta_register_num'] = 'required|string|max:6';
+            $rule['company.ta_category'] = 'required|string|max:2';
         }
 
-        $validator = Validator::make(json_decode($request->getContent(), true), rule);
+        $validator = Validator::make(json_decode($request->getContent(), true), $rule);
         if($validator->fails()){
             return response()->json($validator->errors(), 400);
         }

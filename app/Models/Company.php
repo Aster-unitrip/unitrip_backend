@@ -23,6 +23,9 @@ class Company extends Model
         'bank_name',
         'bank_code',
         'account_name',
-        'account_number'
+        'account_number',
+        'company_type',
+        'ta_register_num',
+        'ta_category'
     ];
 }
