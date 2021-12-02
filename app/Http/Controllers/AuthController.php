@@ -195,6 +195,7 @@ class AuthController extends Controller
      */
     public function userProfile() {
         $profile = auth()->user();
+        dd($profile);
         $company_id = $profile->company_id;
         $profile['company'] = $this->companyService->getById($company_id);
         return response()->json($profile);
