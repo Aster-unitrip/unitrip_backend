@@ -7,7 +7,7 @@ use App\Models\CompanyUser;
 use Illuminate\Http\Request;
 use App\Services\CompanyService;
 use App\Services\UserService;
-
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Validator;
@@ -27,6 +27,58 @@ class AuthController extends Controller
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
         $this->companyService = $companyService;
         $this->userService = $userService;
+        $this->registerRule = [
+            'company_type' => ['required', 'integer', Rule::in([1,2])],
+            'contact_name' => 'required|string|between:2,100',
+            'email' => 'required|string|email|max:100',
+            'password' => 'required|string|confirmed|min:6',
+            'contact_tel' => 'required|string|min:8,12',
+            'contact_address_city' => 'string|max:5',
+            'contact_address_town' => 'string|max:5',
+            'contact_address' => 'string|max:30',
+            'role_id' => 'required|string|min:1',
+            'title' => 'required|string|max:20',
+            'tax_id' => 'required|string|max:12',
+            'tel' => 'required|string|max:15',
+            'address_city' => 'required|string|max:5',
+            'address_town' => 'required|string|max:5',
+            'address' => 'required|string|max:30',
+            'logo_path' => 'required|string|max:100',
+            'website' => 'required|string|max:150',
+            'owner' => 'required|string|max:10',
+            'intro' => 'required|string|max:255',
+            'bank_name' => 'required|string|max:20',
+            'bank_code' => 'required|string|max:5',
+            'account_name' => 'required|string|max:10',
+            'account_number' => 'required|string|max:20',
+        ];
+        $this->updateRule = [
+            'id' => 'required|integer',
+            'contact_name' => 'required|string|between:2,100',
+            'contact_tel' => 'required|string|min:8,12',
+            'role_id' => 'required|string|min:1',
+            'email' => 'required|string|email|max:100',
+            'password' => 'required|string|confirmed|min:6',
+            'address_city' => 'string|max:5',
+            'address_town' => 'string|max:5',
+            'address' => 'string|max:30',
+            'company_id' => 'required|integer',
+            'company.id' => 'required|integer',
+            'company.title' => 'required|string|max:20',
+            'company.tax_id' => 'required|string|max:12',
+            'company.tel' => 'required|string|max:15',
+            'company.address_city' => 'required|string|max:5',
+            'company.address_town' => 'required|string|max:5',
+            'company.address' => 'required|string|max:30',
+            'company.logo_path' => 'required|string|max:100',
+            'company.website' => 'required|string|max:150',
+            'company.owner' => 'required|string|max:10',
+            'company.intro' => 'required|string|max:255',
+            'company.bank_name' => 'required|string|max:20',
+            'company.bank_code' => 'required|string|max:5',
+            'company.account_name' => 'required|string|max:10',
+            'company.account_number' => 'required|string|max:20',
+        ];
     }
 
     /**
@@ -57,30 +109,16 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'contact_name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100',
-            'password' => 'required|string|confirmed|min:6',
-            'contact_tel' => 'required|string|min:8,12',
-            'contact_address_city' => 'string|max:5',
-            'contact_address_town' => 'string|max:5',
-            'contact_address' => 'string|max:30',
-            'role_id' => 'required|string|min:1',
-            'title' => 'required|string|max:20',
-            'tax_id' => 'required|string|max:12',
-            'tel' => 'required|string|max:15',
-            'address_city' => 'required|string|max:5',
-            'address_town' => 'required|string|max:5',
-            'address' => 'required|string|max:30',
-            'logo_path' => 'required|string|max:100',
-            'website' => 'required|string|max:150',
-            'owner' => 'required|string|max:10',
-            'intro' => 'required|string|max:255',
-            'bank_name' => 'required|string|max:20',
-            'bank_code' => 'required|string|max:5',
-            'account_name' => 'required|string|max:10',
-            'account_number' => 'required|string|max:20',
-        ]);
+        $company_type = $request->all()['company_type'];
+        $rule = $this->registerRule;
+        
+        if ($company_type == 2)
+        {
+            $rule = $this->registerRule;
+            $rule['ta_register_num'] = 'required|string|max:6';
+            $rule['ta_category'] = 'required|string|max:2';
+        }
+        $validator = Validator::make($request->all(), $rule);
 
         if($validator->fails()){
             return response()->json($validator->errors(), 400);
@@ -188,33 +226,15 @@ class AuthController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        $validator = Validator::make(json_decode($request->getContent(), true), [
-            'id' => 'required|integer',
-            'contact_name' => 'required|string|between:2,100',
-            'contact_tel' => 'required|string|min:8,12',
-            'role_id' => 'required|string|min:1',
-            'email' => 'required|string|email|max:100',
-            'password' => 'required|string|confirmed|min:6',
-            'contact_address_city' => 'string|max:5',
-            'contact_address_town' => 'string|max:5',
-            'contact_address' => 'string|max:30',
-            'company_id' => 'required|integer',
-            'company.id' => 'required|integer',
-            'company.title' => 'required|string|max:20',
-            'company.tax_id' => 'required|string|max:12',
-            'company.tel' => 'required|string|max:15',
-            'company.address_city' => 'required|string|max:5',
-            'company.address_town' => 'required|string|max:5',
-            'company.address' => 'required|string|max:30',
-            'company.logo_path' => 'required|string|max:100',
-            'company.website' => 'required|string|max:150',
-            'company.owner' => 'required|string|max:10',
-            'company.intro' => 'required|string|max:255',
-            'company.bank_name' => 'required|string|max:20',
-            'company.bank_code' => 'required|string|max:5',
-            'company.account_name' => 'required|string|max:10',
-            'company.account_number' => 'required|string|max:20',
-        ]);
+        $company_type = $request->all()['company']['company_type'];
+        $rule = $this->updateRule;
+        if ($company_type == 2)
+        {
+            $rule['company.ta_register_num'] = 'required|string|max:6';
+            $rule['company.ta_category'] = 'required|string|max:2';
+        }
+
+        $validator = Validator::make(json_decode($request->getContent(), true), $rule);
         if($validator->fails()){
             return response()->json($validator->errors(), 400);
         }
