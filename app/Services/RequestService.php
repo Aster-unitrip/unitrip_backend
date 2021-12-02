@@ -90,10 +90,9 @@ class RequestService
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
             $http_code = explode(' ', $http_response_header[0])[1];
-
-            if ($http_code == "200") {
+            if ($http_code == "201") {
                 $result = json_decode($result, true);
-                return response()->json($result['documents'], 200);
+                return response()->json($result, 201);
             } else {
                 return response()->json($result, 400);
             }
