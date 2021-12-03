@@ -146,7 +146,17 @@ class ComponentAttractionController extends Controller
     public function get_by_id($id)
     {
         $result = $this->requestService->get_one('attractions', $id);
-        return $result;
+        $content =  json_decode($result->content(), true);
+
+        if (array_key_exists('imgs', $content)){
+            foreach ($content['imgs'] as $value){
+                $n = 0;
+                $split_url = explode('/', $value['url']);
+                $content['imgs'][$n]['filename'] = end($split_url);
+            }
+        }
+    
+        return $content;
     }
 
     public function edit(Request $request)
