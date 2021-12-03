@@ -99,15 +99,17 @@ class ComponentAttractionController extends Controller
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|string|max:500',
             'is_display' => 'required|boolean',
-            'owned_by' => 'required|integer',
 
         ];
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $rule);
+        
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
+        $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
+        $validated['owned_by'] = $company_id;
         $attraction = $this->requestService->insert_one('attractions', $validated);
         return $attraction;
 

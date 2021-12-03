@@ -44,8 +44,6 @@ class GCloudService
                 "status" => "success",
                 "message" => "image successfully saved. ",
                 "data" => [
-                    "filename" => $file_name,
-                    "type" => $foldername,
                     "url" => 'https://storage.googleapis.com/unitrip_components/'.$googleCloudStoragePath
                 ]
             ], 200);
