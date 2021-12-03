@@ -44,6 +44,8 @@ class GCloudService
                 "status" => "success",
                 "message" => "image successfully saved. ",
                 "data" => [
+                    "filename" => $file_name,
+                    "type" => $foldername,
                     "url" => 'https://storage.googleapis.com/unitrip_components/'.$googleCloudStoragePath
                 ]
             ], 200);
@@ -72,15 +74,15 @@ class GCloudService
             $object->delete();
             return response()->json([
                 "status" => "success",
-                "message" => "image successfully deleted.",
-            ]);
+                "message" => "image successfully deleted: ".$imgData['filename'],
+            ], 200);
         }
         catch (\Exception $e)
         {
             return response()->json([
                 "status" => "error",
                 "message" => $e->getMessage(),
-            ]);
+            ], 400);
         }
 
     }

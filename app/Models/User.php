@@ -6,19 +6,13 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Company;
+use App\Services\CompanyService;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 
 class User extends Authenticatable implements JWTSubject
 {
-
-    // public function __construct(Company $company)
-    // {
-    //     $this->company = $company;
-    // }
-
     use HasFactory, Notifiable;
 
     /**
@@ -72,12 +66,14 @@ class User extends Authenticatable implements JWTSubject
      * @return array
      */
     public function getJWTCustomClaims() {
+        
+        $company_type = app('App\Services\CompanyService')->getById($this->company_id)->company_type;
         return [
-            // 'id' => $this->id,
-            // 'email' => $this->email,
-            // 'rold_id' => $this->role_id,
-            // 'company_id' => $this->company_id,
-            // 'company_type' => $this->company->company_type,
+            'id' => $this->id,
+            'email' => $this->email,
+            'rold_id' => json_decode($this->role_id),
+            'company_id' => $this->company_id,
+            'company_type' => $company_type
         ];
     }    
 }

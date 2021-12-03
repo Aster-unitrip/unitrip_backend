@@ -82,8 +82,8 @@ class ComponentAttractionController extends Controller
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
             'historic_level' => 'nullable|string|max:6',
-            'org_name' => 'required|string|max:20',
-            'categories' => 'required',   // 要拿掉，改為用表來存
+            'org_name' => 'string|max:20',
+            'categories' => 'required', 
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',
             'address' => 'required|string|max:30',
@@ -99,6 +99,7 @@ class ComponentAttractionController extends Controller
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|string|max:500',
             'is_display' => 'required|boolean',
+            'owned_by' => 'required|integer',
 
         ];
         $data = json_decode($request->getContent(), true);
@@ -128,6 +129,7 @@ class ComponentAttractionController extends Controller
         else{
             $page = 0;
         }
+        $filter['owned_by'] = auth()->user()->company_id;
         
         $projection = array(
                 "_id" => 1,
