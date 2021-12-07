@@ -195,4 +195,70 @@ class RequestService
             return response()->json($e->getMessage(), 400);
         }
     }
+
+    public function aggregate_filter($collection, $projection, $filter=[], $page=0)
+    {
+        $url = "https://data.mongodb-api.com/app/data-ruata/endpoint/data/beta/action/aggregate";
+        $limit = 10;
+        $data = array(
+            "collection" => $collection,
+            "database" => "unitrip",
+            "dataSource" => "RealmCluster",
+            "pipeline" => array(
+                // array('$match' => $filter),
+                // array('$project' => $projection),
+            ),
+        );
+        if ($filter != []) {
+            array_unshift($data['pipeline'], array('$match' => array('categories' => array('$in' => $filter['categories']))));
+            if (array_key_exists('categories', $filter) && gettype($filter['categories']) == 'array') {
+                // array_unshift($data['pipeline'], array('$match' => array('categories' => array('$in' => $filter['categories']))));
+                $data['pipeline'][0]['$match']['categories'] = ['$in' => $filter['categories']];
+            }
+        }
+        if ($projection != []) {
+            array_push($data['pipeline'], array('$project' => $projection));
+        }
+        if ($page>0) {
+            array_push($data['pipeline'], array('$skip' => $page*$limit));
+        }
+        array_push($data['pipeline'], array(
+            '$group' => array(
+                '_id' => null,
+                'docs' => array(
+                    '$push' => '$$ROOT'
+                ),
+                'count' => array('$sum' => 1)
+            )
+        ));
+        array_push($data['pipeline'], array('$project' => array('_id' => 0)));
+        $postdata = json_encode($data);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                    'api-key:'.config('app.mongo_key'),
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        try{
+            $context = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+            $http_code = explode(' ', $http_response_header[0])[1];
+
+            if ($http_code == "200") {
+                $result = json_decode($result, true);
+                return response()->json($result['documents'][0], 200);
+            } else {
+                return response()->json(['error' => $result], 400);
+            }   
+        }
+        catch(\Exception $e) {
+            return response()->json($e->getMessage(), 400);
+        }
+    }
 }

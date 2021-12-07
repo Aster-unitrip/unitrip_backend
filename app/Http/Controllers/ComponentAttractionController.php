@@ -139,7 +139,8 @@ class ComponentAttractionController extends Controller
                 "address_town" => 1,
                 "name" => 1,
             );
-        $result = $this->requestService->get_all('attractions', $projection, $filter, $page);
+        // $result = $this->requestService->get_all('attractions', $projection, $filter, $page);
+        $result = $this->requestService->aggregate_filter('attractions', $projection, $filter, $page);
         return $result;
     }
 
