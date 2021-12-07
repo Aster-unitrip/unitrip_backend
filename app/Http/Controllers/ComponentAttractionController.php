@@ -43,7 +43,7 @@ class ComponentAttractionController extends Controller
             'parking' => 'nullable|string|max:500',
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|string|max:500',
-            'is_display' => 'required|integer',
+            'is_display' => 'required|boolean',
             'imgs' => 'nullable',
 
         ];
