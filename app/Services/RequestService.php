@@ -210,9 +210,8 @@ class RequestService
             ),
         );
         if ($filter != []) {
-            array_unshift($data['pipeline'], array('$match' => array('categories' => array('$in' => $filter['categories']))));
             if (array_key_exists('categories', $filter) && gettype($filter['categories']) == 'array') {
-                // array_unshift($data['pipeline'], array('$match' => array('categories' => array('$in' => $filter['categories']))));
+                array_unshift($data['pipeline'], array('$match' => array('categories' => array('$in' => $filter['categories']))));
                 $data['pipeline'][0]['$match']['categories'] = ['$in' => $filter['categories']];
             }
         }
