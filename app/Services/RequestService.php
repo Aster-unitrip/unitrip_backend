@@ -210,6 +210,7 @@ class RequestService
             ),
         );
         if ($filter != []) {
+            $data['pipeline'][0]['$match'] = $filter;
             if (array_key_exists('categories', $filter) && gettype($filter['categories']) == 'array') {
                 array_unshift($data['pipeline'], array('$match' => array('categories' => array('$in' => $filter['categories']))));
                 $data['pipeline'][0]['$match']['categories'] = ['$in' => $filter['categories']];
@@ -248,9 +249,11 @@ class RequestService
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
             $http_code = explode(' ', $http_response_header[0])[1];
-
             if ($http_code == "200") {
                 $result = json_decode($result, true);
+                if ($result['documents'] == []) {
+                    return response()->json(array('docs' => [], 'count' => 0), 200);
+                }
                 return response()->json($result['documents'][0], 200);
             } else {
                 return response()->json(['error' => $result], 400);
