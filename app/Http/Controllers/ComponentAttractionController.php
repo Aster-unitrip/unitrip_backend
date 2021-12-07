@@ -20,60 +20,60 @@ class ComponentAttractionController extends Controller
         $this->requestService = $requestService;
     }
 
-    public function add(Request $request)
-    {
-        $rule = [
-            'name' => 'required|string|max:30',
-            'website' => 'nullable|string|max:100',
-            'tel' => 'required|string|max:20',
-            'historic_level' => 'nullable|string|max:6',
-            'org_name' => 'required|string|max:20',
-            'categories' => 'required',   // 要拿掉，改為用表來存
-            'address_city' => 'required|string|max:4',
-            'address_town' => 'required|string|max:10',
-            'address' => 'required|string|max:30',
-            'lng' => 'nullable|numeric',
-            'lat' => 'nullable|numeric',
-            'bussiness_time' => 'nullable',
-            'stay_time' => 'nullable|integer',
-            'intro_summary' => 'nullable|string|max:150',
-            'description' => 'nullable|string|max:300',
-            'ticket' => 'nullable',
-            'memo' => 'nullable|string|max:4096',
-            'parking' => 'nullable|string|max:500',
-            'attention' => 'nullable|string|max:500',
-            'experience' => 'nullable|string|max:500',
-            'is_display' => 'required|boolean',
-            'imgs' => 'nullable',
+    // public function add(Request $request)
+    // {
+    //     $rule = [
+    //         'name' => 'required|string|max:30',
+    //         'website' => 'nullable|string|max:100',
+    //         'tel' => 'required|string|max:20',
+    //         'historic_level' => 'nullable|string|max:6',
+    //         'org_name' => 'required|string|max:20',
+    //         'categories' => 'required',   // 要拿掉，改為用表來存
+    //         'address_city' => 'required|string|max:4',
+    //         'address_town' => 'required|string|max:10',
+    //         'address' => 'required|string|max:30',
+    //         'lng' => 'nullable|numeric',
+    //         'lat' => 'nullable|numeric',
+    //         'bussiness_time' => 'nullable',
+    //         'stay_time' => 'nullable|integer',
+    //         'intro_summary' => 'nullable|string|max:150',
+    //         'description' => 'nullable|string|max:300',
+    //         'ticket' => 'nullable',
+    //         'memo' => 'nullable|string|max:4096',
+    //         'parking' => 'nullable|string|max:500',
+    //         'attention' => 'nullable|string|max:500',
+    //         'experience' => 'nullable|string|max:500',
+    //         'is_display' => 'required|boolean',
+    //         'imgs' => 'nullable',
 
-        ];
-        $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $rule);
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
-        }
-        $validated = $validator->validated();
+    //     ];
+    //     $data = json_decode($request->getContent(), true);
+    //     $validator = Validator::make($data, $rule);
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => $validator->errors()], 400);
+    //     }
+    //     $validated = $validator->validated();
 
-        $attraction = $this->attractionService->create($validated);
+    //     $attraction = $this->attractionService->create($validated);
 
-        if (array_key_exists('error', $attraction)) {
-            return response()->json(['error' => $attraction['error']], 400);
-        }
-        else{
-            return response()->json(
-                [
-                    'success' => 'success',
-                    'data' => [
-                        'id' => $attraction['id'],
-                        'name' => $attraction['name']
-                    ]
+    //     if (array_key_exists('error', $attraction)) {
+    //         return response()->json(['error' => $attraction['error']], 400);
+    //     }
+    //     else{
+    //         return response()->json(
+    //             [
+    //                 'success' => 'success',
+    //                 'data' => [
+    //                     'id' => $attraction['id'],
+    //                     'name' => $attraction['name']
+    //                 ]
     
-                ], 200);
-        }
+    //             ], 200);
+    //     }
 
 
         
-    }
+    // }
 
     public function add2(Request $request)
     {
@@ -99,6 +99,7 @@ class ComponentAttractionController extends Controller
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|string|max:500',
             'is_display' => 'required|boolean',
+            'imgs' => 'nullable',
 
         ];
         $data = json_decode($request->getContent(), true);
