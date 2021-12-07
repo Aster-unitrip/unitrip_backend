@@ -44,7 +44,7 @@ class ComponentAttractionController extends Controller
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|string|max:500',
             'is_display' => 'required|integer',
-            'images' => 'nullable',
+            'imgs' => 'nullable',
 
         ];
         $data = json_decode($request->getContent(), true);

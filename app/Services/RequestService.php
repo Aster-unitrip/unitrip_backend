@@ -21,6 +21,9 @@ class RequestService
         );
         if ($filter != []) {
             $data['filter'] = $filter;
+            if (array_key_exists('categories', $filter) && gettype($filter['categories']) == 'array') {
+                $data['filter']['categories'] = ['$in' => $filter['categories']];
+            }
         }
         $postdata = json_encode($data);
         $options = array(
