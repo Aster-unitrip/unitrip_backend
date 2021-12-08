@@ -22,11 +22,11 @@ class CreateCompanyTypesTable extends Migration
             [
                 [ 'type_name' => '供應商'],
                 [ 'type_name' => '旅行社'],
-                [ 'type_name' => '車行'],
-                [ 'type_name' => '飯店'],
-                [ 'type_name' => '餐廳'],
-                [ 'type_name' => '體驗'],
-                [ 'type_name' => '其他'],
+                // [ 'type_name' => '車行'],
+                // [ 'type_name' => '飯店'],
+                // [ 'type_name' => '餐廳'],
+                // [ 'type_name' => '體驗'],
+                // [ 'type_name' => '其他'],
             ]
         );
     }

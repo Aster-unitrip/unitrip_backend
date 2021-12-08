@@ -9,7 +9,7 @@ use App\Http\Controllers\ComponentCategoryController;
 use App\Http\Controllers\MiscController;
 use App\Http\Controllers\ImgController;
 use App\Http\Controllers\ActivityController;
-
+use App\Http\Controllers\ItineraryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +61,13 @@ Route::group(['middleware'=>'api', 'prefix'=>'activities'], function($router){
     Route::post('/list', [ActivityController::class, 'list']);
     Route::get('/{id}', [ActivityController::class, 'get_by_id']);
     Route::post('/update', [ActivityController::class, 'edit']);
+});
+
+Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
+    Route::post('/', [ItineraryController::class, 'add']);
+    // Route::post('/list', [ActivityController::class, 'list']);
+    // Route::get('/{id}', [ActivityController::class, 'get_by_id']);
+    // Route::post('/update', [ActivityController::class, 'edit']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
