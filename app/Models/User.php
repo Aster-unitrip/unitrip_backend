@@ -66,12 +66,11 @@ class User extends Authenticatable implements JWTSubject
      * @return array
      */
     public function getJWTCustomClaims() {
-        
         $company_type = app('App\Services\CompanyService')->getById($this->company_id)->company_type;
         return [
             'id' => $this->id,
             'email' => $this->email,
-            'rold_id' => json_decode($this->role_id),
+            'role_id' => json_decode($this->role_id),
             'company_id' => $this->company_id,
             'company_type' => $company_type
         ];

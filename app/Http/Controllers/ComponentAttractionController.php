@@ -118,6 +118,7 @@ class ComponentAttractionController extends Controller
 
     public function list(Request $request)
     {
+        // Handle filter content
         $filter = json_decode($request->getContent(), true);
         if (array_key_exists('page', $filter)) {
             $page = $filter['page'];
@@ -132,15 +133,46 @@ class ComponentAttractionController extends Controller
         else{
             $page = 0;
         }
-        $filter['owned_by'] = auth()->user()->company_id;
+        // Handle ticket prices
+        if (array_key_exists('fee', $filter)) {
+            if ($filter['fee']['free'] == true){
+                $filter['ticket.free'] = true;
+            }else if ($filter['fee']['free'] == false){
+                $filter['ticket.free'] = false;
+                $price_range = array();
+                if (array_key_exists('price_max', $filter['fee'])){
+                    $price_range['$lte'] = $filter['fee']['price_max'];
+                }
+                if (array_key_exists('price_min', $filter['fee'])){
+                    $price_range['$gte'] = $filter['fee']['price_min'];
+                }
+                if (count($price_range) > 0){
+                    $filter['ticket.full_ticket.price'] = $price_range;
+                }
+            }
+        }
+        unset($filter['fee']);
+        // dd($filter);
+
+        // Decide whether to filter all components or just the ones owned by the company
+        $company_type = auth()->payload()->get('company_type');
+        if ($company_type == 1){
+            $filter['owned_by'] = auth()->user()->company_id;
+        }
         
+        // Handle projection content
         $projection = array(
                 "_id" => 1,
                 "address_city" => 1,
                 "address_town" => 1,
+                "address" => 1,
                 "name" => 1,
+                "tel" => 1,
+                "ticket.free" => 1,
+                "ticket.full_ticket.price" => 1,
+                "imgs" => 1,
+                "experience" => 1,
             );
-        // $result = $this->requestService->get_all('attractions', $projection, $filter, $page);
         $result = $this->requestService->aggregate_filter('attractions', $projection, $filter, $page);
         return $result;
     }

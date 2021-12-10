@@ -56,6 +56,7 @@ class ActivityController extends Controller
 
     public function list(Request $request)
     {
+        // Handle filter content
         $filter = json_decode($request->getContent(), true);
         if (array_key_exists('page', $filter)) {
             $page = $filter['page'];
@@ -70,6 +71,8 @@ class ActivityController extends Controller
         else{
             $page = 0;
         }
+
+        // Handle projection content
         $projection = array(
             "_id" => 1,
             "address_city" => 1,
