@@ -24,6 +24,7 @@ class RequestService
             if (array_key_exists('categories', $filter) && gettype($filter['categories']) == 'array') {
                 $data['filter']['categories'] = ['$in' => $filter['categories']];
             }
+            
         }
         $postdata = json_encode($data);
         $options = array(
@@ -212,8 +213,9 @@ class RequestService
         if ($filter != []) {
             $data['pipeline'][0]['$match'] = $filter;
             if (array_key_exists('categories', $filter) && gettype($filter['categories']) == 'array') {
-                array_unshift($data['pipeline'], array('$match' => array('categories' => array('$in' => $filter['categories']))));
-                $data['pipeline'][0]['$match']['categories'] = ['$in' => $filter['categories']];
+                $data['pipeline'][0]['$match']['categories'] = array('$in' => $filter['categories']);
+                // array_unshift($data['pipeline'], array('$match' => array('categories' => array('$in' => $filter['categories']))));
+                // $data['pipeline'][0]['$match']['categories'] = ['$in' => $filter['categories']];
             }
         }
         if ($projection != []) {

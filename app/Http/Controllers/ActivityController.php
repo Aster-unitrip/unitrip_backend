@@ -71,16 +71,40 @@ class ActivityController extends Controller
         else{
             $page = 0;
         }
+        // Handle ticket prices
+        if (array_key_exists('fee', $filter)) {
+            
+            $price_range = array();
+            if (array_key_exists('price_max', $filter['fee'])){
+                $price_range['$lte'] = $filter['fee']['price_max'];
+            }
+            if (array_key_exists('price_min', $filter['fee'])){
+                $price_range['$gte'] = $filter['fee']['price_min'];
+            }
+            if (empty($price_range)){
+                $filter['activity_items.price'] = array('$all' => array($price_range));
+            }
+        }
+        // {'activity_items.price': {'$all':[]}}
+
+        unset($filter['fee']);
 
         // Handle projection content
         $projection = array(
             "_id" => 1,
             "address_city" => 1,
             "address_town" => 1,
+            "address" => 1,
             "name" => 1,
-            "attraction_name" => 1
+            "attraction_name" => 1,
+            "tel" => 1,
+            "activity_items" => 1,
+            "max_pax_size" => 1,
+            "stay_time" => 1,
+            "imgs" => 1,
+            "experience" => 1,
         );
-        $result = $this->requestService->get_all('activities', $projection, $filter, $page);
+        $result = $this->requestService->aggregate_filter('activities', $projection, $filter, $page);
         return $result;
     }
 

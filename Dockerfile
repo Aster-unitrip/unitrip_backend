@@ -1,4 +1,4 @@
-FROM php:8.1
+FROM php:8
 
 WORKDIR /app
 COPY . /app
