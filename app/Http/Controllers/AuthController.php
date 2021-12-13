@@ -26,7 +26,7 @@ class AuthController extends Controller
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
         $this->companyService = $companyService;
         $this->userService = $userService;
-        $this->registerRule = [
+        $this->supplierRegisterRule = [
             'company_type' => ['required', 'integer', Rule::in([1,2])],
             'contact_name' => 'required|string|between:2,100',
             'email' => 'required|string|email|max:100',
@@ -51,6 +51,12 @@ class AuthController extends Controller
             'account_name' => 'required|string|max:10',
             'account_number' => 'required|string|max:20',
         ];
+        
+        $this->agencyRegisterRule = array_push($this->supplierRegisterRule, array(
+            'ta_register_num' => 'required|string|max:6',
+            'ta_category' => 'required|string|max:20',
+        ));
+
         $this->updateRule = [
             'id' => 'required|integer',
             'contact_name' => 'required|string|between:2,100',
@@ -113,9 +119,11 @@ class AuthController extends Controller
         
         if ($company_type == 2)
         {
-            $rule = $this->registerRule;
-            $rule['ta_register_num'] = 'required|string|max:6';
-            $rule['ta_category'] = 'required|string|max:2';
+            $rule = $this->agencyRegisterRule;
+        }
+        else if ($company_type == 1)
+        {
+            $rule = $this->supplierRegisterRule;
         }
         $validator = Validator::make($request->all(), $rule);
 

@@ -42,6 +42,18 @@ class CreateUsersTable extends Migration
                     'address_town' => '中正區',
                     'address' => '重慶南路一段1號',
                     'company_id' => 1
+                ],[ 
+                    'contact_name' => 'jin', 
+                    'contact_tel' => '02-22222222',
+                    'role_id' => "[1, 2]",
+                    'email' => 'jin@gmail.com',
+                    'email_verified_at' => null,
+                    'password' => '$2y$10$rEqaE6/FR6ch3hXpOITUouB3pn03xFC96lM96Vbk7s8lpnxrB0Ju.',
+                    'remember_token' => null,
+                    'address_city' => '台北市',
+                    'address_town' => '中正區',
+                    'address' => '重慶南路二段1號',
+                    'company_id' => 1
                 ],
             ]
         );
