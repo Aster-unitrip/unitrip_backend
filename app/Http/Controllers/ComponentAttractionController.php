@@ -152,12 +152,23 @@ class ComponentAttractionController extends Controller
             }
         }
         unset($filter['fee']);
-        // dd($filter);
 
-        // Decide whether to filter all components or just the ones owned by the company
+
+
+        // Company_type: 1, Query public components belong to the company
+        // Company_type: 2, Query all public components and private data belong to the company
         $company_type = auth()->payload()->get('company_type');
+        $company_id = auth()->payload()->get('company_id');
         if ($company_type == 1){
             $filter['owned_by'] = auth()->user()->company_id;
+            $query_private = false;
+        }
+        else if ($company_type == 2){
+            $query_private = true;
+            $filter['is_display'] = true;
+        }
+        else{
+            return response()->json(['error' => 'company_type must be 1 or 2'], 400);
         }
         
         // Handle projection content
@@ -171,9 +182,10 @@ class ComponentAttractionController extends Controller
                 "ticket.free" => 1,
                 "ticket.full_ticket.price" => 1,
                 "imgs" => 1,
-                "experience" => 1,
+                "private" => 1,
             );
-        $result = $this->requestService->aggregate_filter('attractions', $projection, $filter, $page);
+        $result = $this->requestService->aggregate_facet('attractions', $projection, $company_id, $filter, $page, $query_private);
+        // $result = $this->requestService->aggregate_join_private('attractions', $projection, $filter, $page);
         return $result;
     }
 
@@ -219,6 +231,7 @@ class ComponentAttractionController extends Controller
             'experience' => 'nullable|string|max:500',
             'is_display' => 'required|integer',
             'images' => 'nullable',
+            'owned_by' => 'required|integer'
 
         ];
         $data = json_decode($request->getContent(), true);
