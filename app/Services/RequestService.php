@@ -294,10 +294,16 @@ class RequestService
             $http_code = explode(' ', $http_response_header[0])[1];
             if ($http_code == "200") {
                 $result = json_decode($result, true);
-                if ($result['documents'] == []) {
+                if (array_key_exists('documents', $result) && $result['documents'] != []) {
+                    return response()->json($result['documents'][0], 200);             
+                }
+                elseif (array_key_exists('document', $result) && $result['document'] != []) {
+                    return response()->json($result['document'], 200);
+                }
+                else{
                     return response()->json(array('docs' => [], 'count' => 0), 200);
                 }
-                return response()->json($result['documents'][0], 200);
+                
             } else {
                 return response()->json(['error' => $result], 400);
             }   

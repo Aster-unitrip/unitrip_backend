@@ -193,7 +193,6 @@ class ComponentAttractionController extends Controller
     {
         $result = $this->requestService->get_one('attractions', $id);
         $content =  json_decode($result->content(), true);
-
         if (array_key_exists('imgs', $content)){
             foreach ($content['imgs'] as $value){
                 $n = 0;
