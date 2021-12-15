@@ -273,7 +273,7 @@ class RequestService
 
         
         $postdata = json_encode($data);
-        dd($postdata);
+        
         $options = array(
             'http' => array(
                 'method' => 'POST',

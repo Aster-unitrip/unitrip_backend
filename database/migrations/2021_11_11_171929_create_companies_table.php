@@ -30,8 +30,8 @@ class CreateCompaniesTable extends Migration
             $table->string('bank_code', 5);
             $table->string('account_name', 10);
             $table->string('account_number', 20);
-            $table->string('ta_register_num', 6)->comment('旅遊業註冊編號');
-            $table->string('ta_category', 2)->comment('旅遊業類別，only in 綜合、甲種、乙種');
+            $table->string('ta_register_num', 6)->nullable()->comment('旅遊業註冊編號');
+            $table->string('ta_category', 2)->nullable()->comment('旅遊業類別，only in 綜合、甲種、乙種');
             $table->integer('parent_id')->nullable();
             $table->timestamps();
         });

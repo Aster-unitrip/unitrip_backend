@@ -50,6 +50,8 @@ class AuthController extends Controller
             'bank_code' => 'required|string|max:5',
             'account_name' => 'required|string|max:10',
             'account_number' => 'required|string|max:20',
+            'ta_register_num' => 'nullable|string|max:6',
+            'ta_category' => 'nullable|string|max:20',
         ];
         
         $this->agencyRegisterRule = array_push($this->supplierRegisterRule, array(
@@ -115,7 +117,6 @@ class AuthController extends Controller
      */
     public function register(Request $request) {
         $company_type = $request->all()['company_type'];
-        $rule = $this->registerRule;
         
         if ($company_type == 2)
         {
