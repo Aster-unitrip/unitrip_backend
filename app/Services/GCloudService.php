@@ -16,9 +16,15 @@ class GCloudService
         // Validate the request
         $rule = [
             'type' => ['required', 'string', Rule::in(['attractions', 'hotels', 'plays', 'restaurants', 'staffs', 'transportations', 'rooms', 'meals'])],
-            'img' => 'required|image|mimes:jpeg,png,jpg|max:3072',
+            [
+                'img.*' => 'required|mimes:jpg,jpeg,png|max:3072'
+                ],[
+                    'img.*.required' => 'Please upload an image',
+                    'img.*.mimes' => 'Only jpeg, jpg and png formats are allowed',
+                    'img.*.max' => 'Sorry! Maximum allowed size for an image is 3MB',
+                ]
+            // 'img.*' => 'required|mimes:jpeg,png,jpg|max:3072',
         ];
-        
         $validator = Validator::make($request->all(), $rule);
         if($validator->fails()){
             return response()->json($validator->errors(), 400);
