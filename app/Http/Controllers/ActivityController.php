@@ -81,13 +81,30 @@ class ActivityController extends Controller
             if (array_key_exists('price_min', $filter['fee'])){
                 $price_range['$gte'] = $filter['fee']['price_min'];
             }
-            if (empty($price_range)){
-                $filter['activity_items.price'] = array('$all' => array($price_range));
+            if (!empty($price_range)){
+                $filter['activity_items'] = array('$all' => array(
+                    array('$elemMatch' => array('price' => $price_range))
+                ));
             }
         }
         // {'activity_items.price': {'$all':[]}}
 
         unset($filter['fee']);
+        // Company_type: 1, Query public components belong to the company
+        // Company_type: 2, Query all public components and private data belong to the company
+        $company_type = auth()->payload()->get('company_type');
+        $company_id = auth()->payload()->get('company_id');
+        if ($company_type == 1){
+            $filter['owned_by'] = auth()->user()->company_id;
+            $query_private = false;
+        }
+        else if ($company_type == 2){
+            $query_private = true;
+            $filter['is_display'] = true;
+        }
+        else{
+            return response()->json(['error' => 'company_type must be 1 or 2'], 400);
+        }
 
         // Handle projection content
         $projection = array(
@@ -104,7 +121,7 @@ class ActivityController extends Controller
             "imgs" => 1,
             "experience" => 1,
         );
-        $result = $this->requestService->aggregate_filter('activities', $projection, $filter, $page);
+        $result = $this->requestService->aggregate_facet('activities', $projection, $company_id, $filter, $page, $query_private);
         return $result;
     }
 

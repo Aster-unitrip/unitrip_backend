@@ -175,7 +175,7 @@ class RequestService
             array_push($data['pipeline'], array('$lookup' => array(
                 'from' => $collection.'_private',
                 'localField' => '_id',
-                'foreignField' => 'public_attraction_id',
+                'foreignField' => 'public_attraction_id', 
                 'as' => 'private'
             )));
             array_push($data['pipeline'], array('$unwind'=>array('path'=>'$private', 'preserveNullAndEmptyArrays'=>true)));
@@ -200,7 +200,6 @@ class RequestService
             )
         ));
         array_push($data['pipeline'], array('$project' => array('_id' => 0)));
-        // dd($data);
         $postdata = json_encode($data);
         $options = array(
             'http' => array(
@@ -233,18 +232,22 @@ class RequestService
             if (array_key_exists('categories', $filter) && gettype($filter['categories']) == 'array') {
                 $query_filter[0]['$match']['categories'] = array('$in' => $filter['categories']);
             }
+            if (array_key_exists('name', $filter) && gettype($filter['name']) == 'string') {
+                $query_filter[0]['$match']['name'] = array('$regex' => $filter['name']);
+            }
         }
         if ($query_private) {
             array_push($query_filter, array('$lookup' => array(
                 'from' => $collection.'_private',
                 'localField' => '_id',
-                'foreignField' => 'public_attraction_id',
+                'foreignField' => 'public_id',
                 'as' => 'private'
             )));
             array_push($query_filter, array('$unwind'=>array('path'=>'$private', 'preserveNullAndEmptyArrays'=>true)));
+            array_push($query_filter, array('$addFields' => array('private.owned_by' => array('$ifNull' => array('$private.owned_by', 0)))));
         }
         if ($query_private) {
-            array_push($query_filter, array('$match' => array('private.owned_by' => $company_id)));
+            array_push($query_filter, array('$match' => array('private.owned_by' => array('$in' => array($company_id, 0)) )));
         }
         if ($projection != []) {
             array_push($query_filter, array('$project' => $projection));
@@ -270,6 +273,7 @@ class RequestService
 
         
         $postdata = json_encode($data);
+        dd($postdata);
         $options = array(
             'http' => array(
                 'method' => 'POST',
