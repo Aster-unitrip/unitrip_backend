@@ -7,7 +7,7 @@ use App\Services\RequestService;
 
 use Validator;
 
-class ActivityController extends Controller
+class ComponentActivityController extends Controller
 {
     private $requestService;
 

@@ -216,6 +216,14 @@ class RequestService
         return $this->send_req($options, $url);
     }
 
+    /* 列出元件
+        $collection: 查詢
+        $projection: 要列出的欄位
+        $company_id: 公司ID
+        $filter: 查詢條件
+        $page: 頁數，0為第一頁
+        $query_private: 是否查詢私有元件
+    */
     public function aggregate_facet($collection, $projection, $company_id, $filter=[], $page=0, $query_private=false)
     {
         $url = "https://data.mongodb-api.com/app/data-ruata/endpoint/data/beta/action/aggregate";
@@ -296,7 +304,7 @@ class RequestService
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
             $http_code = explode(' ', $http_response_header[0])[1];
-            if ($http_code == "200") {
+            if ($http_code == "200" or $http_code == "201") {
                 $result = json_decode($result, true);
                 if (array_key_exists('documents', $result) && $result['documents'] != []) {
                     return response()->json($result['documents'][0], 200);             
