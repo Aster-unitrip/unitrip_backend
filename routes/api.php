@@ -8,7 +8,7 @@ use App\Http\Controllers\ComponentAttractionController;
 use App\Http\Controllers\ComponentCategoryController;
 use App\Http\Controllers\MiscController;
 use App\Http\Controllers\ImgController;
-use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\ComponentActivityController;
 use App\Http\Controllers\ItineraryController;
 
 /*
@@ -57,17 +57,17 @@ Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router){
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'activities'], function($router){
-    Route::post('/', [ActivityController::class, 'add']);
-    Route::post('/list', [ActivityController::class, 'list']);
-    Route::get('/{id}', [ActivityController::class, 'get_by_id']);
-    Route::post('/update', [ActivityController::class, 'edit']);
+    Route::post('/', [ComponentActivityController::class, 'add']);
+    Route::post('/list', [ComponentActivityController::class, 'list']);
+    Route::get('/{id}', [ComponentActivityController::class, 'get_by_id']);
+    Route::post('/update', [ComponentActivityController::class, 'edit']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
     Route::post('/', [ItineraryController::class, 'add']);
-    // Route::post('/list', [ActivityController::class, 'list']);
-    // Route::get('/{id}', [ActivityController::class, 'get_by_id']);
-    // Route::post('/update', [ActivityController::class, 'edit']);
+    // Route::post('/list', [ComponentActivityController::class, 'list']);
+    // Route::get('/{id}', [ComponentActivityController::class, 'get_by_id']);
+    // Route::post('/update', [ComponentActivityController::class, 'edit']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
