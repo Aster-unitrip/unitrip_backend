@@ -7,7 +7,6 @@ RUN apt update && apt install unzip
 RUN composer update
 RUN composer install
 RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
-COPY php.ini.local /usr/local/etc/php.ini
 
 CMD ["php", "artisan", "serve", "--host", "0.0.0.0", "--port", "8080"]
 EXPOSE 8080
