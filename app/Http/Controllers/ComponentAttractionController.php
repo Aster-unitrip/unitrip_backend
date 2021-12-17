@@ -174,7 +174,7 @@ class ComponentAttractionController extends Controller
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|string|max:500',
             'is_display' => 'required|boolean',
-            'images' => 'nullable',
+            'imgs' => 'nullable',
             'owned_by' => 'required|integer'
 
         ];
