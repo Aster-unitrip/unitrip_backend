@@ -11,6 +11,7 @@ use App\Http\Controllers\ImgController;
 use App\Http\Controllers\ComponentActivityController;
 use App\Http\Controllers\ComponentRestaurantController;
 use App\Http\Controllers\ItineraryController;
+use App\Http\Controllers\ComponentAccomendationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,4 +81,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
 
 Route::group(['middleware'=>'api', 'prefix'=>'restaurants'], function($router){
     Route::post('/list', [ComponentRestaurantController::class, 'list']);
+});
+
+Route::group(['middleware'=>'api', 'prefix'=>'accomendations'], function($router){
+    Route::post('/list', [ComponentAccomendationController::class, 'list']);
 });

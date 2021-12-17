@@ -157,7 +157,7 @@ class ComponentAttractionController extends Controller
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
             'historic_level' => 'nullable|string|max:6',
-            'org_name' => 'required|string|max:20',
+            'org_name' => 'string|max:20',
             'categories' => 'required',   // 要拿掉，改為用表來存
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',
@@ -173,7 +173,7 @@ class ComponentAttractionController extends Controller
             'parking' => 'nullable|string|max:500',
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|string|max:500',
-            'is_display' => 'required|integer',
+            'is_display' => 'required|boolean',
             'images' => 'nullable',
             'owned_by' => 'required|integer'
 
