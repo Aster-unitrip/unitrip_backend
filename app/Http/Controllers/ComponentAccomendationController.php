@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\RequestService;
 
-use Validator;
-
-class ComponentRestaurantController extends Controller
+class ComponentAccomendationController extends Controller
 {
     private $requestService;
 
@@ -34,15 +32,31 @@ class ComponentRestaurantController extends Controller
         else{
             $page = 0;
         }
+
+        // Handle star level
+        if (array_key_exists('star', $filter)) {
+            $star = $filter['star'];
+            $filter['star'] = array("\$in" => $star);
+        }
+
         // Handle meal type
-        if (array_key_exists('meal_type', $filter)) {
-            $meal_type = $filter['meal_type'];
-            $filter['meals'] = array('$elemMatch' => array('type' => $meal_type));
-            unset($filter['meal_type']);
+        if (array_key_exists('room_type', $filter)) {
+            $room_type = $filter['room_type'];
+            $filter['room'] = array('$elemMatch' => array('room_type' => array('\$in' => $room_type)));
+            unset($filter['room_type']);
         }
-        else{
-            $meal_type = null;
+
+        if(array_key_exists('with_meals', $filter)){
+            $with_meals = $filter['with_meals'];
+            $filter['room'] = array('$elemMatch' => array('with_meals' => $with_meals));
         }
+
+        // Handle accommendation category
+        if (array_key_exists('category', $filter)) {
+            $category = $filter['category'];
+            $filter['category'] = array('$in' => $category);
+        }
+
 
         // Handle ticket prices
         if (array_key_exists('fee', $filter)) {
@@ -92,7 +106,8 @@ class ComponentRestaurantController extends Controller
             "imgs" => 1,
             "experience" => "\$private.experience",
         );
-        $result = $this->requestService->aggregate_facet('restaurants', $projection, $company_id, $filter, $page, $query_private);
+        $result = $this->requestService->aggregate_facet('accomendations', $projection, $company_id, $filter, $page, $query_private);
         return $result;
     }
+
 }

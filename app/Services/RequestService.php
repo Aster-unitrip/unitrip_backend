@@ -260,15 +260,17 @@ class RequestService
         if ($projection != []) {
             array_push($query_filter, array('$project' => $projection));
         }
+        $second_query_filter = $query_filter;
+
         if ($page>0) {
             array_push($query_filter, array('$skip' => $page*$limit));
         }
         array_push($query_filter, array('$limit' => $limit));
         
         // array_push($data['pipeline'], array('$project' => array('_id' => 0)));
-        $second_query_filter = $query_filter;
-        array_pop($second_query_filter);
-        array_pop($second_query_filter);
+        // $second_query_filter = $query_filter;
+        // array_pop($second_query_filter);
+        // array_pop($second_query_filter);
         $second_query_filter[] = array('$count' => 'totalCount');
         $data['pipeline'] =array( array(
             '$facet' => array(
@@ -281,7 +283,7 @@ class RequestService
 
         
         $postdata = json_encode($data);
-        
+        // dd($postdata);
         $options = array(
             'http' => array(
                 'method' => 'POST',
