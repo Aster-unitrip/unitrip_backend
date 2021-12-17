@@ -9,6 +9,7 @@ use App\Http\Controllers\ComponentCategoryController;
 use App\Http\Controllers\MiscController;
 use App\Http\Controllers\ImgController;
 use App\Http\Controllers\ComponentActivityController;
+use App\Http\Controllers\ComponentRestaurantController;
 use App\Http\Controllers\ItineraryController;
 
 /*
@@ -75,4 +76,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/bank_code', [MiscController::class, 'bankCode']);
     Route::get('/historic_level', [MiscController::class, 'historicLevel']);
     Route::get('/organizations', [MiscController::class, 'organization']);
+});
+
+Route::group(['middleware'=>'api', 'prefix'=>'restaurants'], function($router){
+    Route::post('/list', [ComponentRestaurantController::class, 'list']);
 });

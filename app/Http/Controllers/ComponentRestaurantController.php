@@ -34,6 +34,16 @@ class ComponentRestaurantController extends Controller
         else{
             $page = 0;
         }
+        // Handle meal type
+        if (array_key_exists('meal_type', $filter)) {
+            $meal_type = $filter['meal_type'];
+            $filter['meals'] = array('$elemMatch' => array('type' => $meal_type));
+            unset($filter['meal_type']);
+        }
+        else{
+            $meal_type = null;
+        }
+
         // Handle ticket prices
         if (array_key_exists('fee', $filter)) {
             
@@ -45,7 +55,7 @@ class ComponentRestaurantController extends Controller
                 $price_range['$gte'] = $filter['fee']['price_min'];
             }
             if (!empty($price_range)){
-                $filter['activity_items'] = array('$all' => array(
+                $filter['meals'] = array('$all' => array(
                     array('$elemMatch' => array('price' => $price_range))
                 ));
             }
@@ -76,15 +86,13 @@ class ComponentRestaurantController extends Controller
             "address_town" => 1,
             "address" => 1,
             "name" => 1,
-            "attraction_name" => 1,
             "tel" => 1,
-            "activity_items" => 1,
-            "max_pax_size" => 1,
-            "stay_time" => 1,
+            "cost_per_person" => 1,
+            "meals" => 1,
             "imgs" => 1,
-            "experience" => 1,
+            "experience" => "\$private.experience",
         );
-        $result = $this->requestService->aggregate_facet('activities', $projection, $company_id, $filter, $page, $query_private);
+        $result = $this->requestService->aggregate_facet('restaurants', $projection, $company_id, $filter, $page, $query_private);
         return $result;
     }
 }
