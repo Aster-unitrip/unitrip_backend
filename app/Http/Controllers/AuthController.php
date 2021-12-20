@@ -65,7 +65,7 @@ class AuthController extends Controller
             'contact_tel' => 'required|string|min:8,12',
             'role_id' => 'required|string|min:1',
             'email' => 'required|string|email|max:100',
-            'password' => 'required|string|confirmed|min:6',
+            // 'password' => 'required|string|confirmed|min:6',
             'address_city' => 'string|max:5',
             'address_town' => 'string|max:5',
             'address' => 'string|max:30',
