@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\RequestService;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class ComponentAccomendationController extends Controller
 {
@@ -58,7 +59,7 @@ class ComponentAccomendationController extends Controller
         }
 
 
-        // Handle ticket prices
+        // Handle room prices
         if (array_key_exists('fee', $filter)) {
             
             $price_range = array();
@@ -69,8 +70,8 @@ class ComponentAccomendationController extends Controller
                 $price_range['$gte'] = $filter['fee']['price_min'];
             }
             if (!empty($price_range)){
-                $filter['meals'] = array('$all' => array(
-                    array('$elemMatch' => array('price' => $price_range))
+                $filter['room'] = array('$all' => array(
+                    array('$elemMatch' => array('holiday_price' => $price_range))
                 ));
             }
         }
@@ -104,6 +105,7 @@ class ComponentAccomendationController extends Controller
             "cost_per_person" => 1,
             "meals" => 1,
             "imgs" => 1,
+            "room" => 1,
             "experience" => "\$private.experience",
         );
         $result = $this->requestService->aggregate_facet('accomendations', $projection, $company_id, $filter, $page, $query_private);

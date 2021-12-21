@@ -14,7 +14,7 @@ $db_settings['connections']['sqlite'] = [
     'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
 ];
 
-if (env('APP_ENV') == 'dev') {
+if (env('APP_ENV') == 'dev' || env('APP_ENV') == 'testing') {
     $db_settings['connections']['mysql'] = [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
