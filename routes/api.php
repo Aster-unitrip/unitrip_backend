@@ -13,6 +13,7 @@ use App\Http\Controllers\ComponentRestaurantController;
 use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\ComponentAccomendationController;
 use App\Http\Controllers\ComponentTransportationController;
+use App\Http\Controllers\ComponentGuideController;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,4 +91,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'accomendations'], function($router
 
 Route::group(['middleware'=>'api', 'prefix'=>'transportations'], function($router){
     Route::post('/list', [ComponentTransportationController::class, 'list']);
+});
+
+Route::group(['middleware'=>'api', 'prefix'=>'guides'], function($router){
+    Route::post('/list', [ComponentGuideController::class, 'list']);
 });
