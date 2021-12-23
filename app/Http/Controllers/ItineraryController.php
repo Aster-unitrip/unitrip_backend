@@ -14,11 +14,7 @@ class ItineraryController extends Controller
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
-    }
-
-    public function add(Request $request)
-    {
-        $rule = [
+        $this->rule = [
             'name' => 'required|string|max:30',
             'summary' => 'nullable|string|max:150',
             'code' => 'nullable|string|max:20',
@@ -27,14 +23,27 @@ class ItineraryController extends Controller
             'people_threshold' => 'required|integer|min:1',
             'people_full' => 'required|integer|max:100',
             'sub_categories' => 'nullable|array',
-            'itinerary_content' => 'required|array',
+            'itinerary_content' => 'required|array|min:1',
+            'guides' => 'required|array',
+            'transportations' => 'required|array',
             'accounting' => 'required|array',
             'include_description' => 'nullable|string|max:150',
             'exclude_description' => 'nullable|string|max:150',
 
         ];
+    }
+
+    private function checkAccounting($itinerary)
+    {
+
+        return $itinerary;
+    }
+
+    public function add(Request $request)
+    {
+        
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $rule);
+        $validator = Validator::make($data, $this->rule);
         
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
@@ -42,8 +51,8 @@ class ItineraryController extends Controller
         $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
-        $attraction = $this->requestService->insert_one('itineraries', $validated);
-        return $attraction;
+        $itinerary = $this->requestService->insert_one('itineraries', $validated);
+        return $itinerary;
 
     }
 

@@ -1,0 +1,299 @@
+{
+    "name": "花東一週",
+	"summary": "111111111111111111111111",
+	"code": "aazz123",
+	"total_day": 1,
+	"areas": [
+		"北部（新竹以北）",
+		"中部（中彰投、雲林）"
+	],
+	"people_threshold": 10,
+	"people_full": 100,
+	"sub_categories": [
+		"DIY課程",
+		"伴手禮",
+		"特色表演"
+	],
+	"itinerary_content": [
+		{
+			"sort": 1,
+			"name": "day1",
+			"gather_time": "08:00",
+			"gather_location": "台北車站南三門",
+			"day_summary": "出發日！",
+			"components": [
+				{
+					"sort": 1,
+					"component_id": "abcdefghijklmn",
+					"type": "attraction",
+					"name": "xxxxx",
+					"img": "cdn.unitrip.com/xxxx",
+					"time_since": "10:00",
+					"time_end": "12:00",
+					"note": "bbbbbbbbbbbbb",
+					"pricing_detail": [
+						{
+							"sort": 1,
+							"name": "全票",
+							"count": 3,
+							"unit_price": 200,
+							"sum": 600
+						},
+						{
+							"sort": 2,
+							"name": "半票",
+							"count": 1,
+							"unit_price": 100,
+							"sum": 100
+						}
+					],
+					"subtotal": 700
+				},
+				{
+					"sort": 2,
+					"type": "travel",
+					"travel_time": 30
+				},
+				{
+					"sort": 3,
+					"component_id": "abcdefghijklmn",
+					"type": "attraction",
+					"name": "xxxxx",
+					"img": "cdn.unitrip.com/xxxx",
+					"time_since": "10:00",
+					"time_end": "12:00",
+					"note": "bbbbbbbbbbbbb",
+					"pricing_detail": [
+						{
+							"sort": 1,
+							"name": "全票",
+							"count": 3,
+							"unit_price": 200,
+							"sum": 600
+						},
+						{
+							"sort": 2,
+							"name": "半票",
+							"count": 2,
+							"unit_price": 100,
+							"sum": 200
+						}
+					],
+					"subtotal": 800
+				},
+				{
+					"sort": 4,
+					"type": "travel",
+					"travel_time": 30
+				},
+				{
+					"sort": 5,
+					"component_id": "abcdefghijklmn",
+					"type": "hotel",
+					"name": "xxxxx",
+					"img": "cdn.unitrip.com/xxxx",
+					"time_since": "10:00",
+					"time_end": null,
+					"note": "bbbbbbbbbbbbb",
+					"pricing_detail": [
+						{
+							"sort": 1,
+							"name": "雙人房",
+							"count": 2,
+							"unit_price": 2000,
+							"sum": 600
+						},
+						{
+							"sort": 2,
+							"name": "ooooo",
+							"count": 2,
+							"unit_price": 100,
+							"sum": 200
+						}
+					],
+					"subtotal": 800
+				}
+			]
+		},
+		{
+			"sort": 2,
+			"name": "day2",
+			"gather_time": "08:00",
+			"gather_location": "飯店大廳",
+			"day_summary": "出門爬山",
+			"components": [
+				{
+					"sort": 1,
+					"component_id": "abcdefghijklmn",
+					"type": "attraction",
+					"name": "xxxxx",
+					"img": "cdn.unitrip.com/xxxx",
+					"time_since": "10:00",
+					"time_end": "12:00",
+					"note": "bbbbbbbbbbbbb",
+					"pricing_detail": [
+						{
+							"sort": 1,
+							"name": "xxxxxx",
+							"count": 3,
+							"unit_price": 200,
+							"sum": 600
+						},
+						{
+							"sort": 2,
+							"name": "ooooo",
+							"count": 1,
+							"unit_price": 100,
+							"sum": 100
+						}
+					],
+					"subtotal": 700
+				},
+				{
+					"sort": 2,
+					"type": "travel",
+					"travel_time": 30
+				},
+				{
+					"sort": 3,
+					"component_id": "abcdefghijklmn",
+					"type": "attraction",
+					"name": "xxxxx",
+					"img": "cdn.unitrip.com/xxxx",
+					"time_since": "10:00",
+					"time_end": "12:00",
+					"note": "bbbbbbbbbbbbb",
+					"pricing_detail": [
+						{
+							"sort": 1,
+							"name": "xxxxxx",
+							"count": 3,
+							"unit_price": 200,
+							"sum": 600
+						},
+						{
+							"sort": 2,
+							"name": "ooooo",
+							"count": 2,
+							"unit_price": 100,
+							"sum": 200
+						}
+					],
+					"subtotal": 800
+				},
+				{
+					"sort": 4,
+					"type": "travel",
+					"travel_time": 30
+				},
+				{
+					"sort": 5,
+					"component_id": "abcdefghijklmn",
+					"type": "hotel",
+					"name": "xxxxx",
+					"img": "cdn.unitrip.com/xxxx",
+					"time_since": "10:00",
+					"time_end": null,
+					"note": "bbbbbbbbbbbbb",
+					"pricing_detail": [
+						{
+							"sort": 1,
+							"name": "xxxxxx",
+							"count": 3,
+							"unit_price": 200,
+							"sum": 600
+						},
+						{
+							"sort": 2,
+							"name": "ooooo",
+							"count": 2,
+							"unit_price": 100,
+							"sum": 200
+						}
+					],
+					"subtotal": 800
+				}
+			]
+		}
+	],
+	"guides": [
+		{
+			"sort": 1,
+			"component_id": "abcdefghijklmn",
+			"type": "guide",
+			"name": "xxxxxx",
+			"imgs": [
+				"cdn.unitrip.com/xxxx"
+			],
+			"note": "bbbbbbbbbbbbb",
+			"unit_price": 200,
+			"days": 3,
+			"subtotal": 600
+		},
+		{
+			"sort": 2,
+			"component_id": "abcdefghijklmn",
+			"type": "guide",
+			"name": "ooooo",
+			"imgs": [
+				"cdn.unitrip.com/xxxx"
+			],
+			"note": "bbbbbbbbbbbbb",
+			"unit_price": 100,
+			"days": 2,
+			"subtotal": 200
+		}
+	],
+	"transportations": [
+		{
+			"component_id": "abcdefghijklmn",
+			"note": "bbbbbbbbbbbbb",
+			"type": "transportation",
+			"days": 2,
+			"imgs": [
+				"cdn.unitrip.com/xxxx"
+			],
+			"unit_price": 20000,
+			"count": 3,
+			"subtotal": 60000
+		}
+	],
+	"misc": [
+		{
+			"sort": 1,
+			"item": "aaaaaa",
+			"unit_price": 100,
+			"count": 10,
+			"subtotal": 1000
+		}
+	],
+	"accounting": {
+		"adult": {
+			"cost": 66400,
+			"estimation_price": {
+				"price": 5000,
+				"profit_percentage": 67
+			},
+			"estimation_percentage": {
+				"price": 4500,
+				"profit_percentage": 50
+			}
+		},
+		"child": {
+			"cost": 1000,
+			"estimation_price": {
+				"price": 2000,
+				"profit_percentage": 100
+			},
+			"estimation_percentage": {
+				"price": 1500,
+				"profit_percentage": 50
+			}
+		}
+	},
+	"include_description": "aaaaaaaaaa",
+	"exclude_description": "aaaaaaaaaa",
+	"owned_by": 2,
+	"updated_at": "2021-12-22 12:00:00",
+	"created_at": "2021-12-22 12:00:00"
+}

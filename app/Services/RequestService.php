@@ -306,19 +306,25 @@ class RequestService
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
             $http_code = explode(' ', $http_response_header[0])[1];
-            if ($http_code == "200" or $http_code == "201") {
+            if ($http_code == "200") {
                 $result = json_decode($result, true);
                 if (array_key_exists('documents', $result) && $result['documents'] != []) {
-                    return response()->json($result['documents'][0], 200);             
+                    return response()->json($result['documents'][0], $http_code);             
                 }
                 elseif (array_key_exists('document', $result) && $result['document'] != []) {
-                    return response()->json($result['document'], 200);
+                    return response()->json($result['document'], $http_code);
                 }
                 else{
-                    return response()->json(array('docs' => [], 'count' => 0), 200);
+                    return response()->json(array('docs' => [], 'count' => 0), $http_code);
                 }
-                
-            } else {
+            }
+            elseif ($http_code == "201")
+            {
+                $result = json_decode($result, true);
+                return response()->json($result, $http_code);
+
+            }    
+            else {
                 return response()->json(['error' => $result], 400);
             }   
         }
