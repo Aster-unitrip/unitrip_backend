@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\RequestService;
+use App\Services\ItineraryService;
 use Validator;
 
 class ItineraryController extends Controller
@@ -26,17 +27,12 @@ class ItineraryController extends Controller
             'itinerary_content' => 'required|array|min:1',
             'guides' => 'required|array',
             'transportations' => 'required|array',
+            'misc' => 'required|array',
             'accounting' => 'required|array',
             'include_description' => 'nullable|string|max:150',
             'exclude_description' => 'nullable|string|max:150',
 
         ];
-    }
-
-    private function checkAccounting($itinerary)
-    {
-
-        return $itinerary;
     }
 
     public function add(Request $request)
@@ -51,6 +47,14 @@ class ItineraryController extends Controller
         $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
+
+        // 檢查行程內容
+        // try{
+        $is = new ItineraryService($validated);
+        // } catch (\Exception $e) {
+        //     return response()->json(['error' => $e->getMessage()], 400);
+        // }
+        
         $itinerary = $this->requestService->insert_one('itineraries', $validated);
         return $itinerary;
 

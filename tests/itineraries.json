@@ -89,7 +89,7 @@
 				{
 					"sort": 5,
 					"component_id": "abcdefghijklmn",
-					"type": "hotel",
+					"type": "accomendation",
 					"name": "xxxxx",
 					"img": "cdn.unitrip.com/xxxx",
 					"time_since": "10:00",
@@ -189,7 +189,7 @@
 				{
 					"sort": 5,
 					"component_id": "abcdefghijklmn",
-					"type": "hotel",
+					"type": "accomendation",
 					"name": "xxxxx",
 					"img": "cdn.unitrip.com/xxxx",
 					"time_since": "10:00",

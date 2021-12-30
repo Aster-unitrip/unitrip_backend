@@ -102,7 +102,6 @@ class ComponentAccomendationController extends Controller
             "address" => 1,
             "name" => 1,
             "tel" => 1,
-            "cost_per_person" => 1,
             "meals" => 1,
             "imgs" => 1,
             "room" => 1,
