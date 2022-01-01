@@ -10,7 +10,7 @@ use Validator;
 class ItineraryController extends Controller
 {
     private $requestService;
-    
+
     public function __construct(RequestService $requestService)
     {
         $this->middleware('auth');
@@ -31,16 +31,17 @@ class ItineraryController extends Controller
             'accounting' => 'required|array',
             'include_description' => 'nullable|string|max:150',
             'exclude_description' => 'nullable|string|max:150',
-
         ];
+        $this->edit_rule = array_push($this->rule, ['id'=>'required|string|max:24']) ;
+        $this->edit_rule = array_push($this->rule, ['owned_by'=>'required|integer']) ;
     }
 
     public function add(Request $request)
     {
-        
+
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->rule);
-        
+
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
@@ -54,8 +55,22 @@ class ItineraryController extends Controller
         // } catch (\Exception $e) {
         //     return response()->json(['error' => $e->getMessage()], 400);
         // }
-        
+
         $itinerary = $this->requestService->insert_one('itineraries', $validated);
+        return $itinerary;
+
+    }
+
+    public function edit(Request $request)
+    {
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->edit_rule);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validated = $validator->validated();
+        $itinerary = $this->requestService->update('itineraries', $validated);
         return $itinerary;
 
     }
@@ -80,8 +95,8 @@ class ItineraryController extends Controller
         if (auth()->user()->company->company_type == 1){
             $filter['owned_by'] = auth()->user()->company_id;
         }
-        
-        
+
+
         $projection = array(
                 "_id" => 1,
                 "address_city" => 1,

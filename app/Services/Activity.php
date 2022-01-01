@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class Itinerary
+class Activity
 {
     public function __contruct($raw_data)
     {
