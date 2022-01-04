@@ -172,7 +172,7 @@ class ComponentAttractionController extends Controller
             'memo' => 'nullable|string|max:4096',
             'parking' => 'nullable|string|max:500',
             'attention' => 'nullable|string|max:500',
-            'experience' => 'nullable|string|max:500',
+            'experience' => 'nullable|st ring|max:500',
             'is_display' => 'required|boolean',
             'imgs' => 'nullable'
 

@@ -19,6 +19,25 @@ class ItineraryController extends Controller
             'name' => 'required|string|max:30',
             'summary' => 'nullable|string|max:150',
             'code' => 'nullable|string|max:20',
+            'total_day' => 'required|integer|between:1,7',
+            'areas' => 'nullable|array',
+            'people_threshold' => 'required|integer|min:1',
+            'people_full' => 'required|integer|max:100',
+            'sub_categories' => 'nullable|array',
+            'itinerary_content' => 'required|array|min:1',
+            'pricing_detail.subtotal' => 'required|integer|min:0',
+            'guides' => 'required|array',
+            'transportations' => 'required|array',
+            'misc' => 'required|array',
+            'accounting' => 'required|array',
+            'include_description' => 'nullable|string|max:150',
+            'exclude_description' => 'nullable|string|max:150',
+        ];
+        $this->edit_rule = [
+            '_id'=>'required|string|max:24',
+            'name' => 'required|string|max:30',
+            'summary' => 'nullable|string|max:150',
+            'code' => 'nullable|string|max:20',
             'total_day' => 'required|integer|max:7',
             'areas' => 'nullable|array',
             'people_threshold' => 'required|integer|min:1',
@@ -31,9 +50,9 @@ class ItineraryController extends Controller
             'accounting' => 'required|array',
             'include_description' => 'nullable|string|max:150',
             'exclude_description' => 'nullable|string|max:150',
+            'owned_by'=>'required|integer',
+            'created_at'=>'required|date',
         ];
-        $this->edit_rule = array_push($this->rule, ['id'=>'required|string|max:24']) ;
-        $this->edit_rule = array_push($this->rule, ['owned_by'=>'required|integer']) ;
     }
 
     public function add(Request $request)
@@ -75,6 +94,10 @@ class ItineraryController extends Controller
 
     }
 
+    // filter: 區域, 行程名稱, 子類別, 天數起訖, 成團人數, 滿團人數, 頁數
+    // name, areas, sub_categories, total_day, people_threshold, people_full, page
+
+    // project: ID, 名稱, 子類別, 行程天數, 成團人數, 建立日期
     public function list(Request $request)
     {
         $filter = json_decode($request->getContent(), true);
@@ -92,18 +115,57 @@ class ItineraryController extends Controller
             $page = 0;
         }
 
-        if (auth()->user()->company->company_type == 1){
-            $filter['owned_by'] = auth()->user()->company_id;
+        // Handle itinerary sub_categories
+        if (array_key_exists('sub_categories', $filter)) {
+            $category = $filter['sub_categories'];
+            $filter['sub_categories'] = array('$elemMatch' => array('$in' => $category)); 
         }
 
+        // Handle itinerary areas
+        if (array_key_exists('areas', $filter)) {
+            $areas = $filter['areas'];
+            $filter['areas'] = array('$elemMatch' =>array('$in' => $areas));
+        }
 
+        $company_type = auth()->payload()->get('company_type');
+        $company_id = auth()->payload()->get('company_id');
+        if ($company_type == 1){
+            
+        }
+        else if ($company_type == 2){
+            $query_private = false;
+            $filter['owned_by'] = auth()->user()->company_id;
+            // $filter['is_display'] = true;
+        }
+        else{
+            return response()->json(['error' => 'company_type must be 1 or 2'], 400);
+        }
+
+        
         $projection = array(
                 "_id" => 1,
-                "address_city" => 1,
-                "address_town" => 1,
                 "name" => 1,
+                "sub_categories" => 1,
+                "total_day" => 1,
+                "people_threshold" => 1,
+                "created_at" => 1
             );
-        $result = $this->requestService->aggregate_filter('itineraries', $projection, $filter, $page);
+        $result = $this->requestService->aggregate_facet('itineraries', $projection, $company_id, $filter, $page, $query_private);
         return $result;
+    }
+
+    public function get_by_id($id)
+    {
+        $result = $this->requestService->get_one('itineraries', $id);
+        $content =  json_decode($result->content(), true);
+        if (array_key_exists('imgs', $content)){
+            foreach ($content['imgs'] as $value){
+                $n = 0;
+                $split_url = explode('/', $value['url']);
+                $content['imgs'][$n]['filename'] = end($split_url);
+            }
+        }
+    
+        return $content;
     }
 }

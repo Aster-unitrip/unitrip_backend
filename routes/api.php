@@ -69,9 +69,9 @@ Route::group(['middleware'=>'api', 'prefix'=>'activities'], function($router){
 
 Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
     Route::post('/', [ItineraryController::class, 'add']);
-    // Route::post('/list', [ComponentActivityController::class, 'list']);
-    // Route::get('/{id}', [ComponentActivityController::class, 'get_by_id']);
-    // Route::post('/update', [ComponentActivityController::class, 'edit']);
+    Route::post('/list', [ItineraryController::class, 'list']);
+    Route::get('/{id}', [ItineraryController::class, 'get_by_id']);
+    Route::post('/update', [ItineraryController::class, 'edit']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){

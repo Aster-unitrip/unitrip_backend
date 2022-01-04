@@ -77,7 +77,7 @@ class ItineraryService
                 elseif ($component['type'] == 'travel'){
                 }
                 else {
-                    throw WrongTypeException('Wrong component type. Please check unitrip definition');
+                    throw new WrongTypeException('Wrong component type. Please check unitrip definition');
                 }
             }
         }

@@ -19,7 +19,7 @@ class Attraction
 
     private function check_subtotal(){
         if ($this->subtotal < 0){
-            throw DataIncorrectException('Subtotal must greater than 0.');
+            throw new DataIncorrectException('Subtotal must greater than 0.');
         }
 
         $pricing_check = 0;
@@ -27,7 +27,7 @@ class Attraction
             $pricing_check += $pricing['sum'];
         }
         if ($this->subtotal != $pricing_check){
-            throw DataIncorrectException('Calculation not right.');
+            throw new DataIncorrectException('Calculation not right.');
         }
     }
 }

@@ -109,9 +109,7 @@ class ComponentActivityController extends Controller
         // Handle projection content
         $projection = array(
             "_id" => 1,
-            "address_city" => 1,
-            "address_town" => 1,
-            "address" => 1,
+            "gather_at" => 1,
             "name" => 1,
             "attraction_name" => 1,
             "tel" => 1,
@@ -119,7 +117,8 @@ class ComponentActivityController extends Controller
             "max_pax_size" => 1,
             "stay_time" => 1,
             "imgs" => 1,
-            "experience" => 1,
+            "private" => 1,
+            "updated_at" => 1
         );
         $result = $this->requestService->aggregate_facet('activities', $projection, $company_id, $filter, $page, $query_private);
         return $result;

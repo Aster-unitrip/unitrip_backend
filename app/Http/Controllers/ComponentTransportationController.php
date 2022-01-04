@@ -34,33 +34,7 @@ class ComponentTransportationController extends Controller
         else{
             $page = 0;
         }
-        // Handle meal type
-        // if (array_key_exists('meal_type', $filter)) {
-        //     $meal_type = $filter['meal_type'];
-        //     $filter['meals'] = array('$elemMatch' => array('type' => $meal_type));
-        //     unset($filter['meal_type']);
-        // }
-        // else{
-        //     $meal_type = null;
-        // }
 
-        // Handle ticket prices
-        // if (array_key_exists('fee', $filter)) {
-            
-        //     $price_range = array();
-        //     if (array_key_exists('price_max', $filter['fee'])){
-        //         $price_range['$lte'] = $filter['fee']['price_max'];
-        //     }
-        //     if (array_key_exists('price_min', $filter['fee'])){
-        //         $price_range['$gte'] = $filter['fee']['price_min'];
-        //     }
-        //     if (!empty($price_range)){
-        //         $filter['meals'] = array('$all' => array(
-        //             array('$elemMatch' => array('price' => $price_range))
-        //         ));
-        //     }
-        // }
-        // {'activity_items.price': {'$all':[]}}
 
         // unset($filter['fee']);
         // Company_type: 1, Query public components belong to the company

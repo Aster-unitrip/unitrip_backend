@@ -105,7 +105,9 @@ class ComponentAccomendationController extends Controller
             "meals" => 1,
             "imgs" => 1,
             "room" => 1,
-            "experience" => "\$private.experience",
+            "private" => 1,
+            'updated_at' => 1,
+            'created_at' => 1,
         );
         $result = $this->requestService->aggregate_facet('accomendations', $projection, $company_id, $filter, $page, $query_private);
         return $result;

@@ -90,7 +90,7 @@ class ComponentRestaurantController extends Controller
             "cost_per_person" => 1,
             "meals" => 1,
             "imgs" => 1,
-            "experience" => "\$private.experience",
+            "private" => 1,
         );
         $result = $this->requestService->aggregate_facet('restaurants', $projection, $company_id, $filter, $page, $query_private);
         return $result;
