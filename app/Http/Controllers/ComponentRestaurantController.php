@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\RequestService;
+use App\Services\RequestPService;
 
 use Validator;
 
@@ -11,7 +11,7 @@ class ComponentRestaurantController extends Controller
 {
     private $requestService;
 
-    public function __construct(RequestService $requestService)
+    public function __construct(RequestPService $requestService)
     {
         $this->middleware('auth');
         $this->requestService = $requestService;

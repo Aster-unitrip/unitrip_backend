@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\AttractionService;
-use App\Services\RequestService;
+use App\Services\RequestPService;
 
 use Validator;
 
@@ -13,11 +13,11 @@ class ComponentAttractionController extends Controller
     private $attractionService;
     private $requestService;
 
-    public function __construct(AttractionService $attractionService, RequestService $requestService)
+    public function __construct(AttractionService $attractionService, RequestPService $requestPService)
     {
         $this->middleware('auth');
         $this->attractionService = $attractionService;
-        $this->requestService = $requestService;
+        $this->requestService = $requestPService;
     }
 
     public function add2(Request $request)
@@ -174,7 +174,8 @@ class ComponentAttractionController extends Controller
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|st ring|max:500',
             'is_display' => 'required|boolean',
-            'imgs' => 'nullable'
+            'imgs' => 'nullable',
+            "created_at" => 'nullable|date',
 
         ];
         $data = json_decode($request->getContent(), true);
