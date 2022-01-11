@@ -34,6 +34,19 @@ class ComponentGuideController extends Controller
             $page = 0;
         }
 
+        // Handle "can_drive" field
+        if (array_key_exists('can_drive', $filter)) {
+            $pos = array("1", 1, "true", true);
+            $neg = array("0", 0, "false", false);
+            if (in_array($filter['can_drive'], $pos)){
+                $filter['can_drive'] = true;
+            }
+            else if (in_array($filter['can_drive'], $neg)){
+                $filter['can_drive'] = false;
+            }
+            unset($filter['can_drive']);
+        }
+
 
         // Company_type: 1, Query public components belong to the company
         // Company_type: 2, Query all public components and private data belong to the company
