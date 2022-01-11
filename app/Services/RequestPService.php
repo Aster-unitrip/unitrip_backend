@@ -221,6 +221,7 @@ class RequestPService
 
         
         $postdata = json_encode($data);
+        // 顯示 MongoDB 的查詢語法
         // dd($postdata);
         $options = array(
             'http' => array(

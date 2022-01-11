@@ -51,7 +51,6 @@ class ComponentActivityController extends Controller
         $validated = $validator->validated();
         $activity = $this->requestService->insert_one('activities', $validated);
         return $activity;
- 
     }
 
     public function list(Request $request)
@@ -63,25 +62,23 @@ class ComponentActivityController extends Controller
             unset($filter['page']);
             if ($page <= 0) {
                 return response()->json(['error' => 'page must be greater than 0'], 400);
-            }
-            else{
+            } else {
                 $page = $page - 1;
             }
-        }
-        else{
+        } else {
             $page = 0;
         }
         // Handle ticket prices
         if (array_key_exists('fee', $filter)) {
-            
+
             $price_range = array();
-            if (array_key_exists('price_max', $filter['fee'])){
+            if (array_key_exists('price_max', $filter['fee'])) {
                 $price_range['$lte'] = $filter['fee']['price_max'];
             }
-            if (array_key_exists('price_min', $filter['fee'])){
+            if (array_key_exists('price_min', $filter['fee'])) {
                 $price_range['$gte'] = $filter['fee']['price_min'];
             }
-            if (!empty($price_range)){
+            if (!empty($price_range)) {
                 $filter['activity_items'] = array('$all' => array(
                     array('$elemMatch' => array('price' => $price_range))
                 ));
@@ -94,15 +91,13 @@ class ComponentActivityController extends Controller
         // Company_type: 2, Query all public components and private data belong to the company
         $company_type = auth()->payload()->get('company_type');
         $company_id = auth()->payload()->get('company_id');
-        if ($company_type == 1){
+        if ($company_type == 1) {
             $filter['owned_by'] = auth()->user()->company_id;
             $query_private = false;
-        }
-        else if ($company_type == 2){
+        } else if ($company_type == 2) {
             $query_private = true;
             $filter['is_display'] = true;
-        }
-        else{
+        } else {
             return response()->json(['error' => 'company_type must be 1 or 2'], 400);
         }
 
@@ -169,6 +164,5 @@ class ComponentActivityController extends Controller
         );
         $activity = $this->requestService->update('activities', $validated);
         return $activity;
-
     }
 }
