@@ -98,6 +98,8 @@ class ItineraryController extends Controller
     // name, areas, sub_categories, total_day, people_threshold, people_full, page
 
     // project: ID, 名稱, 子類別, 行程天數, 成團人數, 建立日期
+
+    // TODO: total_day 與 total_day_range 不可同時存在
     public function list(Request $request)
     {
         $filter = json_decode($request->getContent(), true);
@@ -126,6 +128,12 @@ class ItineraryController extends Controller
             $areas = $filter['areas'];
             $filter['areas'] = array('$elemMatch' =>array('$in' => $areas));
         }
+
+        // Handle itinerary totoal_day range query
+        if (array_key_exists('total_day_range', $filter)){
+            $filter['total_day'] = array('$gte' => $filter['total_day_range']['total_day_min'], '$lte' => $filter['total_day_range']['total_day_max']);
+        }
+        unset($filter['total_day_range']);
 
         $company_type = auth()->payload()->get('company_type');
         $company_id = auth()->payload()->get('company_id');
