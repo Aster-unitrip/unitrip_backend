@@ -161,6 +161,7 @@ class ItineraryController extends Controller
         
         $projection = array(
                 "_id" => 1,
+                "code" => 1,
                 "name" => 1,
                 "sub_categories" => 1,
                 "total_day" => 1,
