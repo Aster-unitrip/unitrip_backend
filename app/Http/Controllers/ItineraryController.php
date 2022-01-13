@@ -131,7 +131,16 @@ class ItineraryController extends Controller
 
         // Handle itinerary totoal_day range query
         if (array_key_exists('total_day_range', $filter)){
-            $filter['total_day'] = array('$gte' => $filter['total_day_range']['total_day_min'], '$lte' => $filter['total_day_range']['total_day_max']);
+            if (array_key_exists('total_day_min', $filter['total_day_range']) && array_key_exists('total_day_max', $filter['total_day_range'])){
+                $filter['total_day'] = array('$gte' => $filter['total_day_range']['total_day_min'], '$lte' => $filter['total_day_range']['total_day_max']);
+            }
+            elseif (array_key_exists('total_day_min', $filter['total_day_range']) && !array_key_exists('total_day_max', $filter['total_day_range'])){
+                $filter['total_day'] = array('$gte' => $filter['total_day_range']['total_day_min']);
+            }
+            elseif (!array_key_exists('total_day_min', $filter['total_day_range']) && array_key_exists('total_day_max', $filter['total_day_range'])){
+                $filter['total_day'] = array('$lte' => $filter['total_day_range']['total_day_max']);
+            }
+            
         }
         unset($filter['total_day_range']);
 
