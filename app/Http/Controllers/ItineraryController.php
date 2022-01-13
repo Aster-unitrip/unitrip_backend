@@ -124,10 +124,10 @@ class ItineraryController extends Controller
         }
 
         // Handle itinerary areas
-        if (array_key_exists('areas', $filter)) {
-            $areas = $filter['areas'];
-            $filter['areas'] = array('$elemMatch' =>array('$in' => $areas));
-        }
+        // if (array_key_exists('areas', $filter)) {
+        //     $areas = $filter['areas'];
+        //     $filter['areas'] = array('$elemMatch' =>array('$in' => $areas));
+        // }
 
         // Handle itinerary totoal_day range query
         if (array_key_exists('total_day_range', $filter)){
