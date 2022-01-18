@@ -18,6 +18,7 @@ class CreateCompaniesTable extends Migration
             $table->integer('company_type')->comment('1:供應商 2:旅行社');
             $table->string('title', 20);
             $table->string('tax_id', 12)->unique()->comment('統編');
+            $table->string('fax', 15)->comment('傳真');
             $table->string('tel', 15);
             $table->string('address_city', 5);
             $table->string('address_town', 5);
@@ -40,7 +41,7 @@ class CreateCompaniesTable extends Migration
             [
                 [ 
                     "company_type" => '1',
-                    "title" => "樂多",
+                    "title" => "樂多HOTEL",
                     "tax_id" => "99999999",
                     "tel" => "02-111111111",
                     "address_city" => "台北市",
@@ -54,9 +55,33 @@ class CreateCompaniesTable extends Migration
                     "bank_code" => "013",
                     "account_name" => "小馬",
                     "account_number" => "99999999999",
+                    'ta_register_num' => NULL,
+                    'ta_category' => NULL,
+                    "parent_id" => null,
+                    "updated_at" => date("Y-m-d H:i:s"),
+                    "created_at" => date("Y-m-d H:i:s")
+                ],
+                [ 
+                    "company_type" => '2',
+                    "title" => "樂多旅行社",
+                    "tax_id" => "888888888",
+                    "tel" => "02-111111111",
+                    "address_city" => "台北市",
+                    "address_town" => "萬華區",
+                    "address" => "林森路一段2號",
+                    "logo_path" => "https://cdn.unitrip",
+                    "website" => "https://unitrip.asia",
+                    "owner" => "小馬",
+                    "intro" => "zzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+                    "bank_name" => "國泰",
+                    "bank_code" => "013",
+                    "account_name" => "小馬",
+                    "account_number" => "99999999999",
                     'ta_register_num' => '888888',
                     'ta_category' => '綜合',
                     "parent_id" => null,
+                    "updated_at" => date("Y-m-d H:i:s"),
+                    "created_at" => date("Y-m-d H:i:s")
                 ],
             ]
         );

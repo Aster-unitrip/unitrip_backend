@@ -161,6 +161,7 @@ class RequestPService
         $filter: 查詢條件
         $page: 頁數，0為第一頁
         $query_private: 是否查詢私有元件
+        分頁、排序、計算筆數、查詢子槽
     */
     public function aggregate_facet($collection, $projection, $company_id, $filter=[], $page=0, $query_private=false)
     {
@@ -173,6 +174,7 @@ class RequestPService
             "pipeline" => null,
         );
         $query_filter = [];
+        // 用正規表達式查詢名稱
         if ($filter != []) {
             array_push($query_filter, array('$match' => $filter));
             if (array_key_exists('categories', $filter) && gettype($filter['categories']) == 'array') {
@@ -182,6 +184,8 @@ class RequestPService
                 $query_filter[0]['$match']['name'] = array('$regex' => $filter['name']);
             }
         }
+
+        // 查詢子槽
         if ($query_private) {
             array_push($query_filter, array('$lookup' => array(
                 'from' => $collection.'_private',
@@ -195,11 +199,13 @@ class RequestPService
         if ($query_private) {
             array_push($query_filter, array('$match' => array('private.owned_by' => array('$in' => array($company_id, 0)) )));
         }
+        // 留下需要的欄位
         if ($projection != []) {
             array_push($query_filter, array('$project' => $projection));
         }
         $second_query_filter = $query_filter;
 
+        // 分頁
         if ($page>0) {
             array_push($query_filter, array('$skip' => $page*$limit));
         }
@@ -216,6 +222,7 @@ class RequestPService
                 'count' => $second_query_filter
             ))
             );
+        // 格式轉換
         array_push($data['pipeline'], array('$unwind' => array('path' => '$count')));
         array_push($data['pipeline'], array('$set' => array('count' => '$count.totalCount')));
 

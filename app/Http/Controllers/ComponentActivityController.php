@@ -53,6 +53,7 @@ class ComponentActivityController extends Controller
         return $activity;
     }
 
+    // 
     public function list(Request $request)
     {
         // Handle filter content
