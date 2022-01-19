@@ -9,7 +9,6 @@ use App\Services\Attraction;
 use App\Services\Activity;
 use App\Services\Accomendation;
 use App\Services\Restaurant;
-use App\Services\Itinerary;
 use App\Services\Guide;
 use App\Services\Transportation;
 
