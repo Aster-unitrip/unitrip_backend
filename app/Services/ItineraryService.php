@@ -3,11 +3,12 @@
 namespace App\Services;
 
 use App\Exceptions\WrongTypeException;
+
+
 use App\Services\Attraction;
 use App\Services\Activity;
 use App\Services\Accomendation;
 use App\Services\Restaurant;
-use App\Services\Itinerary;
 use App\Services\Guide;
 use App\Services\Transportation;
 
@@ -25,12 +26,25 @@ class ItineraryService
         $this->people_full = $raw_data['people_full'];
         $this->sub_categories = $raw_data['sub_categories'];
 
+        // 實際計算
+        $this->calculate_adult_cost = 0;
+        $this->calculate_child_cost = 0;
+
+        // 回傳的計算結果
+        $this->adult_cost = $raw_data['accounting']['adult']['cost'];
+        $this->child_cost = $raw_data['accounting']['child']['cost'];
+
+
         foreach ($raw_data['guides'] as $guide) {
-            $this->guides[] = new Guide($guide);
+            $guide = new Guide($guide);
+            $this->calculate_adult_cost += $guide->get_cost_per_person();
+            $this->calculate_child_cost += $guide->get_cost_per_person();
         }
 
         foreach ($raw_data['transportations'] as $transportation) {
-            $this->transportations[] = new Transportation($transportation);
+            $this->transportation = new Transportation($transportation);
+            $this->calculate_adult_cost += $transportation->get_cost_per_person();
+            $this->calculate_child_cost += $transportation->get_cost_per_person();
         }
         $this->misc = $raw_data['misc'];
         $this->accounting = $raw_data['accounting'];
@@ -63,16 +77,24 @@ class ItineraryService
         foreach ($this->itinerary_content as $day) {
             foreach($day['components'] as $component) {
                 if ($component['type'] == 'attraction'){
-
+                    $attraction = new Attraction($component);
+                    $this->calculate_adult_cost += $attraction->get_adult_cost();
+                    $this->calculate->child_cost += $attraction->get_child_cost();
                 }
                 elseif ($component['type'] == 'activity'){
-
+                    $activity = new Activity($component);
+                    $this->calculate_adult_cost += $activity->get_unit_price();
+                    $this->calculate_child_cost += $activity->get_unit_price();
                 }
                 elseif ($component['type'] == 'accomendation'){
-
+                    $accomendation = new Accomendation($component);
+                    $this->calculate_adult_cost += $accomendation->get_cost_per_person();
+                    $this->calculate_child_cost += $accomendation->get_cost_per_person();
                 }
                 elseif ($component['type'] == 'restaurant'){
-
+                    $restaurant = new Restaurant($component);
+                    $this->calculate_adult_cost += $restaurant->get_cost_per_person();
+                    $this->calculate_child_cost += $restaurant->get_cost_per_person();
                 }
                 elseif ($component['type'] == 'travel'){
                 }

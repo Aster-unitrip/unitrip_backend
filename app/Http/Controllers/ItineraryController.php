@@ -25,6 +25,7 @@ class ItineraryController extends Controller
             'people_full' => 'required|integer|max:100',
             'sub_categories' => 'nullable|array',
             'itinerary_content' => 'required|array|min:1',
+            // 'pricing_detail.subtotal' => 'required|integer|min:0',
             'guides' => 'required|array',
             'transportations' => 'required|array',
             'misc' => 'required|array',
@@ -69,7 +70,7 @@ class ItineraryController extends Controller
 
         // 檢查行程內容
         // try{
-        $is = new ItineraryService($validated);
+        // $is = new ItineraryService($validated);
         // } catch (\Exception $e) {
         //     return response()->json(['error' => $e->getMessage()], 400);
         // }
