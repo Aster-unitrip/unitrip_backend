@@ -4,13 +4,13 @@ namespace App\Services;
 
 use App\Exceptions\WrongTypeException;
 
-
-use App\Services\Attraction;
-use App\Services\Activity;
-use App\Services\Accomendation;
-use App\Services\Restaurant;
+// use App\Services\Attraction;
+// use App\Services\Activity;
+// use App\Services\Accomendation;
+// use App\Services\Restaurant;
 use App\Services\Guide;
 use App\Services\Transportation;
+use App\Services\ComponentNode;
 
 
 class ItineraryService
@@ -37,20 +37,22 @@ class ItineraryService
 
         foreach ($raw_data['guides'] as $guide) {
             $guide = new Guide($guide);
-            $this->calculate_adult_cost += $guide->get_cost_per_person();
-            $this->calculate_child_cost += $guide->get_cost_per_person();
+            $this->calculate_adult_cost += $guide->get_cost_per_person()/$this->people_threshold;
+            $this->calculate_child_cost += $guide->get_cost_per_person()/$this->people_threshold;
         }
 
         foreach ($raw_data['transportations'] as $transportation) {
             $this->transportation = new Transportation($transportation);
-            $this->calculate_adult_cost += $transportation->get_cost_per_person();
-            $this->calculate_child_cost += $transportation->get_cost_per_person();
+            $cost = $this->transportation->get_cost_per_person()/$this->people_threshold;
+            $this->calculate_adult_cost += $cost;
+            $this->calculate_child_cost += $cost;
         }
         $this->misc = $raw_data['misc'];
         $this->accounting = $raw_data['accounting'];
 
-        $this->average_guides_cost();
-        $this->average_transportation_cost();
+        // $this->average_guides_cost();
+        // $this->average_transportation_cost();
+        // $this->check_itinerary_components();
 
     }
 

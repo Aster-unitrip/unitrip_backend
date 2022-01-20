@@ -167,6 +167,8 @@ class ItineraryController extends Controller
                 "total_day" => 1,
                 "people_threshold" => 1,
                 "accounting" => 1,
+                "imgs" => 1,
+                "areas" => 1,
                 "created_at" => 1
             );
         $result = $this->requestService->aggregate_facet('itineraries', $projection, $company_id, $filter, $page, $query_private);
