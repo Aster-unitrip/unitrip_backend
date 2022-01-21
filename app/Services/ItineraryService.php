@@ -35,68 +35,79 @@ class ItineraryService
         $this->child_cost = $raw_data['accounting']['child']['cost'];
 
 
+        $guide_sum = 0;
         foreach ($raw_data['guides'] as $guide) {
             $guide = new Guide($guide);
-            $this->calculate_adult_cost += $guide->get_cost_per_person()/$this->people_threshold;
-            $this->calculate_child_cost += $guide->get_cost_per_person()/$this->people_threshold;
+            $guide_sum += $guide->subtotal;
         }
+        $this->guides_cost_per_person = $guide_sum / $this->people_threshold;
+        $this->calculate_adult_cost += $this->guides_cost_per_person;
+        $this->calculate_child_cost += $this->guides_cost_per_person;
+        dump("guide: +".$this->guides_cost_per_person);
 
+        $transportation_sum = 0;
         foreach ($raw_data['transportations'] as $transportation) {
-            $this->transportation = new Transportation($transportation);
-            $cost = $this->transportation->get_cost_per_person()/$this->people_threshold;
-            $this->calculate_adult_cost += $cost;
-            $this->calculate_child_cost += $cost;
+            $transportation = new Transportation($transportation);
+            $transportation_sum += $transportation->subtotal/$this->people_threshold;
         }
-        $this->misc = $raw_data['misc'];
-        $this->accounting = $raw_data['accounting'];
+        $this->calculate_adult_cost += $transportation_sum;
+        $this->calculate_child_cost += $transportation_sum;
+        dump("transportation: +".$transportation_sum);
 
-        // $this->average_guides_cost();
-        // $this->average_transportation_cost();
-        // $this->check_itinerary_components();
+        $misc_sum = 0;
+        foreach($raw_data['misc'] as $m){
+            $misc_sum += $m['subtotal'] / $this->people_threshold;
 
-    }
-
-    // Sum every subtotal and divide by people_threshold
-    private function average_guides_cost()
-    {
-        $sum_cost = 0;
-        foreach ($this->guides as $guide) {
-            $sum_cost += $guide->subtotal;
         }
-        $this->guides_cost_per_person = $sum_cost / $this->people_threshold;
-    }
+        $this->calculate_adult_cost += $misc_sum;
+        $this->calculate_child_cost += $misc_sum;
+        dump("misc: +".$misc_sum);
 
-    private function average_transportation_cost()
-    {
-        $sum_cost = 0;
-        foreach ($this->transportations as $transportation) {
-            $sum_cost += $transportation->subtotal;
+        $this->check_itinerary_components();
+
+        $accounting = new Accounting($raw_data['accounting']);
+
+        dump("cal_adult_cost: ".$this->calculate_adult_cost);
+        dump('adult_cost: '.$this->adult_cost);
+        dump("cal_child_cost: ".$this->calculate_child_cost);
+        dump('child_cost: '.$this->child_cost);
+        if ($this->calculate_adult_cost != $this->adult_cost){
+            throw new WrongTypeException('Adult cost is not correct');
         }
-        $this->transportation_cost_per_person = $sum_cost / $this->people_threshold;
+        elseif ($this->calculate_child_cost != $this->child_cost){
+            throw new WrongTypeException('Child cost is not correct');
+        }
+
     }
 
     private function check_itinerary_components(){
         foreach ($this->itinerary_content as $day) {
             foreach($day['components'] as $component) {
                 if ($component['type'] == 'attraction'){
-                    $attraction = new Attraction($component);
+                    $attraction = new Attraction($component, $this->people_threshold);
                     $this->calculate_adult_cost += $attraction->get_adult_cost();
-                    $this->calculate->child_cost += $attraction->get_child_cost();
+                    $this->calculate_child_cost += $attraction->get_child_cost();
+                    dump('attraction: +'.$attraction->get_adult_cost());
+                    // dump($this->calculate_adult_cost);
+                    // dump($this->calculate_child_cost);
                 }
                 elseif ($component['type'] == 'activity'){
-                    $activity = new Activity($component);
-                    $this->calculate_adult_cost += $activity->get_unit_price();
-                    $this->calculate_child_cost += $activity->get_unit_price();
+                    $activity = new Activity($component, $this->people_threshold);
+                    $this->calculate_adult_cost += $activity->get_cost_per_person();
+                    $this->calculate_child_cost += $activity->get_cost_per_person();
+                    dump('activity: +'.$activity->get_cost_per_person());
                 }
                 elseif ($component['type'] == 'accomendation'){
-                    $accomendation = new Accomendation($component);
+                    $accomendation = new Accomendation($component, $this->people_threshold);
                     $this->calculate_adult_cost += $accomendation->get_cost_per_person();
                     $this->calculate_child_cost += $accomendation->get_cost_per_person();
+                    dump('accomendation: +'.$accomendation->get_cost_per_person());
                 }
                 elseif ($component['type'] == 'restaurant'){
-                    $restaurant = new Restaurant($component);
+                    $restaurant = new Restaurant($component, $this->people_threshold);
                     $this->calculate_adult_cost += $restaurant->get_cost_per_person();
                     $this->calculate_child_cost += $restaurant->get_cost_per_person();
+                    dump('restaurant: +'.$restaurant->get_cost_per_person());
                 }
                 elseif ($component['type'] == 'travel'){
                 }

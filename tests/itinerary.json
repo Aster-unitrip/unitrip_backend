@@ -1,0 +1,407 @@
+{
+  "name": "花東一週",
+  "summary": "111111111111111111111111",
+  "code": "aazz123",
+  "total_day": 1,
+  "areas": [
+    "北部（新竹以北）",
+    "中部（中彰投、雲林）"
+  ],
+  "people_threshold": 10,
+  "people_full": 100,
+  "sub_categories": [
+    "DIY課程",
+    "伴手禮",
+    "特色表演"
+  ],
+  "itinerary_content": [
+    {
+      "sort": 1,
+      "name": "day1",
+      "gather_time": "08:00",
+      "gather_location": "台北車站南三門",
+      "day_summary": "出發日！",
+      "components": [
+        {
+          "sort": 1,
+          "_id": "abcdefghijklmn",
+          "type": "attraction",
+          "name": "fffff",
+          "img": "cdn.unitrip.com/xxxx",
+          "time_since": "10:00",
+          "time_end": "12:00",
+          "note": "bbbbbbbbbbbbb",
+          "pricing_detail": [
+            {
+              "sort": 1,
+              "name": "全票",
+              "count": 3,
+              "unit_price": 200,
+              "sum": 600
+            },
+            {
+              "sort": 2,
+              "name": "半票",
+              "count": 1,
+              "unit_price": 100,
+              "sum": 100
+            }
+          ],
+          "subtotal": 700
+        },
+        {
+          "sort": 2,
+          "type": "travel",
+          "travel_time": 30
+        },
+        {
+          "sort": 3,
+          "_id": "abcdefghijklmn",
+          "type": "activity",
+          "name": "xxxxxhhhhhhhh",
+          "tel": "0912345678",
+          "max_pax_size": 10,
+          "stay_time": 60,
+          "gather_at": {
+            "address_city": "台北市",
+            "address_town": "大安區",
+            "address": "忠孝東路四段100號"
+          },
+          "imgs": [
+            {
+              "url": "cdn.unitrip.com/xxxx",
+              "description": "xxxxx2222"
+            },
+            {
+              "url": "cdn.unitrip.com/xxxx",
+              "description": "xxxxxsssssssss"
+            }
+          ],
+          "activity_items": [
+            {
+              "sort": 1,
+              "name": "潛水",
+              "price": 1000
+            },
+            {
+              "sort": 1,
+              "name": "潛水",
+              "price": 2000
+            }
+          ],
+          "private": {},
+          "pricing_detail": [
+            {
+              "sort": 1,
+              "name": "潛水",
+              "count": 10,
+              "unit_price": 1000,
+              "sum": 10000
+            }
+          ],
+          "time_since": "10:00",
+          "time_end": "12:00",
+          "note": "bbbbbbbbbbbbb",
+          "subtotal": 10000
+        },
+        {
+          "sort": 4,
+          "type": "travel",
+          "travel_time": 30
+        },
+        {
+          "sort": 5,
+          "_id": "abcdefghijklmn",
+          "type": "accomendation",
+          "name": "uuuuuuu",
+          "tel": "0912345678",
+          "address_city": "台北市",
+          "address_town": "大安區",
+          "address": "忠孝東路四段100號",
+          "imgs": [
+            {
+              "url": "cdn.unitrip.com/xxxx",
+              "description": "xxxxx"
+            },
+            {
+              "url": "cdn.unitrip.com/xxxx",
+              "description": "xxxxx"
+            }
+          ],
+          "room": [
+            {
+              "sort": 1,
+              "name": "林隅客房",
+              "imgs": [
+                "cdn.unitrip.asia/aa.jpg"
+              ],
+              "room_type": "雙人房",
+              "beds": [
+                {
+                  "bed_type": "單人床",
+                  "bed_number": 2
+                }
+              ],
+              "suitable_passenger_number": 2,
+              "add_bed_price": 1000,
+              "non_occupy_bed_price": 500,
+              "with_meals": "一泊一食",
+              "weekday_price": 4700,
+              "holiday_price": 6700,
+              "status": "供應中",
+              "memo": "xxxxxxxxxxxx",
+              "updated_at": {
+                "$date": "2022-01-07T04:00:00.000Z"
+              },
+              "created_at": {
+                "$date": "2022-01-07T04:00:00.000Z"
+              }
+            },
+            {
+              "sort": 2,
+              "name": "天逸套房",
+              "imgs": [
+                "cdn.unitrip.asia/aa.jpg"
+              ],
+              "room_type": "雙人房",
+              "beds": [
+                {
+                  "bed_type": "加大雙人床",
+                  "bed_number": 1
+                }
+              ],
+              "suitable_passenger_number": 2,
+              "add_bed_price": 1000,
+              "non_occupy_bed_price": 500,
+              "with_meals": "無附餐",
+              "weekday_price": 7600,
+              "holiday_price": 9600,
+              "status": "供應中",
+              "memo": "xxxxxxxxxxxx",
+              "updated_at": {
+                "$date": "2022-01-07T04:00:00.000Z"
+              },
+              "created_at": {
+                "$date": "2022-01-07T04:00:00.000Z"
+              }
+            }
+          ],
+          "private": {},
+          "pricing_detail": [
+            {
+              "sort": 1,
+              "name": "雙人房",
+              "count": 2,
+              "unit_price": 2000,
+              "sum": 4000,
+              "suitable_passenger_number": 2
+            }
+          ],
+          "time_since": "10:00",
+          "time_end": null,
+          "note": "bbbbbbbbbbbbb",
+          "subtotal": 4000
+        }
+      ]
+    },
+    {
+      "sort": 2,
+      "name": "day2",
+      "gather_time": "08:00",
+      "gather_location": "飯店大廳",
+      "day_summary": "出門爬山",
+      "components": [
+        {
+          "sort": 1,
+          "_id": "abcdefghijklmn",
+          "type": "restaurant",
+          "name": "xxxxx",
+          "tel": "0912345678",
+          "address_city": "台北市",
+          "address_town": "大安區",
+          "address": "忠孝東路四段100號",
+          "cost_per_person": 200,
+          "imgs": [
+            {
+              "url": "cdn.unitrip.com/xxxx",
+              "description": "xxxxx"
+            },
+            {
+              "url": "cdn.unitrip.com/xxxx",
+              "description": "xxxxx"
+            }
+          ],
+          "meals": [
+            {
+              "name": "8800桌菜",
+              "imgs": [
+                "https://storage.googleapis.com/unitrip_components/restaurants/mansui_1.jpg"
+              ],
+              "type": "合菜",
+              "supply_people": 10,
+              "status": "供應中",
+              "content": "百香明蝦塔四拼、煙薰茶鵝拚麵線、金沙海鮮盅、水果龍鬚蝦、鰻魚蒸米糕、梅汁密排、紅鞠燒嫩肉、清蒸海上鮮、蘑菇燉肋排、甜點、水果盤",
+              "memo": "(非必填)這是餐型備註",
+              "price": 8800
+            },
+            {
+              "name": "10800桌菜",
+              "imgs": [
+                "https://storage.googleapis.com/unitrip_components/restaurants/mansui_2.jpg"
+              ],
+              "type": "合菜",
+              "supply_people": 10,
+              "status": "供應中",
+              "content": "百香明蝦塔四拼、太極鴛鴦雞、奇異果生蠔、干貝佛跳牆、紅蟳蒸米糕、蔥油猛石斑、XO醬爆雙鮮、蒜味海大蝦、蘋果人參雞湯、甜點、水果盤",
+              "memo": "(非必填)這是餐型備註",
+              "price": 10800
+            }
+          ],
+          "private": {},
+          "pricing_detail": [
+            {
+              "sort": 1,
+              "name": "8800桌菜",
+              "count": 3,
+              "unit_price": 2000,
+              "sum": 6000,
+              "supply_people": 4
+            }
+          ],
+          "time_since": "10:00",
+          "time_end": "12:00",
+          "note": "bbbbbbbbbbbbb",
+          "subtotal": 6000
+        },
+        {
+          "sort": 2,
+          "type": "travel",
+          "travel_time": 30
+        },
+        {
+          "sort": 3,
+          "_id": "abcdefghijklmn",
+          "type": "attraction",
+          "name": "xxxxx",
+          "img": "cdn.unitrip.com/xxxx",
+          "time_since": "10:00",
+          "time_end": "12:00",
+          "note": "bbbbbbbbbbbbb",
+          "pricing_detail": [
+            {
+              "sort": 1,
+              "name": "全票",
+              "count": 3,
+              "unit_price": 200,
+              "sum": 600
+            }
+          ],
+          "subtotal": 600
+        },
+        {
+          "sort": 4,
+          "type": "travel",
+          "travel_time": 30
+        },
+        {
+          "sort": 5,
+          "_id": "abcdefghijklmn",
+          "type": "accomendation",
+          "name": "xxxxxcccccc",
+          "img": "cdn.unitrip.com/xxxx",
+          "time_since": "10:00",
+          "time_end": null,
+          "note": "bbbbbbbbbbbbb",
+          "pricing_detail": [
+            {
+              "sort": 1,
+              "name": "xxxxxxbbbbbbb",
+              "count": 3,
+              "unit_price": 3000,
+              "suitable_passenger_number":4,
+              "sum": 9000
+            }
+          ],
+          "subtotal": 9000
+        }
+      ]
+    }
+  ],
+  "guides": [
+    {
+      "sort": 1,
+      "_id": "abcdefghijklmn",
+      "type": "guide",
+      "name": "xxxxxxeeeeeeeee",
+      "imgs": [
+        "cdn.unitrip.com/xxxx"
+      ],
+      "note": "bbbbbbbbbbbbb",
+      "unit_price": 200,
+      "days": 3,
+      "subtotal": 600
+    },
+    {
+      "sort": 2,
+      "_id": "abcdefghijklmn",
+      "type": "guide",
+      "name": "ooooo",
+      "imgs": [
+        "cdn.unitrip.com/xxxx"
+      ],
+      "note": "bbbbbbbbbbbbb",
+      "unit_price": 100,
+      "days": 2,
+      "subtotal": 200
+    }
+  ],
+  "transportations": [
+    {
+      "_id": "abcdefghijklmn",
+      "note": "bbbbbbbbbbbbb",
+      "type": "transportation",
+      "days": 2,
+      "imgs": [
+        "cdn.unitrip.com/xxxx"
+      ],
+      "unit_price": 20000,
+      "count": 3,
+      "subtotal": 60000
+    }
+  ],
+  "misc": [
+    {
+      "sort": 1,
+      "item": "aaaaaa",
+      "unit_price": 100,
+      "count": 10,
+      "subtotal": 1000
+    }
+  ],
+  "accounting": {
+    "adult": {
+      "cost": 9480,
+      "estimation_price": {
+        "price": 15000,
+        "profit_percentage": 58.23
+      },
+      "estimation_percentage": {
+        "price": 12324,
+        "profit_percentage": 30
+      }
+    },
+    "child": {
+      "cost": 9180,
+      "estimation_price": {
+        "price": 15000,
+        "profit_percentage": 63.4
+      },
+      "estimation_percentage": {
+        "price": 11934,
+        "profit_percentage": 30
+      }
+    }
+  },
+  "include_description": "aaaaaaaaaa",
+  "exclude_description": "aaaaaaaaaa"
+}

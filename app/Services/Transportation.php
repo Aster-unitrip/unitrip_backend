@@ -25,7 +25,6 @@ class Transportation extends ComponentNode
         }
         $this->subtotal = $raw_data['subtotal'];
         $this->check_subtotal();
-        $this->calculate_cost();
     }
 
     private function check_subtotal()
@@ -37,16 +36,6 @@ class Transportation extends ComponentNode
             throw new DataIncorrectException('subtotal must be equal to unit_price * days');
         }
         return true;
-    }
-    private function calculate_cost()
-    {
-        // 沒有除以成團人數
-        $this->cost_per_person = $this->unit_price * $this->days;
-    }
-
-    public function get_cost_per_person()
-    {
-        return $this->cost_per_person;
     }
 
 }
