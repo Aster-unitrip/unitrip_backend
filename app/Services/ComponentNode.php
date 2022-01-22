@@ -3,35 +3,44 @@
 namespace App\Services;
 
 use App\Exceptions\DataIncorrectException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ComponentNode
 {
-    private $subtotal;
-    private $adult_cost;
-    private $child_cost;
+    public $subtotal;
+    public $adult_cost;
+    public $child_cost = null;
+    public $get_unit_price;
+    public $cost_per_person;
 
-    public function __construct($raw_data)
+    public function __construct($raw_data, $people_threshold)
     {
         $this->raw_data = $raw_data;
         $this->_id = $raw_data['_id'];
         $this->type = $raw_data['type'];
         $this->pricing_detail = $raw_data['pricing_detail'];
         $this->subtotal = $raw_data['subtotal'];
+        $this->people_threshold = $people_threshold;
         $this->check_subtotal();
+        $this->cal_cost_per_person();
     }
 
     private function check_subtotal()
     {
         $pricing_check = 0;
         foreach ($this->pricing_detail as $pricing) {
-            if ($pricing_check['sum'] != $pricing_check['unit_price'] * $pricing_check['count']){
-                throw new DataIncorrectException('Calculation not right.');    
+            if ($pricing['sum'] != $pricing['unit_price'] * $pricing['count']){
+                throw new DataIncorrectException('Calculation not right. In '.$pricing['name']);    
             }
             $pricing_check += $pricing['sum'];
         }
         if ($this->subtotal != $pricing_check){
-            throw new DataIncorrectException('Calculation not right.');
+            throw new DataIncorrectException('Calculation not right. In '.$this->raw_data['name']);
         }
+    }
+    private function cal_cost_per_person()
+    {
+        $this->cost_per_person = $this->subtotal / $this->people_threshold;
     }
 
     public function get_adult_cost(){
@@ -46,13 +55,16 @@ class ComponentNode
     public function get_unit_price(){
         return $this->get_unit_price;
     }
+    public function get_cost_per_person(){
+        return $this->cost_per_person;
+    }
 }
 
 class Attraction extends ComponentNode
 {
-    public function __construct($raw_data=null)
+    public function __construct($raw_data=null, $people_threshold=null)
     {
-        parent::__construct($raw_data);
+        parent::__construct($raw_data, $people_threshold);
         foreach ($this->pricing_detail as $pricing){
             if ($pricing['name'] == '全票'){
                 $this->adult_cost += $pricing['unit_price'];
@@ -61,48 +73,50 @@ class Attraction extends ComponentNode
                 $this->child_cost += $pricing['unit_price'];
             }
         }
+        if ($this->child_cost == null){
+            $this->child_cost = $this->adult_cost;
+        }
 
     }
 }
 
 class Activity extends ComponentNode
 {
-    public function __construct($raw_data=null)
+    public function __construct($raw_data=null, $people_threshold=null)
     {
-        parent::__construct($raw_data);
-        $this->unit_price = $this->pricing_detail[0]['unit_price'];
+        parent::__construct($raw_data, $people_threshold);        
     }
 }
 
 class Accomendation extends ComponentNode
 {
-    public function __construct($raw_data=null)
+    public function __construct($raw_data=null, $people_threshold=null)
     {
-        parent::__construct($raw_data);
-        $this->calculate_cost();
+        parent::__construct($raw_data, $people_threshold);
+        // $this->calculate_cost();
     }
-    private function calculate_cost()
-    {
-        $this->cost_per_person = $this->pricing_detail[0]['unit_price'] / $this->pricing_detail[0]['suitable_passenger_number'];
-    }
-    public function get_cost_per_person()
-    {
-        return $this->cost_per_person;
-    }
+    // private function calculate_cost()
+    // {
+    //     $this->cost_per_person = $this->pricing_detail[0]['unit_price'] / $this->pricing_detail[0]['suitable_passenger_number'];
+    // }
+    // public function get_cost_per_person()
+    // {
+    //     return $this->cost_per_person;
+    // }
 }
 
 class Restaurant extends ComponentNode
 {
-    public function __construct($raw_data=null)
+    public function __construct($raw_data=null, $people_threshold=null)
     {
-        parent::__construct($raw_data);
-        $this->calculate_cost();
+        parent::__construct($raw_data, $people_threshold);
+        // $this->calculate_cost();
     }
 
-    private function calculate_cost()
-    {
-        $this->cost_per_person = $this->pricing_detail[0]['unit_price'] / $this->pricing_detail[0]['supply_people'];
-    }
+    // private function calculate_cost()
+    // {
+    //     $this->cost_per_person = $this->pricing_detail[0]['unit_price'] / $this->pricing_detail[0]['supply_people'];
+    // }
 
     public function get_cost_per_person()
     {
@@ -198,3 +212,51 @@ class Restaurant extends ComponentNode
 //     }
 
 // }
+
+
+class Accounting
+{
+    public function __construct($raw_data)
+    {
+        $this->adult_cost = $raw_data['adult']['cost'];
+        $this->estimate_price = $raw_data['adult']['estimation_price']['price'];
+        $this->estimate_price_profit_percentage = $raw_data['adult']['estimation_price']['profit_percentage'];
+        $this->estimate_percentage = $raw_data['adult']['estimation_percentage']['profit_percentage'];
+        $this->estimate_percentage_price = $raw_data['adult']['estimation_percentage']['price'];
+
+        $this->child_cost = $raw_data['child']['cost'];
+        $this->child_estimate_price = $raw_data['child']['estimation_price']['price'];
+        $this->child_estimate_price_profit_percentage = $raw_data['child']['estimation_price']['profit_percentage'];
+        $this->child_estimate_percentage = $raw_data['child']['estimation_percentage']['profit_percentage'];
+        $this->child_estimate_percentage_price = $raw_data['child']['estimation_percentage']['price'];
+
+        $this->check_price($this->adult_cost, $this->estimate_price, $this->estimate_price_profit_percentage);
+        $this->check_percentage($this->adult_cost, $this->estimate_percentage, $this->estimate_percentage_price);
+
+        $this->check_price($this->child_cost, $this->child_estimate_price, $this->child_estimate_price_profit_percentage);
+        $this->check_percentage($this->child_cost, $this->child_estimate_percentage, $this->child_estimate_percentage_price);
+
+    }
+
+    private static function check_price($cost, $price, $profit_percentage)
+    {   
+        $percentage = (($price - $cost) / $cost)*100;
+        dump("profit_percentage: ".$profit_percentage);
+        dump("percentage: ".round($percentage, 2));
+        if (round($percentage, 2) != $profit_percentage){
+            throw new DataIncorrectException('profit_percentage is not correct');
+        }
+    }   
+
+    private static function check_percentage($cost, $percent, $final_price)
+    {
+        $price = $cost * ($percent/100+1);
+        dump("final_price: ".$final_price);
+        dump("price: ".$price);
+        if (round($price, 2) != $final_price){
+            // throw new DataIncorrectException('price is not correct');
+            throw new HttpException(400, 'price is not correct');
+        }
+    }
+}
+

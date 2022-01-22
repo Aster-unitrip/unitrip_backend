@@ -8,8 +8,9 @@ class DataIncorrectException extends Exception
 {
     public function render($request)
     {
-        return response()->json([
-            'message' => $this->getMessage()
-        ], 400);
+        return response()->json(
+            $data = ['message' => $this->getMessage()], 
+            $status = 400
+        );
     }
 }

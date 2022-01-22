@@ -69,11 +69,11 @@ class ItineraryController extends Controller
         $validated['owned_by'] = $company_id;
 
         // 檢查行程內容
-        // try{
-        // $is = new ItineraryService($validated);
-        // } catch (\Exception $e) {
-        //     return response()->json(['error' => $e->getMessage()], 400);
-        // }
+        try{
+            $is = new ItineraryService($validated);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
 
         $itinerary = $this->requestService->insert_one('itineraries', $validated);
         return $itinerary;
@@ -160,16 +160,15 @@ class ItineraryController extends Controller
 
         
         $projection = array(
-                "_id" => 1,
-                "code" => 1,
-                "name" => 1,
-                "sub_categories" => 1,
-                "total_day" => 1,
-                "people_threshold" => 1,
-                "accounting" => 1,
-                "imgs" => 1,
-                "areas" => 1,
-                "created_at" => 1
+                // "_id" => 1,
+                // "name" => 1,
+                // "sub_categories" => 1,
+                // "total_day" => 1,
+                // "people_threshold" => 1,
+                // "accounting" => 1,
+                // "imgs" => 1,
+                // "areas" => 1,
+                // "created_at" => 1
             );
         $result = $this->requestService->aggregate_facet('itineraries', $projection, $company_id, $filter, $page, $query_private);
         return $result;
