@@ -143,15 +143,15 @@ class ItineraryController extends Controller
 
         
         $projection = array(
-                "_id" => 1,
-                "name" => 1,
-                "sub_categories" => 1,
-                "total_day" => 1,
-                "people_threshold" => 1,
-                "accounting" => 1,
-                "imgs" => 1,
-                "areas" => 1,
-                "created_at" => 1
+                // "_id" => 1,
+                // "name" => 1,
+                // "sub_categories" => 1,
+                // "total_day" => 1,
+                // "people_threshold" => 1,
+                // "accounting" => 1,
+                // "imgs" => 1,
+                // "areas" => 1,
+                // "created_at" => 1
             );
         $result = $this->requestService->aggregate_facet('itineraries', $projection, $company_id, $filter, $page, $query_private);
         return $result;
