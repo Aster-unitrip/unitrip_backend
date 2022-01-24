@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\DataIncorrectException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Exception;
 
 class ComponentNode
 {
@@ -241,8 +242,8 @@ class Accounting
     private static function check_price($cost, $price, $profit_percentage)
     {   
         $percentage = (($price - $cost) / $cost)*100;
-        dump("profit_percentage: ".$profit_percentage);
-        dump("percentage: ".round($percentage, 2));
+        // dump("profit_percentage: ".$profit_percentage);
+        // dump("percentage: ".round($percentage, 2));
         if (round($percentage, 2) != $profit_percentage){
             throw new DataIncorrectException('profit_percentage is not correct');
         }
@@ -251,11 +252,11 @@ class Accounting
     private static function check_percentage($cost, $percent, $final_price)
     {
         $price = $cost * ($percent/100+1);
-        dump("final_price: ".$final_price);
-        dump("price: ".$price);
+        // dump("final_price: ".$final_price);
+        // dump("price: ".$price);
         if (round($price, 2) != $final_price){
             // throw new DataIncorrectException('price is not correct');
-            throw new HttpException(400, 'price is not correct');
+            throw new Exception('price is not correct');
         }
     }
 }

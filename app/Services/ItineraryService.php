@@ -11,7 +11,7 @@ use App\Exceptions\WrongTypeException;
 use App\Services\Guide;
 use App\Services\Transportation;
 use App\Services\ComponentNode;
-
+use Exception;
 
 class ItineraryService
 {
@@ -43,7 +43,7 @@ class ItineraryService
         $this->guides_cost_per_person = $guide_sum / $this->people_threshold;
         $this->calculate_adult_cost += $this->guides_cost_per_person;
         $this->calculate_child_cost += $this->guides_cost_per_person;
-        dump("guide: +".$this->guides_cost_per_person);
+        // dump("guide: +".$this->guides_cost_per_person);
 
         $transportation_sum = 0;
         foreach ($raw_data['transportations'] as $transportation) {
@@ -52,7 +52,7 @@ class ItineraryService
         }
         $this->calculate_adult_cost += $transportation_sum;
         $this->calculate_child_cost += $transportation_sum;
-        dump("transportation: +".$transportation_sum);
+        // dump("transportation: +".$transportation_sum);
 
         $misc_sum = 0;
         foreach($raw_data['misc'] as $m){
@@ -61,21 +61,23 @@ class ItineraryService
         }
         $this->calculate_adult_cost += $misc_sum;
         $this->calculate_child_cost += $misc_sum;
-        dump("misc: +".$misc_sum);
+        // dump("misc: +".$misc_sum);
 
         $this->check_itinerary_components();
 
         $accounting = new Accounting($raw_data['accounting']);
 
-        dump("cal_adult_cost: ".$this->calculate_adult_cost);
-        dump('adult_cost: '.$this->adult_cost);
-        dump("cal_child_cost: ".$this->calculate_child_cost);
-        dump('child_cost: '.$this->child_cost);
+        // dump("cal_adult_cost: ".$this->calculate_adult_cost);
+        // dump('adult_cost: '.$this->adult_cost);
+        // dump("cal_child_cost: ".$this->calculate_child_cost);
+        // dump('child_cost: '.$this->child_cost);
         if ($this->calculate_adult_cost != $this->adult_cost){
-            throw new WrongTypeException('Adult cost is not correct');
+            // throw new WrongTypeException('Adult cost is not correct');
+            throw new Exception("Adult cost is not correct");
         }
         elseif ($this->calculate_child_cost != $this->child_cost){
-            throw new WrongTypeException('Child cost is not correct');
+            // throw new WrongTypeException('Child cost is not correct');
+            throw new Exception("Child cost is not correct");
         }
 
     }
@@ -87,7 +89,7 @@ class ItineraryService
                     $attraction = new Attraction($component, $this->people_threshold);
                     $this->calculate_adult_cost += $attraction->get_adult_cost();
                     $this->calculate_child_cost += $attraction->get_child_cost();
-                    dump('attraction: +'.$attraction->get_adult_cost());
+                    // dump('attraction: +'.$attraction->get_adult_cost());
                     // dump($this->calculate_adult_cost);
                     // dump($this->calculate_child_cost);
                 }
@@ -95,19 +97,19 @@ class ItineraryService
                     $activity = new Activity($component, $this->people_threshold);
                     $this->calculate_adult_cost += $activity->get_cost_per_person();
                     $this->calculate_child_cost += $activity->get_cost_per_person();
-                    dump('activity: +'.$activity->get_cost_per_person());
+                    // dump('activity: +'.$activity->get_cost_per_person());
                 }
                 elseif ($component['type'] == 'accomendation'){
                     $accomendation = new Accomendation($component, $this->people_threshold);
                     $this->calculate_adult_cost += $accomendation->get_cost_per_person();
                     $this->calculate_child_cost += $accomendation->get_cost_per_person();
-                    dump('accomendation: +'.$accomendation->get_cost_per_person());
+                    // dump('accomendation: +'.$accomendation->get_cost_per_person());
                 }
                 elseif ($component['type'] == 'restaurant'){
                     $restaurant = new Restaurant($component, $this->people_threshold);
                     $this->calculate_adult_cost += $restaurant->get_cost_per_person();
                     $this->calculate_child_cost += $restaurant->get_cost_per_person();
-                    dump('restaurant: +'.$restaurant->get_cost_per_person());
+                    // dump('restaurant: +'.$restaurant->get_cost_per_person());
                 }
                 elseif ($component['type'] == 'travel'){
                 }
