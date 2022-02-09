@@ -65,20 +65,21 @@ class ItineraryService
 
         $this->check_itinerary_components();
 
-        $accounting = new Accounting($raw_data['accounting']);
+        // 不驗算最後售價了
+        // $accounting = new Accounting($raw_data['accounting']);
 
         // dump("cal_adult_cost: ".$this->calculate_adult_cost);
         // dump('adult_cost: '.$this->adult_cost);
         // dump("cal_child_cost: ".$this->calculate_child_cost);
         // dump('child_cost: '.$this->child_cost);
-        if ($this->calculate_adult_cost != $this->adult_cost){
-            // throw new WrongTypeException('Adult cost is not correct');
-            throw new Exception("Adult cost is not correct");
-        }
-        elseif ($this->calculate_child_cost != $this->child_cost){
-            // throw new WrongTypeException('Child cost is not correct');
-            throw new Exception("Child cost is not correct");
-        }
+        // if ($this->calculate_adult_cost != $this->adult_cost){
+        //     // throw new WrongTypeException('Adult cost is not correct');
+        //     throw new Exception("Adult cost is not correct");
+        // }
+        // elseif ($this->calculate_child_cost != $this->child_cost){
+        //     // throw new WrongTypeException('Child cost is not correct');
+        //     throw new Exception("Child cost is not correct");
+        // }
 
     }
 

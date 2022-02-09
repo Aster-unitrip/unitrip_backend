@@ -10,20 +10,10 @@ class Transportation extends ComponentNode
     {
         $this->_id = $raw_data['_id'];
         $this->type = $raw_data['type'];
-        $this->unit_price = $raw_data['unit_price'];
-        if ($raw_data['days'] <= 0) {
-            throw new DataIncorrectException('days must be greater than 0');
-        }
-        elseif( $raw_data['days'] > 0 ) {
-            $this->days = $raw_data['days'];
-        }
-        if ($raw_data['count'] <= 0) {
-            throw new DataIncorrectException('count must be greater than 0');
-        }
-        else {
-            $this->count = $raw_data['count'];
-        }
-        $this->subtotal = $raw_data['subtotal'];
+        $this->days = $raw_data['pricing_detail'][0]['days'];
+        $this->count = $raw_data['pricing_detail'][0]['count'];
+        $this->unit_price = $raw_data['pricing_detail'][0]['unit_price'];
+        $this->subtotal = $raw_data['pricing_detail'][0]['subtotal'];
         $this->check_subtotal();
     }
 

@@ -8,7 +8,7 @@ use Exception;
 
 class ComponentNode
 {
-    public $subtotal;
+    public $total;
     public $adult_cost;
     public $child_cost = null;
     public $get_unit_price;
@@ -20,28 +20,25 @@ class ComponentNode
         $this->_id = $raw_data['_id'];
         $this->type = $raw_data['type'];
         $this->pricing_detail = $raw_data['pricing_detail'];
-        $this->subtotal = $raw_data['subtotal'];
         $this->people_threshold = $people_threshold;
-        $this->check_subtotal();
+        $this->subtotal();
         $this->cal_cost_per_person();
     }
 
-    private function check_subtotal()
+    private function subtotal()
     {
         $pricing_check = 0;
         foreach ($this->pricing_detail as $pricing) {
-            if ($pricing['sum'] != $pricing['unit_price'] * $pricing['count']){
-                throw new DataIncorrectException('Calculation not right. In '.$pricing['name']);    
+            if ($pricing['subtotal'] != $pricing['unit_price'] * $pricing['count']){
+                throw new Exception('Calculation not right. In '.$pricing['name']);    
             }
-            $pricing_check += $pricing['sum'];
+            $pricing_check += $pricing['subtotal'];
         }
-        if ($this->subtotal != $pricing_check){
-            throw new DataIncorrectException('Calculation not right. In '.$this->raw_data['name']);
-        }
+        $this->total = $pricing_check;
     }
     private function cal_cost_per_person()
     {
-        $this->cost_per_person = $this->subtotal / $this->people_threshold;
+        $this->cost_per_person = $this->total / $this->people_threshold;
     }
 
     public function get_adult_cost(){
