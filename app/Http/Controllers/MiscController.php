@@ -15,13 +15,13 @@ class MiscController extends Controller
 
     }
 
-    
+
     public function cityTown()
     {
         return $this->miscService->getCityTown();
     }
 
-    
+
     public function bankCode()
     {
         return $this->miscService->getBankCode();
@@ -35,5 +35,16 @@ class MiscController extends Controller
     public function organization()
     {
         return $this->miscService->getOrganization();
+    }
+
+    public function nationality()
+    {
+        return $this->miscService->getNationality();
+    }
+
+
+    public function order_source()
+    {
+        return $this->miscService->getOrderSource();
     }
 }

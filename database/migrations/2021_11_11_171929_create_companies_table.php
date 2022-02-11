@@ -39,11 +39,12 @@ class CreateCompaniesTable extends Migration
 
         DB::table('companies')->insert(
             [
-                [ 
+                [
                     "company_type" => '1',
                     "title" => "樂多HOTEL",
                     "tax_id" => "99999999",
                     "tel" => "02-111111111",
+                    "fax" => "02-111111111",
                     "address_city" => "台北市",
                     "address_town" => "萬華區",
                     "address" => "林森路一段1號",
@@ -61,11 +62,12 @@ class CreateCompaniesTable extends Migration
                     "updated_at" => date("Y-m-d H:i:s"),
                     "created_at" => date("Y-m-d H:i:s")
                 ],
-                [ 
+                [
                     "company_type" => '2',
                     "title" => "樂多旅行社",
                     "tax_id" => "888888888",
                     "tel" => "02-111111111",
+                    "fax" => "02-111111111",
                     "address_city" => "台北市",
                     "address_town" => "萬華區",
                     "address" => "林森路一段2號",

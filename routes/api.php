@@ -15,6 +15,7 @@ use App\Http\Controllers\ComponentAccomendationController;
 use App\Http\Controllers\ComponentTransportationController;
 use App\Http\Controllers\ComponentGuideController;
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -79,6 +80,9 @@ Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/bank_code', [MiscController::class, 'bankCode']);
     Route::get('/historic_level', [MiscController::class, 'historicLevel']);
     Route::get('/organizations', [MiscController::class, 'organization']);
+    Route::get('/nationality', [MiscController::class, 'nationality']); //國籍
+    Route::get('/order_source', [MiscController::class, 'order_source']); //訂單來源
+
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'restaurants'], function($router){
@@ -96,3 +100,4 @@ Route::group(['middleware'=>'api', 'prefix'=>'transportations'], function($route
 Route::group(['middleware'=>'api', 'prefix'=>'guides'], function($router){
     Route::post('/list', [ComponentGuideController::class, 'list']);
 });
+

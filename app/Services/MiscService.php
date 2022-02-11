@@ -3,10 +3,12 @@
 namespace App\Services;
 
 class MiscService
-{   
+{
     protected $cityTownFile;
     protected $bankCodeFile;
     protected $historicLevelFile;
+    protected $nationalityFile;
+    protected $orderSourceFile;
 
     public function __construct()
     {
@@ -14,6 +16,8 @@ class MiscService
         $this->bankCodeFile = storage_path('misc/bankCode.json');
         $this->historicLevelFile = storage_path('misc/historicLevel.json');
         $this->organizations = storage_path('misc/organizations.json');
+        $this->nationalityFile = storage_path('misc/nationality.json');
+        $this->orderSourceFile = storage_path('misc/orderSource.json');
     }
 
     public function getCityTown()
@@ -37,6 +41,18 @@ class MiscService
     public function getOrganization()
     {
         $jsonString = file_get_contents($this->organizations);
+        return json_decode($jsonString, true);
+    }
+
+    public function getNationality()
+    {
+        $jsonString = file_get_contents($this->nationalityFile);
+        return json_decode($jsonString, true);
+    }
+
+    public function getOrderSource()
+    {
+        $jsonString = file_get_contents($this->orderSourceFile);
         return json_decode($jsonString, true);
     }
 }
