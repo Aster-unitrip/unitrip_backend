@@ -44,20 +44,18 @@ class ComponentRestaurantController extends Controller
             $meal_type = null;
         }
 
-        // Handle ticket prices
-        if (array_key_exists('fee', $filter)) {
+        // Handle cost_per_person range
+        if (array_key_exists('cost_per_person', $filter)) {
             
             $price_range = array();
-            if (array_key_exists('price_max', $filter['fee'])){
-                $price_range['$lte'] = $filter['fee']['price_max'];
+            if (array_key_exists('price_max', $filter['cost_per_person'])){
+                $price_range['$lte'] = $filter['cost_per_person']['price_max'];
             }
-            if (array_key_exists('price_min', $filter['fee'])){
-                $price_range['$gte'] = $filter['fee']['price_min'];
+            if (array_key_exists('price_min', $filter['cost_per_person'])){
+                $price_range['$gte'] = $filter['cost_per_person']['price_min'];
             }
             if (!empty($price_range)){
-                $filter['meals'] = array('$all' => array(
-                    array('$elemMatch' => array('price' => $price_range))
-                ));
+                $filter['cost_per_person'] = $price_range;
             }
         }
         // {'activity_items.price': {'$all':[]}}

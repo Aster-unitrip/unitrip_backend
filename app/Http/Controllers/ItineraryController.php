@@ -19,7 +19,7 @@ class ItineraryController extends Controller
             'name' => 'required|string|max:30',
             'summary' => 'nullable|string|max:150',
             'code' => 'nullable|string|max:20',
-            'total_day' => 'required|integer|between:1,7',
+            'total_day' => 'required|integer|between:1,30',
             'areas' => 'nullable|array',
             'people_threshold' => 'required|integer|min:1',
             'people_full' => 'required|integer|max:100',
@@ -28,7 +28,7 @@ class ItineraryController extends Controller
             // 'pricing_detail.subtotal' => 'required|integer|min:0',
             'guides' => 'required|array',
             'transportations' => 'required|array',
-            'misc' => 'required|array',
+            'misc' => 'array',
             'accounting' => 'required|array',
             'include_description' => 'nullable|string|max:150',
             'exclude_description' => 'nullable|string|max:150',
@@ -143,6 +143,13 @@ class ItineraryController extends Controller
             
         }
         unset($filter['total_day_range']);
+
+        // Handle itinerary area query
+        if (array_key_exists('areas', $filter)) {
+            $areas = $filter['areas'];
+            $filter['areas'] = array('$in' => $areas);
+        }
+
 
         $company_type = auth()->payload()->get('company_type');
         $company_id = auth()->payload()->get('company_id');

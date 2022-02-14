@@ -229,7 +229,7 @@ class RequestPService
         
         $postdata = json_encode($data);
         // 顯示 MongoDB 的查詢語法
-        // dd($postdata);
+        // dump($postdata);
         $options = array(
             'http' => array(
                 'method' => 'POST',
@@ -251,6 +251,7 @@ class RequestPService
         try{
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
+            // dump($result);
             $http_code = explode(' ', $http_response_header[0])[1];
             if ($http_code == "200") {
                 $result = json_decode($result, true);
