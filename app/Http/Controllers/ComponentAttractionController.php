@@ -28,7 +28,7 @@ class ComponentAttractionController extends Controller
             'tel' => 'required|string|max:20',
             'historic_level' => 'nullable|string|max:6',
             'org_name' => 'string|max:20',
-            'categories' => 'required', 
+            'categories' => 'required',
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',
             'address' => 'required|string|max:30',
@@ -49,7 +49,7 @@ class ComponentAttractionController extends Controller
         ];
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $rule);
-        
+
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
@@ -115,7 +115,7 @@ class ComponentAttractionController extends Controller
         else{
             return response()->json(['error' => 'company_type must be 1 or 2'], 400);
         }
-        
+
         // Handle projection content
         $projection = array(
                 "_id" => 1,
@@ -146,7 +146,7 @@ class ComponentAttractionController extends Controller
                 $content['imgs'][$n]['filename'] = end($split_url);
             }
         }
-    
+
         return $content;
     }
 
