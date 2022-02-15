@@ -124,9 +124,7 @@ class ComponentAttractionController extends Controller
                 "address" => 1,
                 "name" => 1,
                 "tel" => 1,
-                "ticket.free" => 1,
-                "ticket.full_ticket.price" => 1,
-                "ticket.full_ticket.name" => 1,
+                "ticket" => 1,
                 "imgs" => 1,
                 "private" => 1,
             );

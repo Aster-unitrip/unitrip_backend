@@ -40,16 +40,17 @@ class ComponentAccomendationController extends Controller
             $filter['star'] = array("\$in" => $star);
         }
 
-        // Handle meal type
+        // Handle room type
         if (array_key_exists('room_type', $filter)) {
             $room_type = $filter['room_type'];
-            $filter['room'] = array('$elemMatch' => array('room_type' => array('\$in' => $room_type)));
+            $filter['room'] = array('$elemMatch' => array('room_type' => array('$in' => $room_type)));
             unset($filter['room_type']);
         }
 
         if(array_key_exists('with_meals', $filter)){
             $with_meals = $filter['with_meals'];
             $filter['room'] = array('$elemMatch' => array('with_meals' => $with_meals));
+            unset($filter['with_meals']);
         }
 
         // Handle accommendation category
@@ -61,6 +62,9 @@ class ComponentAccomendationController extends Controller
 
         // Handle room prices
         if (array_key_exists('fee', $filter)) {
+            if ($filter['fee'] == array()) {
+                unset($filter['fee']);
+            }
             
             $price_range = array();
             if (array_key_exists('price_max', $filter['fee'])){

@@ -36,15 +36,20 @@ class ComponentGuideController extends Controller
 
         // Handle "can_drive" field
         if (array_key_exists('can_drive', $filter)) {
-            $pos = array("1", 1, "true", true);
-            $neg = array("0", 0, "false", false);
+            $pos = array("1", 1, "true", "True", true);
+            $neg = array("0", 0, "false", "False", false);
             if (in_array($filter['can_drive'], $pos)){
                 $filter['can_drive'] = true;
             }
             else if (in_array($filter['can_drive'], $neg)){
                 $filter['can_drive'] = false;
             }
-            unset($filter['can_drive']);
+        }
+
+        // Handle "language" field
+        if (array_key_exists('languages', $filter)){
+            $languages = $filter['languages'];
+            $filter['languages'] = array('$in' => $languages);
         }
 
 
