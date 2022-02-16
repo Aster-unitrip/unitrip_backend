@@ -14,7 +14,7 @@ use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\ComponentAccomendationController;
 use App\Http\Controllers\ComponentTransportationController;
 use App\Http\Controllers\ComponentGuideController;
-
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,3 +101,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'guides'], function($router){
     Route::post('/list', [ComponentGuideController::class, 'list']);
 });
 
+//訂單
+Route::group(['middleware'=>'api', 'prefix'=>'order'], function($router){
+    Route::post('/', [OrderController::class, 'add']);
+});
