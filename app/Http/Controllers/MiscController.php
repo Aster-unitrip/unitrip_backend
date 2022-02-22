@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Services\MiscService;
+use App\Models\User;
+
 
 class MiscController extends Controller
 {
@@ -46,5 +48,13 @@ class MiscController extends Controller
     public function order_source()
     {
         return $this->miscService->getOrderSource();
+    }
+
+    public function company_employee()
+    {
+        // 所有資料傳回(未過濾)
+        $user_company_id = auth()->user()->company_id;
+        $same_company_users_data = User::where('company_id', $user_company_id)->get();
+        return $same_company_users_data;
     }
 }

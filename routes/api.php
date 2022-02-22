@@ -82,6 +82,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/organizations', [MiscController::class, 'organization']);
     Route::get('/nationality', [MiscController::class, 'nationality']); //國籍
     Route::get('/order_source', [MiscController::class, 'order_source']); //訂單來源
+    Route::get('/company_employee', [MiscController::class, 'company_employee']); //查詢與使用帳號同公司所有員工
+
 
 });
 
