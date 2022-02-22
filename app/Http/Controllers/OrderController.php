@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
 
 use Validator;
 use Carbon\Carbon;
+
+
 
 class OrderController extends Controller
 {
@@ -76,27 +79,32 @@ class OrderController extends Controller
 
         //預設
         $user_name = auth()->user()->contact_name;
+
         $now_date = date('Ymd');
         $now_time = date('His');
 
-
         $validated = $validator->validated();
-        $travel_days = round((strtotime($validated['travel_end']) - strtotime($validated['travel_start']))/3600/24)+1 ;
+        //$travel_days = round((strtotime($validated['travel_end']) - strtotime($validated['travel_start']))/3600/24)+1 ;
 
+        $validated['user_company_id'] = auth()->user()->company_id;
+        //找user公司名稱
+        $company_data = Company::find($validated['user_company_id']);
+        $validated['user_company_name'] = $company_data['title'];
         $validated['order_status'] = "收到需求單";
         $validated['payment_status'] = "未付款";
         $validated['out_status'] = "未出團";
         $validated['order_number'] = "CUS_".$now_date."_".$now_time;
-        $validated['cus_group_code'] = "CUS_".$now_date."_".$travel_days."_1";
         $validated['last_updated_on'] = $user_name;
-        $validated['user_id'] = $user_name;
+        $validated['user_name'] = $user_name;
+
         $validated['order_record'] = array();
         $order_record_add_order_status = array(
             "event" =>  $validated['order_status'],
-            "date" => date('Y-m-d H:i:s'),
+            "date" => date('Y-m-d')."T".date('H:i:s'),
             "modified_by" => $user_name
         );
         array_push($validated['order_record'], $order_record_add_order_status);
+
         $validated['deposit_status'] = "未付款";
         $validated['deposit'] = 0;
         $validated['balance_status'] = "未付款";
@@ -104,9 +112,10 @@ class OrderController extends Controller
         $validated['amount'] = 0;
         $validated['cancel_at'] = null;
         $validated['deleted_at'] = null;
+        $validated['cus_group_code'] = null;
         $validated['versions'] = array();
-        $validated['travel_start'] = new Carbon($validated['travel_start']);
-        $validated['travel_end'] = new Carbon($validated['travel_end']);
+        $validated['travel_start'] = $validated['travel_start']."T00:00:00";
+        $validated['travel_end'] = $validated['travel_end']."T23:59:59";
 
 
         $cus_orders = $this->requestService->insert_one('cus_orders', $validated);
@@ -137,7 +146,7 @@ class OrderController extends Controller
 
             $order_record_add_order_status = array(
                 "event" =>  $validated['order_status'],
-                "date" => date('Y-m-d H:i:s'),
+                "date" => date('Y-m-d')."T".date('H:i:s'),
                 "modified_by" => $user_name
             );
             $validated['order_record'] = $content['order_record'] + $order_record_add_order_status;
@@ -183,11 +192,8 @@ class OrderController extends Controller
         if(array_key_exists('order_time_start', $filter) && array_key_exists('order_time_end', $filter)){
             if(strtotime($filter['order_time_end']) - strtotime($filter['order_time_start']) > 0){
 
-                $order_time_start = new Carbon($filter['order_time_start']);
-                $order_time_end = new Carbon($filter['order_time_end']);
-                //dump($order_time_start);
-                //return strtotime($order_time_start);
-                $filter['created_at'] = array('$gte' => $order_time_start, '$lte' => $order_time_end);
+                $filter['created_at'] = array('$gte' => $filter['order_time_start']."T00:00:00"
+                , '$lte' => $filter['order_time_end']."T00:00:00");
 
             }
             else return response()->json(['error' => '訂購結束時間不可早於訂購開始時間'], 400);

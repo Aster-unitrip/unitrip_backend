@@ -9,6 +9,10 @@ class Company extends Model
 {
     use HasFactory;
 
+    public function users(){
+        return $this->hasMany('App\Models\User');
+    }
+
     protected $fillable = [
         'title',
         'tax_id',
@@ -28,4 +32,5 @@ class Company extends Model
         'ta_register_num',
         'ta_category'
     ];
+
 }
