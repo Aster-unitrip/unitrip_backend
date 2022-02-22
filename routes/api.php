@@ -104,4 +104,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'guides'], function($router){
 //訂單
 Route::group(['middleware'=>'api', 'prefix'=>'order'], function($router){
     Route::post('/', [OrderController::class, 'add']);
+    Route::post('/list', [OrderController::class, 'list']);
+    Route::post('/update', [OrderController::class, 'edit']);
+
 });

@@ -24,7 +24,7 @@ class RequestPService
             if (array_key_exists('categories', $filter) && gettype($filter['categories']) == 'array') {
                 $data['filter']['categories'] = ['$in' => $filter['categories']];
             }
-            
+
         }
         $postdata = json_encode($data);
         $options = array(
@@ -55,7 +55,7 @@ class RequestPService
         // );
         $post_data['updated_at'] = date('Y-m-d H:i:s');
         $post_data['created_at'] = date('Y-m-d H:i:s');
-        
+
         $data = array(
             "collection" => $collection,
             "database" => "unitrip",
@@ -76,11 +76,11 @@ class RequestPService
             )
         );
         return $this->send_req($options, $url);
-        
+
     }
 
     public function get_one($collection, $id)
-    {   
+    {
         $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/find_one";
         $data = array(
             "collection" => $collection,
@@ -106,8 +106,100 @@ class RequestPService
         return $this->send_req($options, $url);
     }
 
+    public function get_one_by_field($collection, $field_name, $field_data)
+    {
+        $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/find_one";
+        $data = array(
+            "collection" => $collection,
+            "database" => "unitrip",
+            "dataSource" => "RealmCluster",
+            "filter" => array(
+                $field_name => $field_data
+            ),
+        );
+        $postdata = json_encode($data);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                    'api-key:'.config('app.mongo_key'),
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        return $this->send_req($options, $url);
+    }
+    public function find_one($collection, $_id, $field_name, $field_data)
+    {
+        $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/find_one";
+        if(!$_id){
+            $data = array(
+                "collection" => $collection,
+                "database" => "unitrip",
+                "dataSource" => "RealmCluster",
+                "filter" => array(
+                    $field_name => $field_data
+                ),
+            );
+        }
+        else{
+            $data = array(
+                "collection" => $collection,
+                "database" => "unitrip",
+                "dataSource" => "RealmCluster",
+                "filter" => array(
+                    "_id" => $_id ,
+                    $field_name => $field_data
+                ),
+            );
+        }
+
+        //return $data;
+        $postdata = json_encode($data);
+        //return $postdata;
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                    'api-key:'.config('app.mongo_key'),
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+
+        try{
+            $context = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+            $http_code = explode(' ', $http_response_header[0])[1];
+            if ($http_code == "200") {
+                $result = json_decode($result, true);
+                if (array_key_exists('documents', $result) && $result['documents'] != []) {
+                    return $result;
+                }
+                elseif (array_key_exists('document', $result) && $result['document'] != []) {
+                    return $result;
+                }
+                else{
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        catch(\Exception $e) {
+            return false;
+        }
+
+    }
     public function update($collection, $update_data)
-    {   
+    {
         $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/update";
         $id = $update_data['_id'];
         unset($update_data['_id']);
@@ -210,7 +302,7 @@ class RequestPService
             array_push($query_filter, array('$skip' => $page*$limit));
         }
         array_push($query_filter, array('$limit' => $limit));
-        
+
         // array_push($data['pipeline'], array('$project' => array('_id' => 0)));
         // $second_query_filter = $query_filter;
         // array_pop($second_query_filter);
@@ -226,7 +318,7 @@ class RequestPService
         array_push($data['pipeline'], array('$unwind' => array('path' => '$count')));
         array_push($data['pipeline'], array('$set' => array('count' => '$count.totalCount')));
 
-        
+
         $postdata = json_encode($data);
         // 顯示 MongoDB 的查詢語法
         // dump($postdata);
@@ -245,18 +337,76 @@ class RequestPService
         return $this->send_req($options, $url);
     }
 
+    public function aggregate_search($collection, $projection, $filter=[], $page=0){
+        $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/aggregate";
+        $limit = 10;
+        $data = array(
+            "collection" => $collection,
+            "database" => "unitrip",
+            "dataSource" => "RealmCluster",
+            "pipeline" => null,
+        );
+        $query_filter = [];
+
+        // 用正規表達式查詢名稱
+        if ($filter != []) {
+            array_push($query_filter, array('$match' => $filter));
+        }
+        // 留下需要的欄位
+        if ($projection != []) {
+            array_push($query_filter, array('$project' => $projection));
+        }
+        $second_query_filter = $query_filter;
+
+        // 分頁
+        if ($page>0) {
+            array_push($query_filter, array('$skip' => $page*$limit));
+        }
+        array_push($query_filter, array('$limit' => $limit));
+
+        $second_query_filter[] = array('$count' => 'totalCount');
+        $data['pipeline'] =array( array(
+            '$facet' => array(
+                'docs' => $query_filter,
+                'count' => $second_query_filter
+            ))
+            );
+        // 格式轉換
+        array_push($data['pipeline'], array('$unwind' => array('path' => '$count')));
+        array_push($data['pipeline'], array('$set' => array('count' => '$count.totalCount')));
+
+
+        $postdata = json_encode($data);
+        //return $postdata;
+        // 顯示 MongoDB 的查詢語法
+        // dump($postdata);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                    'api-key:'.config('app.mongo_key'),
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+
+        return $this->send_req($options, $url);
+    }
 
     public static function send_req($options, $url)
     {
         try{
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
-            // dump($result);
+            //dump($result);
             $http_code = explode(' ', $http_response_header[0])[1];
             if ($http_code == "200") {
                 $result = json_decode($result, true);
                 if (array_key_exists('documents', $result) && $result['documents'] != []) {
-                    return response()->json($result['documents'], $http_code);             
+                    return response()->json($result['documents'], $http_code);
                 }
                 elseif (array_key_exists('document', $result) && $result['document'] != []) {
                     return response()->json($result['document'], $http_code);
@@ -270,10 +420,10 @@ class RequestPService
                 $result = json_decode($result, true);
                 return response()->json($result, $http_code);
 
-            }    
+            }
             else {
                 return response()->json(['error' => $result], 400);
-            }   
+            }
         }
         catch(\Exception $e) {
             return response()->json($e->getMessage(), 400);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
+
 use Validator;
 use Carbon\Carbon;
 
@@ -15,33 +16,59 @@ class OrderController extends Controller
     {
         $this->middleware('auth');
         $this->requestService = $requestPService;
-    }
 
-    // 新增訂單
-    public function add(Request $request)
-    {
-        $rule = [
+        // 前端條件
+        $this->rule = [
             'order_passenger' => 'required|string|max:30',
             'company' => 'nullable|string|max:50',
             'email' => 'required|email',
             'phone' => 'required|string',
             'nationality' => 'required|string',
-            'money' => 'required|string|max:30',
-            'language' => 'required',
+            'currency' => 'required|string|max:30',
+            'languages' => 'required',
             'budget_min' => 'required|numeric',
             'budget_max' => 'required|numeric',
-            'attendance_adults' => 'required|integer',
-            'attendance_children' => 'required|integer',
-            'attendance_infant' => 'required|integer',
+            'adult_num' => 'required|integer',
+            'child_num' => 'required|integer',
+            'baby_num' => 'required|integer',
             'source' => 'required|string',
             'needs' => 'nullable|string',
             'note' => 'nullable|string',
             'travel_start' => 'required|date',
             'travel_end' => 'required|date',
         ];
+        $this->edit_rule = [
+            '_id'=>'required|string|max:24',
+            'cus_group_code' => 'required|string',
+            'order_status' => 'string',
+/*             'order_passenger' => 'required|string|max:30',
+            'company' => 'nullable|string|max:50',
+            'email' => 'required|email',
+            'phone' => 'required|string',
+            'nationality' => 'required|string',
+            'currency' => 'required|string|max:30',
+            'languages' => 'required',
+            'budget_min' => 'required|numeric',
+            'budget_max' => 'required|numeric',
+            'adult_num' => 'required|integer',
+            'child_num' => 'required|integer',
+            'baby_num' => 'required|integer',
+            'source' => 'required|string',
+            'needs' => 'nullable|string',
+            'note' => 'nullable|string',
+            'travel_start' => 'required|date',
+            'travel_end' => 'required|date',
+            'payment_status' => 'required|string',
+            'out_status' => 'required|string', */
+
+        ];
+    }
+
+    public function add(Request $request)
+    {
 
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $rule);
+        $validator = Validator::make($data, $this->rule);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
@@ -56,24 +83,132 @@ class OrderController extends Controller
         $validated = $validator->validated();
         $travel_days = round((strtotime($validated['travel_end']) - strtotime($validated['travel_start']))/3600/24)+1 ;
 
-        $validated['order_state'] = "收到需求單";
-        $validated['payment_state'] = "未付款";
-        $validated['out_state'] = "未出團";
+        $validated['order_status'] = "收到需求單";
+        $validated['payment_status'] = "未付款";
+        $validated['out_status'] = "未出團";
         $validated['order_number'] = "CUS_".$now_date."_".$now_time;
-        $validated['code'] = "CUS_".$now_date."_".$travel_days."_1";
+        $validated['cus_group_code'] = "CUS_".$now_date."_".$travel_days."_1";
         $validated['last_updated_on'] = $user_name;
-        $validated['person_in_charge'] = $user_name;
-        $validated['order_record'] = array(
-            "event" => "收到需求單",
+        $validated['user_id'] = $user_name;
+        $validated['order_record'] = array();
+        $order_record_add_order_status = array(
+            "event" =>  $validated['order_status'],
             "date" => date('Y-m-d H:i:s'),
-            "person_in_charge" => $user_name
+            "modified_by" => $user_name
         );
-        $validated['version'] = array();
+        array_push($validated['order_record'], $order_record_add_order_status);
+        $validated['deposit_status'] = "未付款";
+        $validated['deposit'] = 0;
+        $validated['balance_status'] = "未付款";
+        $validated['balance'] = 0;
+        $validated['amount'] = 0;
+        $validated['cancel_at'] = null;
+        $validated['deleted_at'] = null;
+        $validated['versions'] = array();
+        $validated['travel_start'] = new Carbon($validated['travel_start']);
+        $validated['travel_end'] = new Carbon($validated['travel_end']);
+
+
+        $cus_orders = $this->requestService->insert_one('cus_orders', $validated);
+        return $cus_orders;
+
+    }
+
+    public function edit(Request $request)
+    {
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->edit_rule);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $user_name = auth()->user()->contact_name;
+        $validated = $validator->validated();
+        $validated['last_updated_on'] = $user_name;
+
+        // 參團編號需擋重複
+        $cus_orders_past = $this->requestService->find_one('cus_orders', null, 'cus_group_code', $validated['cus_group_code']);
+        if($cus_orders_past !== False) return response()->json(['error' => "已存在此參團編號"], 400);
+
+        // TODO: 當 order_status 更換必須 push 到 order_record
+        $order_status_past = $this->requestService->get_one('cus_orders', $validated['_id']);
+        $content =  json_decode($order_status_past->content(), true);
+        if($content['order_status'] !== $validated['order_status']){
+
+            $order_record_add_order_status = array(
+                "event" =>  $validated['order_status'],
+                "date" => date('Y-m-d H:i:s'),
+                "modified_by" => $user_name
+            );
+            $validated['order_record'] = $content['order_record'] + $order_record_add_order_status;
+
+            /* $validated['order_record'] =  array_push($content['order_record'], $order_record_add_order_status);*/
+            return $order_record_add_order_status.$validated['order_record'];
+        }
+
+
+        return $validated['order_record'];
+
+        /* $cus_orders = $this->requestService->update('cus_orders', $validated); */
+
+    }
 
 
 
-        $cus_order = $this->requestService->insert_one('cus_order', $validated);
-        return $cus_order;
+    // filter: 訂單編號, 參團編號, 旅客代表人姓名, 來源, 訂購期間(ordertime_start、ordertime_end), 行程期間, 負責人, 出團狀態, 付款狀態, 頁數
+
+    // order_number, code, order_passenger, source, order_status, created_at, travel_start, travel_end, user_id,payment_status, out_status, page
+
+    //假定 訂購期間為 order_time_start<= created_at <=order_time_end
+    public function list(Request $request)
+
+    {
+        $filter = json_decode($request->getContent(), true);
+
+        if (array_key_exists('page', $filter)) {
+            $page = $filter['page'];
+            unset($filter['page']);
+            if ($page <= 0) {
+                return response()->json(['error' => 'page must be greater than 0'], 400);
+            }
+            else{
+                $page = $page - 1;
+            }
+        }
+        else{
+            $page = 0;
+        }
+
+        // TODO ISODate
+        if(array_key_exists('order_time_start', $filter) && array_key_exists('order_time_end', $filter)){
+            if(strtotime($filter['order_time_end']) - strtotime($filter['order_time_start']) > 0){
+
+                $order_time_start = new Carbon($filter['order_time_start']);
+                $order_time_end = new Carbon($filter['order_time_end']);
+                //dump($order_time_start);
+                //return strtotime($order_time_start);
+                $filter['created_at'] = array('$gte' => $order_time_start, '$lte' => $order_time_end);
+
+            }
+            else return response()->json(['error' => '訂購結束時間不可早於訂購開始時間'], 400);
+        }
+        elseif(array_key_exists('order_time_start', $filter) && !array_key_exists('order_time_end', $filter)){
+            return response()->json(['error' => '沒有訂購結束時間'], 400);
+        }
+        elseif(!array_key_exists('order_time_start', $filter) && array_key_exists('order_time_end', $filter)){
+            return response()->json(['error' => '沒有訂購開始時間'], 400);
+        }
+        unset($filter['order_time_start']);
+        unset($filter['order_time_end']);
+
+        //return $filter;
+
+        $projection = array(
+            /* "order_passenger" => 1, */
+        );
+
+        $result = $this->requestService->aggregate_search('cus_orders', $projection, $filter, $page);
+        return $result;
 
     }
 

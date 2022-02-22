@@ -120,7 +120,7 @@ class ItineraryController extends Controller
         // Handle itinerary sub_categories
         if (array_key_exists('sub_categories', $filter)) {
             $category = $filter['sub_categories'];
-            $filter['sub_categories'] = array('$elemMatch' => array('$in' => $category)); 
+            $filter['sub_categories'] = array('$elemMatch' => array('$in' => $category));
         }
 
         // Handle itinerary areas
@@ -140,7 +140,7 @@ class ItineraryController extends Controller
             elseif (!array_key_exists('total_day_min', $filter['total_day_range']) && array_key_exists('total_day_max', $filter['total_day_range'])){
                 $filter['total_day'] = array('$lte' => $filter['total_day_range']['total_day_max']);
             }
-            
+
         }
         unset($filter['total_day_range']);
 
@@ -154,7 +154,7 @@ class ItineraryController extends Controller
         $company_type = auth()->payload()->get('company_type');
         $company_id = auth()->payload()->get('company_id');
         if ($company_type == 1){
-            
+
         }
         else if ($company_type == 2){
             $query_private = false;
@@ -165,7 +165,7 @@ class ItineraryController extends Controller
             return response()->json(['error' => 'company_type must be 1 or 2'], 400);
         }
 
-        
+
         $projection = array(
                 // "_id" => 1,
                 // "name" => 1,
@@ -192,7 +192,7 @@ class ItineraryController extends Controller
                 $content['imgs'][$n]['filename'] = end($split_url);
             }
         }
-    
+
         return $content;
     }
 }
