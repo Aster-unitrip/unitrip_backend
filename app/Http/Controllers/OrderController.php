@@ -166,11 +166,11 @@ class OrderController extends Controller
 
     // filter: 訂單編號, 參團編號, 旅客代表人姓名, 來源, 訂購期間(ordertime_start、ordertime_end), 行程期間, 負責人, 出團狀態, 付款狀態, 頁數
 
-    // order_number, code, order_passenger, source, order_status, created_at, travel_start, travel_end, user_id,payment_status, out_status, page
+    // order_number, code, order_passenger, source, order_status, travel_start, travel_end, user_name, payment_status, out_status, page
+    // code, out_status
 
-    //假定 訂購期間為 order_time_start<= created_at <=order_time_end
+
     public function list(Request $request)
-
     {
         $filter = json_decode($request->getContent(), true);
 
@@ -188,13 +188,18 @@ class OrderController extends Controller
             $page = 0;
         }
 
-        // TODO ISODate
+        //擋下供應商/其他公司的id
+        $company_type = auth()->payload()->get('company_type');
+        $filter['user_company_id'] = auth()->user()->company_id;
+        if ($company_type !== 1){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+        //訂購期間為 order_time_start<= created_at <=order_time_end
         if(array_key_exists('order_time_start', $filter) && array_key_exists('order_time_end', $filter)){
             if(strtotime($filter['order_time_end']) - strtotime($filter['order_time_start']) > 0){
-
                 $filter['created_at'] = array('$gte' => $filter['order_time_start']."T00:00:00"
-                , '$lte' => $filter['order_time_end']."T00:00:00");
-
+                , '$lte' => $filter['order_time_end']."T23:59:59");
             }
             else return response()->json(['error' => '訂購結束時間不可早於訂購開始時間'], 400);
         }
@@ -207,10 +212,13 @@ class OrderController extends Controller
         unset($filter['order_time_start']);
         unset($filter['order_time_end']);
 
+
         //return $filter;
+
 
         $projection = array(
             /* "order_passenger" => 1, */
+
         );
 
         $result = $this->requestService->aggregate_search('cus_orders', $projection, $filter, $page);

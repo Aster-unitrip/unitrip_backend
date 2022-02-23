@@ -352,6 +352,8 @@ class RequestPService
         if ($filter != []) {
             array_push($query_filter, array('$match' => $filter));
         }
+
+
         // 留下需要的欄位
         if ($projection != []) {
             array_push($query_filter, array('$project' => $projection));
