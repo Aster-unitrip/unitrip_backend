@@ -87,7 +87,7 @@ class RequestPService
             "database" => "unitrip",
             "dataSource" => "RealmCluster",
             "filter" => array(
-                "_id" => array( "\$oid" => $id )
+                "_id" => $id
             ),
         );
         $postdata = json_encode($data);
