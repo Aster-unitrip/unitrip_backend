@@ -107,6 +107,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'guides'], function($router){
 Route::group(['middleware'=>'api', 'prefix'=>'order'], function($router){
     Route::post('/', [OrderController::class, 'add']);
     Route::post('/list', [OrderController::class, 'list']);
+    Route::get('/{id}', [OrderController::class, 'get_by_id']);
     Route::post('/update', [OrderController::class, 'edit']);
 
 });

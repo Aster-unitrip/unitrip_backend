@@ -87,10 +87,12 @@ class RequestPService
             "database" => "unitrip",
             "dataSource" => "RealmCluster",
             "filter" => array(
-                "_id" => array( "\$oid" => $id )
+                "_id" => $id
             ),
         );
+
         $postdata = json_encode($data);
+
         $options = array(
             'http' => array(
                 'method' => 'POST',
@@ -103,35 +105,10 @@ class RequestPService
                 'timeout' => 10 // 超時時間（單位:s）
             )
         );
+
         return $this->send_req($options, $url);
     }
 
-    public function get_one_by_field($collection, $field_name, $field_data)
-    {
-        $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/find_one";
-        $data = array(
-            "collection" => $collection,
-            "database" => "unitrip",
-            "dataSource" => "RealmCluster",
-            "filter" => array(
-                $field_name => $field_data
-            ),
-        );
-        $postdata = json_encode($data);
-        $options = array(
-            'http' => array(
-                'method' => 'POST',
-                'header' => array(
-                    'Content-type:application/json',
-                    'Access-Control-Request-Headers: *',
-                    'api-key:'.config('app.mongo_key'),
-                ),
-                'content' => $postdata,
-                'timeout' => 10 // 超時時間（單位:s）
-            )
-        );
-        return $this->send_req($options, $url);
-    }
     public function find_one($collection, $_id, $field_name, $field_data)
     {
         $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/find_one";
@@ -198,6 +175,7 @@ class RequestPService
         }
 
     }
+
     public function update($collection, $update_data)
     {
         $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/update";
@@ -394,7 +372,6 @@ class RequestPService
                 'timeout' => 10 // 超時時間（單位:s）
             )
         );
-
         return $this->send_req($options, $url);
     }
 
