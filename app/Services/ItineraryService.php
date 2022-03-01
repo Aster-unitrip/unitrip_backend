@@ -114,6 +114,10 @@ class ItineraryService
                 }
                 elseif ($component['type'] == 'travel'){
                 }
+                elseif ($component['type'] == 'guide'){
+                }
+                elseif ($component['type'] == 'transportation'){
+                }
                 else {
                     throw new WrongTypeException('Wrong component type. Please check unitrip definition');
                 }
