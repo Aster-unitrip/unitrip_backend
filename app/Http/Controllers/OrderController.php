@@ -306,10 +306,26 @@ class OrderController extends Controller
         unset($filter['order_start']);
         unset($filter['order_end']);
 
+        if(array_key_exists("travel_start", $filter) && array_key_exists('travel_end', $filter)){
+
+            if(strtotime($filter['travel_end']) - strtotime($filter['travel_start']) > 0){
+                /* $filter['travel_start'] = array('$gte' => $filter['travel_start']."T00:00:00");
+                $filter['travel_end'] = array('$lte' => $filter['travel_end']."T23:59:59"); */
+                $filter['travel_start'] = $filter['travel_start']."T00:00:00";
+                $filter['travel_end'] = $filter['travel_end']."T23:59:59";
+            }
+            else return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
+        }
+
+        //缺訂單編號, 行程時間
+
         $projection = array(
             /* "order_passenger" => 1, */
 
         );
+
+
+        return $filter;
 
         $result = $this->requestService->aggregate_search('cus_orders', $projection, $filter, $page);
         return $result;
