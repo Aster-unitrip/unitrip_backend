@@ -85,8 +85,6 @@ Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/nationality', [MiscController::class, 'nationality']); //國籍
     Route::get('/order_source', [MiscController::class, 'order_source']); //訂單來源
     Route::get('/company_employee', [MiscController::class, 'company_employee']); //查詢與使用帳號同公司所有員工
-
-
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'restaurants'], function($router){
@@ -111,7 +109,6 @@ Route::group(['middleware'=>'api', 'prefix'=>'order'], function($router){
     Route::post('/list', [OrderController::class, 'list']);
     Route::get('/{id}', [OrderController::class, 'get_by_id']);
     Route::post('/update', [OrderController::class, 'edit']);
-
     //Route::post('/operator', [OrderController::class, 'operator']);// TODO 修改旅行社旅客控團預警
 
 });

@@ -42,7 +42,7 @@ class OrderController extends Controller
         ];
         $this->edit_rule = [
             '_id'=>'required|string|max:24',
-            'order_status' => 'required|string'/* ,
+            'order_status' => 'required|string',
             'out_status' => 'required|string',
             'payment_status' => 'required|string',
             'cus_group_code' => 'string',
@@ -62,7 +62,7 @@ class OrderController extends Controller
             'baby_num' => 'required|integer',
             'source' => 'required|string',
             'needs' => 'string',
-            'note' => 'string', */
+            'note' => 'string',
         ];
     }
 
@@ -253,8 +253,6 @@ class OrderController extends Controller
             if($cus_orders_past !== False) return response()->json(['error' => "已存在此參團編號"], 400);
         }
 
-        return $validated;
-
         $cus_orders = $this->requestService->update('cus_orders', $validated);
         return $cus_orders;
 
@@ -308,9 +306,10 @@ class OrderController extends Controller
         unset($filter['order_start']);
         unset($filter['order_end']);
 
-        // 旅行時間 考慮時區 -8
+        // TODO　旅行時間差考慮時區 -8
 
-        //
+        //存下時間　　美國時間
+        //查詢時間    台灣時間
         if(array_key_exists("travel_start", $filter) && array_key_exists('travel_end', $filter)){
 
             if(strtotime($filter['travel_end']) - strtotime($filter['travel_start']) > 0){
@@ -327,9 +326,6 @@ class OrderController extends Controller
             /* "order_passenger" => 1, */
 
         );
-
-
-        //return $filter;
 
         $result = $this->requestService->aggregate_search('cus_orders', $projection, $filter, $page);
         return $result;
