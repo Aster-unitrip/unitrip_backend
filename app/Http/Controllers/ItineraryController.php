@@ -195,4 +195,8 @@ class ItineraryController extends Controller
 
         return $content;
     }
+    public function operator($id)
+    {
+        return $id;
+    }
 }

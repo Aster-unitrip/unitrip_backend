@@ -187,7 +187,7 @@ class RequestPService
             "database" => "unitrip",
             "dataSource" => "RealmCluster",
             "filter" => array(
-                "_id" => array( "\$oid" => $id )
+                "_id" => $id
             ),
             "replacement" => $update_data,
             "upsert" => false

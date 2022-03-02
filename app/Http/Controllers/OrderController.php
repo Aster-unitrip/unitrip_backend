@@ -42,7 +42,7 @@ class OrderController extends Controller
         ];
         $this->edit_rule = [
             '_id'=>'required|string|max:24',
-            'order_status' => 'required|string',
+            'order_status' => 'required|string'/* ,
             'out_status' => 'required|string',
             'payment_status' => 'required|string',
             'cus_group_code' => 'string',
@@ -62,7 +62,7 @@ class OrderController extends Controller
             'baby_num' => 'required|integer',
             'source' => 'required|string',
             'needs' => 'string',
-            'note' => 'string',
+            'note' => 'string', */
         ];
     }
 
@@ -130,6 +130,7 @@ class OrderController extends Controller
 
         // 2. 先驗證前端傳回資料
         $data = json_decode($request->getContent(), true);
+
         $validator = Validator::make($data, $this->edit_rule);
         $user_name = auth()->user()->contact_name;
 
@@ -158,7 +159,7 @@ class OrderController extends Controller
 
         // 4. 訂單狀態->參團號碼 需寫判斷
         // 寫入資料 $validated / 比較資料(在資料庫) $data_before
-        if($data_before['order_status'] !== $validated['order_status']){
+        if(array_key_exists('order_status',$validated) && $data_before['order_status'] !== $validated['order_status']){
             //客製化訂單狀態: 0.收到需求單 -> 1 4 / 1.已規劃行程&詢價 ->2 4 / 2.已回覆旅客 ->1 3 4 / 3.已成團 -> 4 / 4.棄單 -> X
             switch($data_before['order_status']){
                 case "收到需求單":
@@ -194,7 +195,7 @@ class OrderController extends Controller
         }
 
         // 5. 付款狀態 需寫判斷
-        if($data_before['payment_status'] !== $validated['payment_status']){
+        if(array_key_exists('payment_status',$validated) && $data_before['payment_status'] !== $validated['payment_status']){
             //客製化付款狀態: 0.未付款 -> 1 2 / 1.已付訂金 ->2 3 / 2.已付款 ->3 / 3.待退款 -> 4 / 4.已退款 -> X
             switch($data_before['payment_status']){
                 case "未付款":
@@ -223,7 +224,7 @@ class OrderController extends Controller
         }
 
         // 6. 出團狀態 需寫判斷
-        if($data_before['out_status'] !== $validated['out_status']){
+        if(array_key_exists('out_status',$validated) && $data_before['out_status'] !== $validated['out_status']){
             //客製化付款狀態: 0.未出團 ->1 / 1.出團中 ->2 3 / 2.已出團，未結團 ->3 / 3.已結團 -> X
             switch($data_before['out_status']){
                 case "未出團":
@@ -252,7 +253,7 @@ class OrderController extends Controller
             if($cus_orders_past !== False) return response()->json(['error' => "已存在此參團編號"], 400);
         }
 
-        //return $validated;
+        return $validated;
 
         $cus_orders = $this->requestService->update('cus_orders', $validated);
         return $cus_orders;
@@ -307,18 +308,20 @@ class OrderController extends Controller
         unset($filter['order_start']);
         unset($filter['order_end']);
 
+        // 旅行時間 考慮時區 -8
+
+        //
         if(array_key_exists("travel_start", $filter) && array_key_exists('travel_end', $filter)){
 
             if(strtotime($filter['travel_end']) - strtotime($filter['travel_start']) > 0){
-                /* $filter['travel_start'] = array('$gte' => $filter['travel_start']."T00:00:00");
-                $filter['travel_end'] = array('$lte' => $filter['travel_end']."T23:59:59"); */
-                $filter['travel_start'] = $filter['travel_start']."T00:00:00";
-                $filter['travel_end'] = $filter['travel_end']."T23:59:59";
+                $filter['travel_start'] = array('$gte' => $filter['travel_start']."T00:00:00"
+                , '$lte' => $filter['travel_start']."T23:59:59");
+                $filter['travel_end'] = array('$gte' => $filter['travel_end']."T00:00:00"
+                , '$lte' => $filter['travel_end']."T23:59:59");
             }
+
             else return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
         }
-
-        //缺訂單編號, 行程時間
 
         $projection = array(
             /* "order_passenger" => 1, */
@@ -326,7 +329,7 @@ class OrderController extends Controller
         );
 
 
-        return $filter;
+        //return $filter;
 
         $result = $this->requestService->aggregate_search('cus_orders', $projection, $filter, $page);
         return $result;
@@ -340,5 +343,8 @@ class OrderController extends Controller
         return $content;
     }
 
-
+    public function operator($id)
+    {
+        return $id;
+    }
 }
