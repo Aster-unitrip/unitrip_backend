@@ -41,7 +41,7 @@ class OrderController extends Controller
             'travel_end' => 'required|date',
         ];
         $this->edit_rule = [
-            'id'=>'required|string|max:24',
+            '_id'=>'required|string|max:24',
             'order_status' => 'required|string',
             'out_status' => 'required|string',
             'payment_status' => 'required|string',
@@ -105,6 +105,7 @@ class OrderController extends Controller
         );
         array_push($validated['order_record'], $order_record_add_order_status);
 
+        $validated['pay_deposit'] = false;
         $validated['deposit_status'] = "未付款";
         $validated['deposit'] = 0;
         $validated['balance_status'] = "未付款";
@@ -125,9 +126,9 @@ class OrderController extends Controller
 
     public function edit(Request $request)
     {
-        // TODO : 1. 區分必填/非必填 OK
+        // 1. 區分必填/非必填 OK
 
-        // TODO : 2. 先驗證前端傳回資料
+        // 2. 先驗證前端傳回資料
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->edit_rule);
         $user_name = auth()->user()->contact_name;
@@ -139,13 +140,13 @@ class OrderController extends Controller
         $validated = $validator->validated();
 
 
-        // TODO: 3.用id抓編輯前資料及前端給的資料，之後需要比較(4.5.6.)
-        $id = $validated['id'];
+        // 3.用id抓編輯前資料及前端給的資料，之後需要比較(4.5.6.)
+        $id = $validated['_id'];
         $result = $this->requestService->get_one('cus_orders', $id);
         $data_before =  json_decode($result->content(), true);
 
 
-        // TODO : 非旅行社及該旅行社人員不可修改訂單
+        // 非旅行社及該旅行社人員不可修改訂單
         $company_type = auth()->payload()->get('company_type');
         $user_company_id = auth()->user()->company_id;
         if ($company_type !== 1){
@@ -155,7 +156,7 @@ class OrderController extends Controller
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
-        // TODO : 4. 訂單狀態->參團號碼 需寫判斷
+        // 4. 訂單狀態->參團號碼 需寫判斷
         // 寫入資料 $validated / 比較資料(在資料庫) $data_before
         if($data_before['order_status'] !== $validated['order_status']){
             //客製化訂單狀態: 0.收到需求單 -> 1 4 / 1.已規劃行程&詢價 ->2 4 / 2.已回覆旅客 ->1 3 4 / 3.已成團 -> 4 / 4.棄單 -> X
@@ -190,10 +191,9 @@ class OrderController extends Controller
             );
             $validated['order_record'] = $data_before['order_record'];
             array_push($validated['order_record'], $order_record_add_order_status);
-            //return $validated['order_record'];
         }
 
-        // TODO : 5. 付款狀態 需寫判斷
+        // 5. 付款狀態 需寫判斷
         if($data_before['payment_status'] !== $validated['payment_status']){
             //客製化付款狀態: 0.未付款 -> 1 2 / 1.已付訂金 ->2 3 / 2.已付款 ->3 / 3.待退款 -> 4 / 4.已退款 -> X
             switch($data_before['payment_status']){
@@ -222,7 +222,7 @@ class OrderController extends Controller
             return $validated['payment_status'];
         }
 
-        // TODO : 6. 出團狀態 需寫判斷
+        // 6. 出團狀態 需寫判斷
         if($data_before['out_status'] !== $validated['out_status']){
             //客製化付款狀態: 0.未出團 ->1 / 1.出團中 ->2 3 / 2.已出團，未結團 ->3 / 3.已結團 -> X
             switch($data_before['out_status']){
@@ -247,14 +247,15 @@ class OrderController extends Controller
         $validated['last_updated_on'] = $user_name;
 
         // 參團編號需擋重複
-        $cus_orders_past = $this->requestService->find_one('cus_orders', null, 'cus_group_code', $validated['cus_group_code']);
-        if($cus_orders_past !== False) return response()->json(['error' => "已存在此參團編號"], 400);
+        if(array_key_exists('cus_group_code', $validated)){
+            $cus_orders_past = $this->requestService->find_one('cus_orders', null, 'cus_group_code', $validated['cus_group_code']);
+            if($cus_orders_past !== False) return response()->json(['error' => "已存在此參團編號"], 400);
+        }
 
+        //return $validated;
 
-        return $validated;
-
-
-        /* $cus_orders = $this->requestService->update('cus_orders', $validated); */
+        $cus_orders = $this->requestService->update('cus_orders', $validated);
+        return $cus_orders;
 
     }
 
