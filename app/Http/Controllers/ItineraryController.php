@@ -195,8 +195,15 @@ class ItineraryController extends Controller
 
         return $content;
     }
-    public function operator($id)
+    public function operator(Request $request)
     {
-        return $id;
+        //傳團行程
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->rule);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
     }
 }

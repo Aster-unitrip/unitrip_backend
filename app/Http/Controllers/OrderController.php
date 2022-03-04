@@ -64,6 +64,15 @@ class OrderController extends Controller
             'needs' => 'string',
             'note' => 'string',
         ];
+        $this->operator_rule = [
+            '_id'=>'required|string|max:24',
+            'pay_deposit' => 'required|boolean',
+            'deposit_status' => 'required|string',
+            'deposit' => 'required|numeric',
+            'balance_status' => 'required|string',
+            'balance' => 'required|numeric',
+            'amount' => 'required|numeric',
+        ];
     }
 
 
@@ -114,7 +123,7 @@ class OrderController extends Controller
         $validated['cancel_at'] = null;
         $validated['deleted_at'] = null;
         $validated['cus_group_code'] = null;
-        $validated['versions'] = array();
+        $validated['itinerary_group_id'] = null; //團行程一開始沒有
         $validated['travel_start'] = $validated['travel_start']."T00:00:00";
         $validated['travel_end'] = $validated['travel_end']."T23:59:59";
 
@@ -143,8 +152,11 @@ class OrderController extends Controller
 
         // 3.用id抓編輯前資料及前端給的資料，之後需要比較(4.5.6.)
         $id = $validated['_id'];
-        $result = $this->requestService->get_one('cus_orders', $id);
-        $data_before =  json_decode($result->content(), true);
+        $data_before = $this->requestService->find_one('cus_orders', $id, null, null);
+        if($data_before===false){
+            return response()->json(['error' => '此id沒有資料。'], 400);
+        }
+        $data_before = $data_before['document'];
 
 
         // 非旅行社及該旅行社人員不可修改訂單
@@ -306,20 +318,14 @@ class OrderController extends Controller
         unset($filter['order_start']);
         unset($filter['order_end']);
 
-        // TODO　旅行時間差考慮時區 -8
 
-        //存下時間　　美國時間
-        //查詢時間    台灣時間
         if(array_key_exists("travel_start", $filter) && array_key_exists('travel_end', $filter)){
-
             if(strtotime($filter['travel_end']) - strtotime($filter['travel_start']) > 0){
                 $filter['travel_start'] = array('$gte' => $filter['travel_start']."T00:00:00"
                 , '$lte' => $filter['travel_start']."T23:59:59");
                 $filter['travel_end'] = array('$gte' => $filter['travel_end']."T00:00:00"
                 , '$lte' => $filter['travel_end']."T23:59:59");
-            }
-
-            else return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
+            }else return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
         }
 
         $projection = array(
@@ -335,12 +341,21 @@ class OrderController extends Controller
     public function get_by_id($id)
     {
         $result = $this->requestService->get_one('cus_orders', $id);
-        $content =  json_decode($result->content(), true);
+        $content = json_decode($result->content(), true);
         return $content;
     }
 
-    public function operator($id)
+    public function operator(Request $request)
     {
-        return $id;
+        //前端傳 order 給後端
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->operator_rule);
+        $validated = $validator->validated();
+        //將order調出
+        $cus_orders = $this->requestService->find_one('cus_orders', null, '_id', $validated['_id']);
+        if(!$cus_orders) return response()->json(['error' => '沒有這個id'],400);
+        //須設定前端可修改
+        $cus_orders = $this->requestService->update('cus_orders', $validated);
+        return $cus_orders;
     }
 }
