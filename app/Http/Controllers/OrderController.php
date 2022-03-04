@@ -62,16 +62,15 @@ class OrderController extends Controller
             'baby_num' => 'required|integer',
             'source' => 'required|string',
             'needs' => 'string',
-            'note' => 'string',
+            'note' => 'string'
         ];
         $this->operator_rule = [
             '_id'=>'required|string|max:24',
-            'pay_deposit' => 'required|boolean',
-            'deposit_status' => 'required|string',
-            'deposit' => 'required|numeric',
-            'balance_status' => 'required|string',
-            'balance' => 'required|numeric',
-            'amount' => 'required|numeric',
+            'pay_deposit' => 'boolean',
+            'deposit_status' => 'string',
+            'deposit' => 'numeric',
+            'balance_status' => 'string',
+            'balance' => 'numeric'
         ];
     }
 
@@ -135,11 +134,8 @@ class OrderController extends Controller
 
     public function edit(Request $request)
     {
-        // 1. 區分必填/非必填 OK
-
         // 2. 先驗證前端傳回資料
         $data = json_decode($request->getContent(), true);
-
         $validator = Validator::make($data, $this->edit_rule);
         $user_name = auth()->user()->contact_name;
 
@@ -265,7 +261,7 @@ class OrderController extends Controller
             if($cus_orders_past !== False) return response()->json(['error' => "已存在此參團編號"], 400);
         }
 
-        $cus_orders = $this->requestService->update('cus_orders', $validated);
+        $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
 
     }
@@ -354,8 +350,8 @@ class OrderController extends Controller
         //將order調出
         $cus_orders = $this->requestService->find_one('cus_orders', null, '_id', $validated['_id']);
         if(!$cus_orders) return response()->json(['error' => '沒有這個id'],400);
-        //須設定前端可修改
-        $cus_orders = $this->requestService->update('cus_orders', $validated);
+
+        $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
     }
 }

@@ -53,6 +53,13 @@ class ItineraryController extends Controller
             'owned_by'=>'required|integer',
             'created_at'=>'required|date',
         ];
+        $this->operator_rule = [
+            '_id'=>'required|string|max:24',
+            'itinerary_content' => 'required|array|min:1',
+            'guides' => 'present|array',
+            'transportations' => 'present|array',
+            'misc' => 'present|array'
+        ];
     }
 
     public function add(Request $request)
@@ -199,11 +206,32 @@ class ItineraryController extends Controller
     {
         //傳團行程
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $this->rule);
+        $validator = Validator::make($data, $this->operator_rule);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
+        $validated = $validator->validated();
+
+        // 叫出該_id資料
+        $id = $validated['_id'];
+        $data_before = $this->requestService->find_one('itinerary_group', $id, null, null);
+        if($data_before===false){
+            return response()->json(['error' => '此id沒有資料。'], 400);
+        }
+        $data_before = $data_before['document'];
+
+        // TODO 供應商預定狀態判斷
+        // 如何抓到所有元件
+        //某元件 --- 客製化預定狀態: 0.未預定 -> 1 / 1.已預定 ->2 / 2.待確認退訂 ->3 / 3.已退訂 -> X
+        if(array_key_exists('order_status',$validated) && $data_before['order_status'] !== $validated['order_status']){
+
+        }
+
+        // TODO 供應商付款狀態判斷
+
+        // TODO 供應商待退/退款
+
 
     }
 }

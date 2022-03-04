@@ -222,6 +222,53 @@ class RequestPService
         }
     }
 
+    public function update_one($collection, $update_data)
+    {
+        $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/update_one";
+        $id = $update_data['_id'];
+        unset($update_data['_id']);
+        $update_data['updated_at'] = date('Y-m-d H:i:s');
+        $data = array(
+            "collection" => $collection,
+            "database" => "unitrip",
+            "dataSource" => "RealmCluster",
+            "filter" => array(
+                "_id" => $id
+            ),
+            "update" => $update_data,
+            "upsert" => false
+        );
+        //dd($data);
+        $postdata = json_encode($data);
+
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                    'api-key:'.config('app.mongo_key'),
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        try{
+            $context = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+            $http_code = explode(' ', $http_response_header[0])[1];
+
+            if ($http_code == "200") {
+                $result = json_decode($result, true);
+                return response()->json("Modified ID: ".$id, 200);
+            } else {
+                return response()->json($result, 400);
+            }
+        }
+        catch(\Exception $e) {
+            return response()->json($e->getMessage(), 400);
+        }
+    }
 
     /* 列出元件
         $collection: 查詢
