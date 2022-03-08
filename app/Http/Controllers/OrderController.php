@@ -70,9 +70,8 @@ class OrderController extends Controller
         $this->operator_rule = [
             '_id'=>'required|string|max:24',
             'pay_deposit' => 'boolean',
-            'deposit_status' => 'string',
+            'payment_status' => 'string',
             'deposit' => 'numeric',
-            'balance_status' => 'string',
             'balance' => 'numeric'
         ];
     }
@@ -90,6 +89,8 @@ class OrderController extends Controller
 
         //預設
         $user_name = auth()->user()->contact_name;
+        $user_name = auth()->user()->contact_name;
+
 
         $now_date = date('Ymd');
         $now_time = date('His');
@@ -98,6 +99,8 @@ class OrderController extends Controller
         //$travel_days = round((strtotime($validated['travel_end']) - strtotime($validated['travel_start']))/3600/24)+1 ;
 
         $validated['user_company_id'] = auth()->user()->company_id;
+        $validated['own_by_id'] = auth()->user()->id;
+
         //找user公司名稱
         $company_data = Company::find($validated['user_company_id']);
         $validated['user_company_name'] = $company_data['title'];
@@ -159,6 +162,7 @@ class OrderController extends Controller
         if($data_before===false){
             return response()->json(['error' => '此id沒有資料。'], 400);
         }
+
         $data_before = $data_before['document'];
 
 
@@ -351,6 +355,13 @@ class OrderController extends Controller
 
     public function get_by_id($id)
     {
+        // 非旅行社及該旅行社人員不可修改訂單
+        $company_type = auth()->payload()->get('company_type');
+        $user_company_id = auth()->user()->company_id;
+        if ($company_type !== 1){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
         $result = $this->requestService->get_one('cus_orders', $id);
         $content = json_decode($result->content(), true);
         return $content;
@@ -358,27 +369,66 @@ class OrderController extends Controller
 
     public function operator(Request $request)
     {
-        //前端傳 order 給後端
+        // 非旅行社及該旅行社人員不可修改訂單
+        $company_type = auth()->payload()->get('company_type');
+        $user_company_id = auth()->user()->company_id;
+        if ($company_type !== 1){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->operator_rule);
         $validated = $validator->validated();
         //將order調出
         $cus_orders_past = $this->requestService->find_one('cus_orders', null, '_id', $validated['_id']);
-        if(!$cus_orders_past) return response()->json(['error' => '沒有這個id'],400);
+        if(!$cus_orders_past) return response()->json(['error' => '沒有這個id'], 400);
 
-        $cus_orders_pasts = $cus_orders_past['document'];
+        $cus_orders_past = $cus_orders_past['document'];
 
-        // TODO381 付款狀態判斷
+        //判斷是否為該公司
+        //return $user_company_id;
+        if($user_company_id !== $cus_orders_past['user_company_id']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+
+        // TODO381 是否付訂金此欄必須為true後才可以更改
+        if($validated['pay_deposit'] === false)
+
         // TODO381 如有要改付款狀態 必須在訂單狀態為 已成團才可以修改
 
-        if($cus_orders_pasts['order_status'] === "已成團"){
-            $result = $this-> orderService->check_payment_status($validated, $cus_orders_pasts);
-            return $result;
+        if($cus_orders_past['order_status'] === "已成團"){
+                    if(array_key_exists('payment_status', $validated)){
+            if($cus_orders_past['payment_status'] !== $validated['payment_status']){
+                switch($cus_orders_past['payment_status']){
+                    case "未付款":
+                        if($validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，免退款"){
+                            return response()->json(['error' => "只可改到狀態1、2、5"], 400);
+                        }
+                        break;
+                    case "已付訂金":
+                        if($validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，待退款"){
+                            return response()->json(['error' => "只可改到狀態2、3"], 400);
+                        }
+                        break;
+                    case "已付全額":
+                        if($validated['payment_status'] !== "已棄單，待退款"){
+                            return response()->json(['error' => "只可改到狀態3"], 400);
+                        }
+                        break;
+                    case "已棄單，待退款":
+                        if($validated['payment_status'] !== "已棄單，已退款"){
+                            return response()->json(['error' => "只可改到狀態4"], 400);
+                        }
+                        break;
+                }
+            }
+        }else{
+            return response()->json(['error' =>'沒有付款狀態欄位', 400]);
+        }
         }else{
             return response()->json(['error' => '付款狀態必須是已成團，才可以更改付款狀態'], 400);
         }
-
-
 
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
