@@ -199,6 +199,10 @@ class OrderController extends Controller
                     }
                     break;
             }
+            //TODO381 處理成團狀態
+            if($validated['order_status'] === "已成團") $validated['group_status'] = "成團";
+
+
             //存入 order_record
             $order_record_add_order_status = array(
                 "event" =>  $validated['order_status'],
