@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
+use App\Services\OrderService;
 
 use Validator;
 
@@ -15,10 +16,12 @@ class OrderController extends Controller
 {
     private $requestService;
 
-    public function __construct(RequestPService $requestPService)
+    public function __construct(RequestPService $requestPService, OrderService $orderService)
     {
         $this->middleware('auth');
         $this->requestService = $requestPService;
+        $this->orderService = $orderService;
+
 
         // 前端條件
         $this->rule = [
@@ -114,14 +117,18 @@ class OrderController extends Controller
         array_push($validated['order_record'], $order_record_add_order_status);
 
         $validated['pay_deposit'] = false;
-        $validated['deposit_status'] = "未付款";
         $validated['deposit'] = 0;
-        $validated['balance_status'] = "未付款";
         $validated['balance'] = 0;
         $validated['amount'] = 0;
         $validated['cancel_at'] = null;
         $validated['deleted_at'] = null;
         $validated['cus_group_code'] = null;
+        $validated['group_status'] = "未成團";
+        $validated['total_people'] = $validated['adult_num'] + $validated['child_num'] + $validated['baby_num'];
+        if(!array_key_exists('company',$validated)) $validated['company'] = null;
+
+
+
         $validated['itinerary_group_id'] = null; //團行程一開始沒有
         $validated['travel_start'] = $validated['travel_start']."T00:00:00";
         $validated['travel_end'] = $validated['travel_end']."T23:59:59";
@@ -262,6 +269,9 @@ class OrderController extends Controller
             if($cus_orders_past !== False) return response()->json(['error' => "已存在此參團編號"], 400);
         }
 
+        //總人數 = 各項人數相加
+        $validated['total_people'] = $validated['adult_num'] + $validated['child_num'] + $validated['baby_num'];
+
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
 
@@ -300,7 +310,7 @@ class OrderController extends Controller
 
         //訂購期間為 order_start<= created_at <=order_end
         if(array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
-            if(strtotime($filter['order_end']) - strtotime($filter['order_start']) > 0){
+            if(strtotime($filter['order_end']) - strtotime($filter['order_start']) >= 0){
                 $filter['created_at'] = array('$gte' => $filter['order_start']."T00:00:00"
                 , '$lte' => $filter['order_end']."T23:59:59");
             }
@@ -349,8 +359,22 @@ class OrderController extends Controller
         $validator = Validator::make($data, $this->operator_rule);
         $validated = $validator->validated();
         //將order調出
-        $cus_orders = $this->requestService->find_one('cus_orders', null, '_id', $validated['_id']);
-        if(!$cus_orders) return response()->json(['error' => '沒有這個id'],400);
+        $cus_orders_past = $this->requestService->find_one('cus_orders', null, '_id', $validated['_id']);
+        if(!$cus_orders_past) return response()->json(['error' => '沒有這個id'],400);
+
+        $cus_orders_pasts = $cus_orders_past['document'];
+
+        // TODO381 付款狀態判斷
+        // TODO381 如有要改付款狀態 必須在訂單狀態為 已成團才可以修改
+
+        if($cus_orders_pasts['order_status'] === "已成團"){
+            $result = $this-> orderService->check_payment_status($validated, $cus_orders_pasts);
+            return $result;
+        }else{
+            return response()->json(['error' => '付款狀態必須是已成團，才可以更改付款狀態'], 400);
+        }
+
+
 
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
