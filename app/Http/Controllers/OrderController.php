@@ -132,7 +132,7 @@ class OrderController extends Controller
 
 
 
-        $validated['itinerary_group_id'] = null; //團行程一開始沒有
+        $validated['itinerary_group_id'] = null; //團行程一開始沒有(versions)
         $validated['travel_start'] = $validated['travel_start']."T00:00:00";
         $validated['travel_end'] = $validated['travel_end']."T23:59:59";
 
@@ -167,9 +167,10 @@ class OrderController extends Controller
 
 
         // 非旅行社及該旅行社人員不可修改訂單
-        $company_type = auth()->payload()->get('company_type');
         $user_company_id = auth()->user()->company_id;
-        if ($company_type !== 1){
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
         if($user_company_id !== $data_before['user_company_id']){
@@ -310,9 +311,14 @@ class OrderController extends Controller
         }
 
         //擋下供應商/其他公司的id
-        $company_type = auth()->payload()->get('company_type');
+        $company_id = auth()->payload()->get('company_id');
         $filter['user_company_id'] = auth()->user()->company_id;
-        if ($company_type !== 1){
+
+
+        // 找該 company 的 types
+        $company_data = Company::find($company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
 
