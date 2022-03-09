@@ -160,7 +160,7 @@ class OrderController extends Controller
         $id = $validated['_id'];
         $data_before = $this->requestService->find_one('cus_orders', $id, null, null);
         if($data_before===false){
-            return response()->json(['error' => '此id沒有資料。'], 400);
+            return response()->json(['error' => '沒有此id資料。'], 400);
         }
 
         $data_before = $data_before['document'];
@@ -362,10 +362,21 @@ class OrderController extends Controller
     public function get_by_id($id)
     {
         // 非旅行社及該旅行社人員不可修改訂單
-        $company_type = auth()->payload()->get('company_type');
         $user_company_id = auth()->user()->company_id;
-        if ($company_type !== 1){
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+        $data_before = $this->requestService->find_one('cus_orders', $id, null, null);
+        if($data_before===false){
+            return response()->json(['error' => '沒有此id資料。'], 400);
+        }
+
+        $data_before = $data_before['document'];
+
+        if($user_company_id !== $data_before['user_company_id']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
         $result = $this->requestService->get_one('cus_orders', $id);
@@ -443,5 +454,35 @@ class OrderController extends Controller
 
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
+    }
+
+    public function passenger(Request $request)
+    {
+        // 非旅行社及該旅行社人員不可修改訂單
+        $company_type = auth()->payload()->get('company_type');
+        $user_company_id = auth()->user()->company_id;
+        if ($company_type !== 1){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->operator_rule);
+        $validated = $validator->validated();
+        //將order調出
+        $cus_orders_past = $this->requestService->find_one('cus_orders', null, '_id', $validated['_id']);
+        if(!$cus_orders_past) return response()->json(['error' => '沒有這個id'], 400);
+
+        $cus_orders_past = $cus_orders_past['document'];
+
+        //判斷是否為該公司
+        if($user_company_id !== $cus_orders_past['user_company_id']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+
+        //新增旅客資訊
+
+
+
     }
 }
