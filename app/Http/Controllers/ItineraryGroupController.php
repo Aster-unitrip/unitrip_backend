@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
-use App\Services\ItineraryService;
+use App\Services\ItineraryGroupService;
 use Validator;
 
-class ItineraryController extends Controller
+class ItineraryGroupController extends Controller
 {
     private $requestService;
 
@@ -16,28 +16,36 @@ class ItineraryController extends Controller
         $this->middleware('auth');
         $this->requestService = $requestService;
         $this->rule = [
+            'order_id' => 'required|string',
             'name' => 'required|string|max:30',
             'summary' => 'nullable|string|max:150',
             'code' => 'nullable|string|max:20',
+            'travel_start' => 'required|date',
+            'travel_end' => 'required|date',
             'total_day' => 'required|integer|between:1,30',
             'areas' => 'nullable|array',
             'people_threshold' => 'required|integer|min:1',
             'people_full' => 'required|integer|max:100',
             'sub_categories' => 'nullable|array',
             'itinerary_content' => 'required|array|min:1',
-            // 'pricing_detail.subtotal' => 'required|integer|min:0',
             'guides' => 'present|array',
             'transportations' => 'present|array',
             'misc' => 'present|array',
             'accounting' => 'required|array',
+            'itinerary_group_cost' => 'required|numeric',
+            'itinerary_group_price' => 'required|numeric',
             'include_description' => 'nullable|string|max:150',
             'exclude_description' => 'nullable|string|max:150',
+
         ];
         $this->edit_rule = [
+            'order_id' => 'required|string',
             '_id'=>'required|string|max:24',
             'name' => 'required|string|max:30',
             'summary' => 'nullable|string|max:150',
             'code' => 'nullable|string|max:20',
+            'travel_start' => 'required|date',
+            'travel_end' => 'required|date',
             'total_day' => 'required|integer|max:7',
             'areas' => 'nullable|array',
             'people_threshold' => 'required|integer|min:1',
@@ -50,6 +58,8 @@ class ItineraryController extends Controller
             'accounting' => 'required|array',
             'include_description' => 'nullable|string|max:150',
             'exclude_description' => 'nullable|string|max:150',
+            'itinerary_group_cost' => 'required|numeric',
+            'itinerary_group_price' => 'required|numeric',
             'owned_by'=>'required|integer',
             'created_at'=>'required|date',
         ];
@@ -73,17 +83,22 @@ class ItineraryController extends Controller
         }
         $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
-        return $validated;
         $validated['owned_by'] = $company_id;
 
-        // 檢查行程內容
-        try{
-            $is = new ItineraryService($validated);
+        // TODO(US-407) 需要將所有傳入時間(string)改成時間(date)傳入
+
+
+        // TODO(US-390) 檢查行程內容
+/*         try{
+            $is = new ItineraryGroupService($validated);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
-        }
+        } */
 
-        $itinerary = $this->requestService->insert_one('itineraries', $validated);
+        // 當團行程建立，更改 order versions、cus_group_code
+
+
+        $itinerary = $this->requestService->insert_one('itinerary_group', $validated);
         return $itinerary;
 
     }
@@ -202,5 +217,37 @@ class ItineraryController extends Controller
         }
 
         return $content;
+    }
+    public function operator(Request $request)
+    {
+        //傳團行程
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->operator_rule);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validated = $validator->validated();
+
+        // 叫出該_id資料
+        $id = $validated['_id'];
+        $data_before = $this->requestService->find_one('itinerary_group', $id, null, null);
+        if($data_before===false){
+            return response()->json(['error' => '此id沒有資料。'], 400);
+        }
+        $data_before = $data_before['document'];
+
+        // TODO 供應商預定狀態判斷
+        // 如何抓到所有元件
+        //某元件 --- 客製化預定狀態: 0.未預定 -> 1 / 1.已預定 ->2 / 2.待確認退訂 ->3 / 3.已退訂 -> X
+        if(array_key_exists('order_status',$validated) && $data_before['order_status'] !== $validated['order_status']){
+
+        }
+
+        // TODO 供應商付款狀態判斷
+
+        // TODO 供應商待退/退款
+
+
     }
 }

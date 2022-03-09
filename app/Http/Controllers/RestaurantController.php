@@ -35,7 +35,7 @@ class RestaurantController extends Controller
         }
         // Handle ticket prices
         if (array_key_exists('fee', $filter)) {
-            
+
             $price_range = array();
             if (array_key_exists('price_max', $filter['fee'])){
                 $price_range['$lte'] = $filter['fee']['price_max'];
@@ -49,7 +49,6 @@ class RestaurantController extends Controller
         }
 
         unset($filter['fee']);
-
         // Handle projection content
         $projection = array(
             "_id" => 1,
