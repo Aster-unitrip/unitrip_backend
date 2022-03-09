@@ -95,11 +95,16 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         } */
 
-        // 當團行程建立，更改 order versions、cus_group_code
+        $result = $this->requestService->insert_one('itinerary_group', $validated); // 回傳是否建立成功
+
+        // 團行程建立成功，需更改 order itinerary_group_id、cus_group_code
+        $order = $this->requestService->get_one('cus_orders', $validated['order_id']); //找到要加入itinerary_group_id、cus_group_code 的 order 資料
+        //撈出團行程
+/*         $order_add = [];
+        $order_add["itinerary_group_id"] = $itinerary_group['id']; */
 
 
-        $itinerary = $this->requestService->insert_one('itinerary_group', $validated);
-        return $itinerary;
+        return $result;
 
     }
 
