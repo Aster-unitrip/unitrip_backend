@@ -400,37 +400,40 @@ class OrderController extends Controller
         // TODO381 如有要改付款狀態 必須在訂單狀態為 已成團才可以修改
 
         if($cus_orders_past['order_status'] === "已成團"){
-                    if(array_key_exists('payment_status', $validated)){
-            if($cus_orders_past['payment_status'] !== $validated['payment_status']){
-                switch($cus_orders_past['payment_status']){
-                    case "未付款":
-                        if($validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，免退款"){
-                            return response()->json(['error' => "只可改到狀態1、2、5"], 400);
-                        }
-                        break;
-                    case "已付訂金":
-                        if($validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，待退款"){
-                            return response()->json(['error' => "只可改到狀態2、3"], 400);
-                        }
-                        break;
-                    case "已付全額":
-                        if($validated['payment_status'] !== "已棄單，待退款"){
-                            return response()->json(['error' => "只可改到狀態3"], 400);
-                        }
-                        break;
-                    case "已棄單，待退款":
-                        if($validated['payment_status'] !== "已棄單，已退款"){
-                            return response()->json(['error' => "只可改到狀態4"], 400);
-                        }
-                        break;
+            if(array_key_exists('payment_status', $validated)){
+                if($cus_orders_past['payment_status'] !== $validated['payment_status']){
+                    switch($cus_orders_past['payment_status']){
+                        case "未付款":
+                            if($validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，免退款"){
+                                return response()->json(['error' => "只可改到狀態1、2、5"], 400);
+                            }
+                            break;
+                        case "已付訂金":
+                            if($validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，待退款"){
+                                return response()->json(['error' => "只可改到狀態2、3"], 400);
+                            }
+                            break;
+                        case "已付全額":
+                            if($validated['payment_status'] !== "已棄單，待退款"){
+                                return response()->json(['error' => "只可改到狀態3"], 400);
+                            }
+                            break;
+                        case "已棄單，待退款":
+                            if($validated['payment_status'] !== "已棄單，已退款"){
+                                return response()->json(['error' => "只可改到狀態4"], 400);
+                            }
+                            break;
+                    }
                 }
-            }
         }else{
             return response()->json(['error' =>'沒有付款狀態欄位', 400]);
         }
         }else{
             return response()->json(['error' => '付款狀態必須是已成團，才可以更改付款狀態'], 400);
         }
+
+        //TODO 驗算
+
 
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;

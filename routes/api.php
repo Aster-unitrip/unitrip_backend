@@ -15,6 +15,7 @@ use App\Http\Controllers\ComponentAccomendationController;
 use App\Http\Controllers\ComponentTransportationController;
 use App\Http\Controllers\ComponentGuideController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ItineraryGroupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,8 +74,6 @@ Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
     Route::post('/list', [ItineraryController::class, 'list']);
     Route::get('/{id}', [ItineraryController::class, 'get_by_id']);
     Route::post('/update', [ItineraryController::class, 'edit']);
-    Route::post('/operator', [ItineraryController::class, 'operator']); // TODO 修改旅行社供應商控團預警
-
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
@@ -110,6 +109,15 @@ Route::group(['middleware'=>'api', 'prefix'=>'order'], function($router){
     Route::get('/{id}', [OrderController::class, 'get_by_id']);
     Route::post('/update', [OrderController::class, 'edit']);
     Route::post('/operator', [OrderController::class, 'operator']);// 修改旅行社旅客控團預警
+});
+
+//團行程
+Route::group(['middleware'=>'api', 'prefix'=>'itinerary/group'], function($router){
+    Route::post('/', [ItineraryGroupController::class, 'add']);
+    Route::post('/list', [ItineraryGroupController::class, 'list']);
+    Route::get('/{id}', [ItineraryGroupController::class, 'get_by_id']);
+    Route::post('/update', [ItineraryGroupController::class, 'edit']);
+    Route::post('/operator', [ItineraryGroupController::class, 'operator']); // TODO 修改旅行社供應商控團預警
 
 });
 
