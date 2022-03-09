@@ -85,6 +85,7 @@ class ItineraryGroupController extends Controller
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
 
+
         // TODO(US-407) 需要將所有傳入時間(string)改成時間(date)傳入
 
 
@@ -95,17 +96,39 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         } */
 
+        //TODO 需擋代碼重複
+
+
         $result = $this->requestService->insert_one('itinerary_group', $validated); // 回傳是否建立成功
+        $result_data = json_decode($result->getContent(), true);
+
 
 
         // 團行程建立成功，需更改 order itinerary_group_id、cus_group_code
-        $order = $this->requestService->get_one('cus_orders', $validated['order_id']); //找到要加入itinerary_group_id、cus_group_code 的 order 資料
+        $itinerary_group = $this->requestService->get_one('itinerary_group', $result_data['inserted_id']);
+        $itinerary_group_data = json_decode($itinerary_group->getContent(), true);
+        $order = $this->requestService->get_one('cus_orders', $itinerary_group_data["order_id"]);
+        $order_data = json_decode($order->getContent(), true);
 
-        //撈出團行程
-/*         $order_add = [];
-        $order_add["itinerary_group_id"] = $itinerary_group['id']; */
+        //處理created_at:2022-03-09T17:52:30 -> 20220309_
+        $created_at_date = substr($order_data["created_at"], 0, 10);
+        $created_at_time = substr($order_data["created_at"], 11);
+        $created_at_date = preg_replace('/-/', "", $created_at_date);
+        $created_at_time = preg_replace('/:/', "", $created_at_time);
 
 
+        $fixed["itinerary_group_id"] = $itinerary_group_data['_id'];
+
+
+        //CUS_"行程代碼"_"旅行社員工id"_"客製團訂單日期"_"客製團訂單時間"_"行程天數"_"第幾團"
+        if(array_key_exists('code', $itinerary_group_data)){
+            $fixed["cus_group_code"] = "CUS_".$itinerary_group_data['code']."_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
+        }else{
+            $fixed["cus_group_code"] = "CUS_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
+        }
+        $fixed["_id"] = $order_data["_id"];
+
+        $result = $this->requestService->update_one('cus_orders', $fixed);
         return $result;
 
     }
