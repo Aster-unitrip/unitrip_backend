@@ -109,6 +109,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'order'], function($router){
     Route::get('/{id}', [OrderController::class, 'get_by_id']);
     Route::post('/update', [OrderController::class, 'edit']);
     Route::post('/operator', [OrderController::class, 'operator']);// 修改旅行社旅客控團預警
+    Route::post('/passenger', [OrderController::class, 'passenger']);// 新增旅客資訊
 });
 
 //團行程
@@ -118,6 +119,4 @@ Route::group(['middleware'=>'api', 'prefix'=>'itinerary/group'], function($route
     Route::get('/{id}', [ItineraryGroupController::class, 'get_by_id']);
     Route::post('/update', [ItineraryGroupController::class, 'edit']);
     Route::post('/operator', [ItineraryGroupController::class, 'operator']); // TODO 修改旅行社供應商控團預警
-
 });
-
