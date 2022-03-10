@@ -420,6 +420,7 @@ class RequestPService
         return $this->send_req($options, $url);
     }
 
+    
     public function aggregate($collection, $filter=[]){
         $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/aggregate";
         $data = array(
@@ -435,6 +436,13 @@ class RequestPService
             array_push($query_filter, array('$match' => $filter));
         }
 
+        $second_query_filter[] = array('$count' => 'totalCount');
+        $data['pipeline'] =array( array(
+            '$facet' => array(
+                'docs' => $query_filter,
+                'count' => $second_query_filter
+            ))
+        );
 
         // 格式轉換
         array_push($data['pipeline'], array('$unwind' => array('path' => '$count')));

@@ -97,13 +97,11 @@ class ItineraryGroupController extends Controller
         } */
 
         //TODO 建立前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼
-        $projection=[];
         $filter["code"] = $validated['code'];
         $filter["company_id"] = $validated['owned_by'];
-        $result_code = $this->requestService->aggregate_search('itinerary_group', $filter);
+        $result_code = $this->requestService->aggregate('itinerary_group', $filter);
         $result_code_data = json_decode($result_code->getContent(), true);
         if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
-
 
 
         // 建立團行程，並回傳 團行程id

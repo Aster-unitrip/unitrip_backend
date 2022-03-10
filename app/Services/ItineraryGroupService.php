@@ -120,4 +120,8 @@ class ItineraryGroupService
             }
         }
     }
+
+    private function check_itinerary_group_code_is_unique(){
+        
+    }
 }
