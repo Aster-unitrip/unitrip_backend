@@ -96,15 +96,21 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         } */
 
-        //TODO 需擋代碼重複
+        //TODO 建立前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼
+        $projection=[];
+        $filter["code"] = $validated['code'];
+        $filter["company_id"] = $validated['owned_by'];
+        $result_code = $this->requestService->aggregate_search('itinerary_group', $filter);
+        $result_code_data = json_decode($result_code->getContent(), true);
+        if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
 
 
+
+        // 建立團行程，並回傳 團行程id
         $result = $this->requestService->insert_one('itinerary_group', $validated); // 回傳是否建立成功
         $result_data = json_decode($result->getContent(), true);
 
-
-
-        // 團行程建立成功，需更改 order itinerary_group_id、cus_group_code
+        // 找出團行程的 order_id，去修改 order itinerary_group_id、cus_group_code
         $itinerary_group = $this->requestService->get_one('itinerary_group', $result_data['inserted_id']);
         $itinerary_group_data = json_decode($itinerary_group->getContent(), true);
         $order = $this->requestService->get_one('cus_orders', $itinerary_group_data["order_id"]);
@@ -142,7 +148,7 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
         $validated = $validator->validated();
-        $itinerary = $this->requestService->update('itineraries', $validated);
+        $itinerary = $this->requestService->update('itinerary_group', $validated);
         return $itinerary;
 
     }
