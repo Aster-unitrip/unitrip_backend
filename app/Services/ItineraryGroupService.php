@@ -65,6 +65,7 @@ class ItineraryGroupService
 
         $this->check_itinerary_components();
 
+
         // 不驗算最後售價了
         // $accounting = new Accounting($raw_data['accounting']);
 
