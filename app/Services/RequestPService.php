@@ -420,7 +420,7 @@ class RequestPService
         return $this->send_req($options, $url);
     }
 
-    
+
     public function aggregate($collection, $filter=[]){
         $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/aggregate";
         $data = array(

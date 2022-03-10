@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use App\Services\ItineraryGroupService;
@@ -61,7 +62,10 @@ class ItineraryGroupController extends Controller
             'itinerary_group_cost' => 'required|numeric',
             'itinerary_group_price' => 'required|numeric',
             'owned_by'=>'required|integer',
-            'created_at'=>'required|date',
+        ];
+        $this->get_rule = [
+            '_id'=>'required|string|max:24',
+            'owned_by'=>'required|integer',
         ];
         $this->operator_rule = [
             '_id'=>'required|string|max:24',
@@ -96,13 +100,14 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         } */
 
-        //TODO 建立前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼
+        // 建立前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼
         $filter["code"] = $validated['code'];
         $filter["company_id"] = $validated['owned_by'];
+
         $result_code = $this->requestService->aggregate('itinerary_group', $filter);
         $result_code_data = json_decode($result_code->getContent(), true);
-        if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
 
+        if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
 
         // 建立團行程，並回傳 團行程id
         $result = $this->requestService->insert_one('itinerary_group', $validated); // 回傳是否建立成功
@@ -146,8 +151,21 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
         $validated = $validator->validated();
+
+        // 建立前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼
+
+        $filter["code"] = $validated['code'];
+        $filter["company_id"] = $validated['owned_by'];
+        $result_code = $this->requestService->aggregate('itinerary_group', $filter);
+
+        $result_code_data = json_decode($result_code->getContent(), true);
+        return $result_code_data;
+        if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+
         $itinerary = $this->requestService->update('itinerary_group', $validated);
         return $itinerary;
+
+        // TODO 需要去限制只能同公司員工作修正
 
     }
 
@@ -197,7 +215,6 @@ class ItineraryGroupController extends Controller
             elseif (!array_key_exists('total_day_min', $filter['total_day_range']) && array_key_exists('total_day_max', $filter['total_day_range'])){
                 $filter['total_day'] = array('$lte' => $filter['total_day_range']['total_day_max']);
             }
-
         }
         unset($filter['total_day_range']);
 
@@ -252,6 +269,56 @@ class ItineraryGroupController extends Controller
 
         return $content;
     }
+
+
+    public function get_component_type(Request $request)
+    {
+        //傳團行程
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->get_rule);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validated = $validator->validated();
+
+        // 非旅行社及該旅行社人員不可修改訂單
+        $data_before = $this->requestService->find_one('itinerary_group', $validated['_id'], null, null);
+        if($data_before===false){
+            return response()->json(['error' => '沒有此id資料。'], 400);
+        }
+
+        $data_before = $data_before['document'];
+        $user_company_id = auth()->user()->company_id;
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+        if($user_company_id !== $data_before['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+
+        $result = $this->requestService->get_one('itinerary_group_groupby_component_type', $validated["_id"]);
+
+        return $result;
+
+
+
+    }
+
+    public function get_delete_items(Request $request)
+    {
+
+    }
+
+
+
+
+
+
+
+
     public function operator(Request $request)
     {
         //傳團行程
