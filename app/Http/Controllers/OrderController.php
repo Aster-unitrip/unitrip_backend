@@ -126,6 +126,7 @@ class OrderController extends Controller
         $validated['cancel_at'] = null;
         $validated['deleted_at'] = null;
         $validated['cus_group_code'] = null;
+        $validated['operator_note'] = null;
         $validated['group_status'] = "未成團";
         $validated['total_people'] = $validated['adult_num'] + $validated['child_num'] + $validated['baby_num'];
         if(!array_key_exists('company',$validated)) $validated['company'] = null;
@@ -224,7 +225,6 @@ class OrderController extends Controller
 
             switch($data_before['payment_status']){
                 case "未付款":
-                    return $validated['payment_status'];
                     if($validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，免退款"){
                         return response()->json(['error' => "只可改到狀態1、2、5"], 400);
                     }

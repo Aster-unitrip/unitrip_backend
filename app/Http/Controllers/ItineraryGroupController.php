@@ -37,7 +37,6 @@ class ItineraryGroupController extends Controller
             'itinerary_group_price' => 'required|numeric',
             'include_description' => 'nullable|string|max:150',
             'exclude_description' => 'nullable|string|max:150',
-
         ];
         $this->edit_rule = [
             'order_id' => 'required|string',
@@ -68,11 +67,18 @@ class ItineraryGroupController extends Controller
             'owned_by'=>'required|integer',
         ];
         $this->operator_rule = [
-            '_id'=>'required|string|max:24',
-            'itinerary_content' => 'required|array|min:1',
-            'guides' => 'present|array',
-            'transportations' => 'present|array',
-            'misc' => 'present|array'
+            '_id' => 'required|string|max:24',
+            'type' => 'required|string',
+            'date' => 'required|date',
+            'sort' => 'required|integer',
+            'pay_deposit' => 'required|boolean',
+            'booking_status' => 'required|string',
+            'payment_status' => 'required|string',
+            'deposit' => 'required|numeric',
+            'balance' => 'required|numeric',
+            "operator_note" => 'required|string',
+            "travel_start" => 'required|date',
+            "owned_by" => 'required|integer',
         ];
     }
 
@@ -100,14 +106,19 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         } */
 
-        // 建立前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼
-        $filter["code"] = $validated['code'];
-        $filter["company_id"] = $validated['owned_by'];
+        // 建立前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
+        if(array_key_exists('code', $validated)){
+            $filter["code"] = $validated['code'];
+            $filter["owned_by"] = $validated['owned_by'];
+            $validated['operator_note'] = null;
 
-        $result_code = $this->requestService->aggregate('itinerary_group', $filter);
-        $result_code_data = json_decode($result_code->getContent(), true);
+            $result_code = $this->requestService->aggregate_search('itinerary_group', null, $filter, $page=0);
+            $result_code_data = json_decode($result_code->getContent(), true);
+            return $result_code_data;
 
-        if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+            if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+        }else $validated['code'] = null;
+
 
         // 建立團行程，並回傳 團行程id
         $result = $this->requestService->insert_one('itinerary_group', $validated); // 回傳是否建立成功
@@ -132,11 +143,12 @@ class ItineraryGroupController extends Controller
         //CUS_"行程代碼"_"旅行社員工id"_"客製團訂單日期"_"客製團訂單時間"_"行程天數"_"第幾團"
         if(array_key_exists('code', $itinerary_group_data)){
             $fixed["cus_group_code"] = "CUS_".$itinerary_group_data['code']."_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
-        }else{
+        }else if(!array_key_exists('code', $itinerary_group_data) && $validated['code'] !== null){
             $fixed["cus_group_code"] = "CUS_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
         }
-        $fixed["_id"] = $order_data["_id"];
 
+
+        $fixed["_id"] = $order_data["_id"];
         $result = $this->requestService->update_one('cus_orders', $fixed);
         return $result;
 
@@ -152,20 +164,36 @@ class ItineraryGroupController extends Controller
         }
         $validated = $validator->validated();
 
-        // 建立前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼
+        // 1-1 使用者公司必須是旅行社
+        $user_company_id = auth()->user()->company_id;
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
 
-        $filter["code"] = $validated['code'];
-        $filter["company_id"] = $validated['owned_by'];
-        $result_code = $this->requestService->aggregate('itinerary_group', $filter);
+        // 1-2 限制只能同公司員工作修正
+        // 找團行程的company_id和使用者company_id
+        if($user_company_id !== $validated['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
 
-        $result_code_data = json_decode($result_code->getContent(), true);
-        return $result_code_data;
-        if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+
+        // 2.修改前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
+        if(array_key_exists('code', $validated)){
+            $filter["code"] = $validated['code'];
+            $filter["owned_by"] = $validated['owned_by'];
+            $validated['operator_note'] = null;
+            $result_code = $this->requestService->aggregate_search('itinerary_group', null, $filter, $page=0);
+            $result_code_data = json_decode($result_code->getContent(), true);
+            if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+        }
 
         $itinerary = $this->requestService->update('itinerary_group', $validated);
         return $itinerary;
 
-        // TODO 需要去限制只能同公司員工作修正
+        //TODO 更新 order 版本
+        //TODO 應該要擋住控團預警可以使用部分
 
     }
 
@@ -312,10 +340,24 @@ class ItineraryGroupController extends Controller
 
     }
 
+    public function save_to_itinerary(Request $request)
+    {
+        //傳入資訊
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->rule);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $company_id = auth()->user()->company_id;
+        $validated = $validator->validated();
+        $validated['owned_by'] = $company_id;
+
+        // TODO 將團行程處理成行程存下來 (等parker)
 
 
 
-
+    }
 
 
 
@@ -330,7 +372,142 @@ class ItineraryGroupController extends Controller
         }
         $validated = $validator->validated();
 
-        // 叫出該_id資料
+        // 1-1 使用者公司必須是旅行社
+        $user_company_id = auth()->user()->company_id;
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+        // 1-2 限制只能同公司員工作修正
+        // 找團行程的company_id和使用者company_id
+        if($user_company_id !== $validated['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+
+        // TODO: 2.處理前端傳來的資料
+        /*
+        {
+        "_id": "1222222",
+        "type":"itinerary"
+        "travel_start" : "2022/03/21 00:00:00",
+        "date" : "2022/03/21 00:00:00",
+        "sort" : 1,
+        "pay_deposit": true,
+        "booking_status": "已預訂",
+        "payment_status": "未付款",
+        "deposit": 8080,
+        "balance": 5420,
+        "operator_note" : "qqqqqq"
+        }
+        update_one
+        ({_id:ObjectId('62297152ee702c753257eb19')}, {'$set':{'itinerary_content.0.components.0.pricing_detail.0.count':30}})
+        IndexI是第幾天 J是天裡面排第幾 K是第幾個選項
+        {
+            "_id": "1222222",
+            "name":"itinerary"
+            "indexI": 0,
+            "indexJ": 0,
+            "indexK": 0,
+            "pay_deposit": true,
+            "booking_status": "已預訂",
+            "payment_status": "未付款",
+            "deposit": 8080,
+            "balance": 5420
+        }
+        */
+        // TODO381 : 比較狀態
+        $itinerary_group_past_data = $this->requestService->get_one('itinerary_group', $validated['_id']);
+
+
+        //經由 itinerary_group id 去 order 找 order_status ?== 已成團
+        $itinerary_group_order_data = $this->requestService->find_one('cus_orders', null, 'itinerary_group_id', $validated['_id']);
+        if($itinerary_group_order_data['document']['order_status'] !== "已成團") return response()->json(['error' => "訂單狀態不是已成團不可更改付款狀態"], 400);
+
+        // 必須是已成團後才可以修改付款狀態
+        if(array_key_exists("payment_status", $validated) && $itinerary_group_past_data['payment_status'] !== $validated['payment_status']){
+            switch($itinerary_group_past_data["payment_status"]){
+                case "未付款":
+                    if($validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，免退款"){
+                        return response()->json(['error' => "只可改到狀態1、2、5"], 400);
+                    }
+                    break;
+                case "已付訂金":
+                    if($validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，待退款"){
+                        return response()->json(['error' => "只可改到狀態2、3"], 400);
+                    }
+                    break;
+                case "已付全額":
+                    if($validated['payment_status'] !== "已棄單，待退款"){
+                        return response()->json(['error' => "只可改到狀態3"], 400);
+                    }
+                    break;
+                case "已棄單，待退款":
+                    if($validated['payment_status'] !== "已棄單，已退款"){
+                        return response()->json(['error' => "只可改到狀態4"], 400);
+                    }
+                    break;
+            }
+        }
+
+        if(array_key_exists("booking_status", $validated) && $itinerary_group_past_data['payment_status'] !== $validated['payment_status']){
+            switch($itinerary_group_past_data["booking_status"]){
+                case "未預訂":
+                    if($validated['booking_status'] !== "已預訂"){
+                        return response()->json(['error' => "只可改到狀態已預訂"], 400);
+                    }
+                    break;
+                case "已預訂":
+                    if($validated['booking_status'] !== "待確認退訂"){
+                        return response()->json(['error' => "只可改到狀態待確認退訂"], 400);
+                    }
+                    break;
+                case "待確認退訂":
+                    if($validated['booking_status'] !== "已退訂"){
+                        return response()->json(['error' => "只可改到狀態已退訂"], 400);
+                    }
+                    break;
+            }
+        }
+
+        // 設定修改內容
+        if(array_key_exists("type", $validated)){
+            if($validated["type"] === "attractions" || $validated["type"] === "accomendations"|| $validated["type"] === "activities" || $validated["type"] === "restaurants"){
+                if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
+                    // TODO: 將 date 做轉換成第幾天
+
+                    $date = substr($validated["date"], 0, 10);
+                    $date = preg_replace('/-/', "", $date);
+                    $travel_start= substr($$validated['travel_start'], 0, 10);
+                    $travel_start = preg_replace('/-/', "", $travel_start);
+
+
+
+
+
+
+
+                    $sort = $validated["sort"]-1; // sort比原來少1
+                    $name = "itinerary_content".$day."components".$sort;
+                }else return response()->json(['error' => 'date, sort are not defined.'], 400);
+
+
+            }else if($validated["name"] === "transportations" || $validated["name"] === "guides"){
+                $sort = $validated["sort"]-1; // sort比原來少1
+                $name = "itinerary_content".$sort;
+            }
+        }else return response()->json(['error' => '沒有傳回修改項目名稱(name)'], 400);
+
+        $fixed['_id'] = $validated['_id'];
+        //抓到更新欄位
+
+        //判斷狀態可否CRUD
+        $result = $this->requestService->update_one('itinerary_group', $fixed);
+        return $result;
+
+
+/*         // 叫出該_id資料
         $id = $validated['_id'];
         $data_before = $this->requestService->find_one('itinerary_group', $id, null, null);
         if($data_before===false){
@@ -338,16 +515,9 @@ class ItineraryGroupController extends Controller
         }
         $data_before = $data_before['document'];
 
-        // TODO 供應商預定狀態判斷
-        // 如何抓到所有元件
-        //某元件 --- 客製化預定狀態: 0.未預定 -> 1 / 1.已預定 ->2 / 2.待確認退訂 ->3 / 3.已退訂 -> X
-        if(array_key_exists('order_status',$validated) && $data_before['order_status'] !== $validated['order_status']){
-
-        }
-
         // TODO 供應商付款狀態判斷
 
-        // TODO 供應商待退/退款
+        // TODO 供應商待退/退款 */
 
 
     }
