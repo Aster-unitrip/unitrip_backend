@@ -425,8 +425,10 @@ class ItineraryGroupController extends Controller
         $itinerary_group_order_data = $this->requestService->find_one('cus_orders', null, 'itinerary_group_id', $validated['_id']);
         if($itinerary_group_order_data['document']['order_status'] !== "已成團") return response()->json(['error' => "訂單狀態不是已成團不可更改付款狀態"], 400);
 
+
         // 必須是已成團後才可以修改付款狀態
-        if(array_key_exists("payment_status", $validated) && $itinerary_group_past_data['payment_status'] !== $validated['payment_status']){
+        // TODO 必須深入去看細項項目的各類狀態而不是大項
+/*         if(array_key_exists("payment_status", $validated) && $itinerary_group_past_data['payment_status'] !== $validated['payment_status']){
             switch($itinerary_group_past_data["payment_status"]){
                 case "未付款":
                     if($validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，免退款"){
@@ -469,7 +471,7 @@ class ItineraryGroupController extends Controller
                     }
                     break;
             }
-        }
+        } */
 
         // 設定修改內容
         if(array_key_exists("type", $validated)){
@@ -478,9 +480,12 @@ class ItineraryGroupController extends Controller
                     // TODO: 將 date 做轉換成第幾天
 
                     $date = substr($validated["date"], 0, 10);
-                    $date = preg_replace('/-/', "", $date);
+
+                    // 必須判別是"/", "-"
+                    $date = preg_replace('-', "", $date);
                     $travel_start= substr($$validated['travel_start'], 0, 10);
                     $travel_start = preg_replace('/-/', "", $travel_start);
+                    return $date;
 
 
 
