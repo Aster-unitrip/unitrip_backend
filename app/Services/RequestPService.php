@@ -420,54 +420,6 @@ class RequestPService
         return $this->send_req($options, $url);
     }
 
-
-    public function aggregate($collection, $filter=[]){
-        $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/aggregate";
-        $data = array(
-            "collection" => $collection,
-            "database" => "unitrip",
-            "dataSource" => "RealmCluster",
-            "pipeline" => null,
-        );
-        $query_filter = [];
-
-        // 用正規表達式查詢名稱
-        if ($filter != []) {
-            array_push($query_filter, array('$match' => $filter));
-        }
-
-        $second_query_filter[] = array('$count' => 'totalCount');
-        $data['pipeline'] =array( array(
-            '$facet' => array(
-                'docs' => $query_filter,
-                'count' => $second_query_filter
-            ))
-        );
-
-        // 格式轉換
-        array_push($data['pipeline'], array('$unwind' => array('path' => '$count')));
-        array_push($data['pipeline'], array('$set' => array('count' => '$count.totalCount')));
-
-
-        $postdata = json_encode($data);
-        //return $postdata;
-        // 顯示 MongoDB 的查詢語法
-        // dump($postdata);
-        $options = array(
-            'http' => array(
-                'method' => 'POST',
-                'header' => array(
-                    'Content-type:application/json',
-                    'Access-Control-Request-Headers: *',
-                    'api-key:'.config('app.mongo_key'),
-                ),
-                'content' => $postdata,
-                'timeout' => 10 // 超時時間（單位:s）
-            )
-        );
-        return $this->send_req($options, $url);
-    }
-
     public static function send_req($options, $url)
     {
         try{

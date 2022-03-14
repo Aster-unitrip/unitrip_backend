@@ -5,17 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
+use App\Services\RequestStatesService;
+
 use App\Services\ItineraryGroupService;
 use Validator;
 
 class ItineraryGroupController extends Controller
 {
     private $requestService;
+    private $requestStatesService;
 
-    public function __construct(RequestPService $requestService)
+
+    public function __construct(RequestPService $requestService, RequestStatesService $requestStatesService)
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
+        $this->requestStatesService = $requestStatesService;
+
         $this->rule = [
             'order_id' => 'required|string',
             'name' => 'required|string|max:30',
@@ -402,23 +408,12 @@ class ItineraryGroupController extends Controller
         "operator_note" : "qqqqqq"
         }
         update_one
-        ({_id:ObjectId('62297152ee702c753257eb19')}, {'$set':{'itinerary_content.0.components.0.pricing_detail.0.count':30}})
-        IndexI是第幾天 J是天裡面排第幾 K是第幾個選項
-        {
-            "_id": "1222222",
-            "name":"itinerary"
-            "indexI": 0,
-            "indexJ": 0,
-            "indexK": 0,
-            "pay_deposit": true,
-            "booking_status": "已預訂",
-            "payment_status": "未付款",
-            "deposit": 8080,
-            "balance": 5420
-        }
+        ({_id:ObjectId('62297152ee702c753257eb19')}, {'$set':{'itinerary_content.0.components.0.payment_status':30}})
         */
+
         // TODO381 : 比較狀態
         $itinerary_group_past_data = $this->requestService->get_one('itinerary_group', $validated['_id']);
+        $itinerary_group_past_data = json_decode($itinerary_group_past_data->getContent(), true);
 
 
         //經由 itinerary_group id 去 order 找 order_status ?== 已成團
@@ -427,103 +422,45 @@ class ItineraryGroupController extends Controller
 
 
         // 必須是已成團後才可以修改付款狀態
-        // TODO 必須深入去看細項項目的各類狀態而不是大項
-/*         if(array_key_exists("payment_status", $validated) && $itinerary_group_past_data['payment_status'] !== $validated['payment_status']){
-            switch($itinerary_group_past_data["payment_status"]){
-                case "未付款":
-                    if($validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，免退款"){
-                        return response()->json(['error' => "只可改到狀態1、2、5"], 400);
-                    }
-                    break;
-                case "已付訂金":
-                    if($validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，待退款"){
-                        return response()->json(['error' => "只可改到狀態2、3"], 400);
-                    }
-                    break;
-                case "已付全額":
-                    if($validated['payment_status'] !== "已棄單，待退款"){
-                        return response()->json(['error' => "只可改到狀態3"], 400);
-                    }
-                    break;
-                case "已棄單，待退款":
-                    if($validated['payment_status'] !== "已棄單，已退款"){
-                        return response()->json(['error' => "只可改到狀態4"], 400);
-                    }
-                    break;
+
+
+        // 設定修改內容名稱
+        if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
+            $find_day = floor((strtotime($validated["date"]) - strtotime($validated['travel_start'])) / (60*60*24)); //將 date 做轉換成第幾天
+            $find_sort = $validated["sort"]-1; // sort比原來少1
+            if(array_key_exists("type", $validated)){
+                if($validated["type"] === "attractions" || $validated["type"] === "accomendations"|| $validated["type"] === "activities" || $validated["type"] === "restaurants"){
+                    $find_type = 'itinerary_content';
+                    $find_name = $find_type.".".$find_day.".components.".$find_sort.".";
+                }else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
+                    $find_type =$validated["type"];
+                    $find_name = $find_type.".".$find_sort.".";
+                }
+            }else{
+                return response()->json(['error' => '沒有傳回修改項目名稱(name)'], 400);
             }
+        }else{
+            return response()->json(['error' => 'date, sort are not defined.'], 400);
         }
 
-        if(array_key_exists("booking_status", $validated) && $itinerary_group_past_data['payment_status'] !== $validated['payment_status']){
-            switch($itinerary_group_past_data["booking_status"]){
-                case "未預訂":
-                    if($validated['booking_status'] !== "已預訂"){
-                        return response()->json(['error' => "只可改到狀態已預訂"], 400);
-                    }
-                    break;
-                case "已預訂":
-                    if($validated['booking_status'] !== "待確認退訂"){
-                        return response()->json(['error' => "只可改到狀態待確認退訂"], 400);
-                    }
-                    break;
-                case "待確認退訂":
-                    if($validated['booking_status'] !== "已退訂"){
-                        return response()->json(['error' => "只可改到狀態已退訂"], 400);
-                    }
-                    break;
-            }
-        } */
 
-        // 設定修改內容
-        if(array_key_exists("type", $validated)){
-            if($validated["type"] === "attractions" || $validated["type"] === "accomendations"|| $validated["type"] === "activities" || $validated["type"] === "restaurants"){
-                if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
-                    // TODO: 將 date 做轉換成第幾天
-
-                    $date = substr($validated["date"], 0, 10);
-
-                    // 必須判別是"/", "-"
-                    $date = preg_replace('-', "", $date);
-                    $travel_start= substr($$validated['travel_start'], 0, 10);
-                    $travel_start = preg_replace('/-/', "", $travel_start);
-                    return $date;
-
-
-
-
-
-
-
-                    $sort = $validated["sort"]-1; // sort比原來少1
-                    $name = "itinerary_content".$day."components".$sort;
-                }else return response()->json(['error' => 'date, sort are not defined.'], 400);
-
-
-            }else if($validated["name"] === "transportations" || $validated["name"] === "guides"){
-                $sort = $validated["sort"]-1; // sort比原來少1
-                $name = "itinerary_content".$sort;
-            }
-        }else return response()->json(['error' => '沒有傳回修改項目名稱(name)'], 400);
-
-        $fixed['_id'] = $validated['_id'];
         //抓到更新欄位
+        $fixed['_id'] = $validated['_id'];
+        $fixed[$find_name.'pay_deposit'] = $validated['pay_deposit'];
+        $fixed[$find_name.'booking_status'] = $validated['booking_status'];
+        $fixed[$find_name.'payment_status'] = $validated['payment_status'];
+        $fixed[$find_name.'deposit'] = $validated['deposit'];
+        $fixed[$find_name.'balance'] = $validated['balance'];
+        $fixed[$find_name.'operator_note'] = $validated['operator_note'];
+
+        //先確定能否更改狀態
+        $this->requestStatesService->payment_status($fixed, $itinerary_group_past_data);
+
+
 
         //判斷狀態可否CRUD
         $result = $this->requestService->update_one('itinerary_group', $fixed);
         return $result;
-
-
-/*         // 叫出該_id資料
-        $id = $validated['_id'];
-        $data_before = $this->requestService->find_one('itinerary_group', $id, null, null);
-        if($data_before===false){
-            return response()->json(['error' => '此id沒有資料。'], 400);
-        }
-        $data_before = $data_before['document'];
-
-        // TODO 供應商付款狀態判斷
-
-        // TODO 供應商待退/退款 */
-
 
     }
 }
