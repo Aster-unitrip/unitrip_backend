@@ -452,10 +452,59 @@ class ItineraryGroupController extends Controller
 
         }
 
-        //判斷狀態可否CRUD
-        return "沒有被改到";
+        //存資料
         $result = $this->requestService->update_one('itinerary_group', $fixed);
-        return $result;
+
+        //取得存後資料
+        $operator_data = $this->requestService->get_one('itinerary_group', $validated['_id']);
+        $operator_data = json_decode($operator_data->getContent(), true);
+
+
+        // 判斷該筆資料type
+        if($find_type === "itinerary_content"){
+            $to_deleted = $operator_data[$find_type][$find_day]['components'][$find_sort];
+        }else if($find_type === "transportations" || $find_type === "guides"){
+            $to_deleted = $operator_data[$find_type][$find_sort];
+        }
+
+
+        // 當狀態須加上刪除判斷
+        // 如果待退已退則刪除該obj放入刪除DB中
+        if($to_deleted['booking_status'] === "待確認退訂"){
+            /*
+                _id
+                order_id 訂單
+                itinerary_id 團行程
+                component_id 元件
+                (圖元件)
+                to_be_deleted(待刪除為新增時間)
+                deleted_at(刪除)
+            */
+            // TODO: 建立資料庫元件(cus_delete_components)
+            // 1. 拉出這筆團行程元件資料
+            $to_deleted['to_be_deleted'] = date('Y-m-d H:i:s');
+            $to_deleted['deleted_at'] = null;
+            $to_deleted['deleted_reason'] = null; // TODO: 待刪除理由
+            $to_deleted['order_id'] = $operator_data['order_id'];
+            $to_deleted['itinerary_group_id'] = $operator_data['_id'];
+            $to_deleted['component_id'] = $to_deleted['_id'];
+            unset($to_deleted['_id']);
+
+            return $to_deleted;
+
+
+            // 2. 拉出筆訂單id、團行程id
+
+        }
+        if($to_deleted['booking_status'] === "已退訂"){
+        }
+        if($to_deleted['booking_status'] === "未預訂" || $to_deleted['booking_status'] === "已預訂"){
+        }
+
+        //TODO　訂金尾款驗算
+        // 團行程定價和總值售價要跟著修正
+        // 一旦 待退=>總值售價和成本會減少~
+        // TODO 確定可以一次修改兩筆不同資料
 
     }
 }
