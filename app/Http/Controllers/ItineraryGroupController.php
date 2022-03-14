@@ -392,21 +392,8 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
-        // TODO: 2.處理前端傳來的資料
+        // 2.處理前端傳來的資料
         /*
-        {
-        "_id": "1222222",
-        "type":"itinerary"
-        "travel_start" : "2022/03/21 00:00:00",
-        "date" : "2022/03/21 00:00:00",
-        "sort" : 1,
-        "pay_deposit": true,
-        "booking_status": "已預訂",
-        "payment_status": "未付款",
-        "deposit": 8080,
-        "balance": 5420,
-        "operator_note" : "qqqqqq"
-        }
         update_one
         ({_id:ObjectId('62297152ee702c753257eb19')}, {'$set':{'itinerary_content.0.components.0.payment_status':30}})
         */
@@ -432,6 +419,7 @@ class ItineraryGroupController extends Controller
                 if($validated["type"] === "attractions" || $validated["type"] === "accomendations"|| $validated["type"] === "activities" || $validated["type"] === "restaurants"){
                     $find_type = 'itinerary_content';
                     $find_name = $find_type.".".$find_day.".components.".$find_sort.".";
+
                 }else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
                     $find_type =$validated["type"];
                     $find_name = $find_type.".".$find_sort.".";
@@ -453,12 +441,19 @@ class ItineraryGroupController extends Controller
         $fixed[$find_name.'balance'] = $validated['balance'];
         $fixed[$find_name.'operator_note'] = $validated['operator_note'];
 
-        //先確定能否更改狀態
-        $this->requestStatesService->payment_status($fixed, $itinerary_group_past_data);
+        //如果是itinerary
+        if($find_type === "itinerary_content"){
+            $result = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
+            if($result) return $result;
 
+        }else if($find_type === "transportations" || $find_type === "guides"){
+            $result = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
+            if($result) return $result;
 
+        }
 
         //判斷狀態可否CRUD
+        return "沒有被改到";
         $result = $this->requestService->update_one('itinerary_group', $fixed);
         return $result;
 
