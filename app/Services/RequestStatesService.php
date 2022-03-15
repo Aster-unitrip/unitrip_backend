@@ -57,10 +57,5 @@ class RequestStatesService
             }
         }
     }
-
-    public function delete_component_fields(){
-
-    }
-
 }
 ?>

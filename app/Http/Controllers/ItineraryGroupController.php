@@ -6,6 +6,8 @@ use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use App\Services\RequestStatesService;
+use App\Services\RequestCostService;
+
 
 use App\Services\ItineraryGroupService;
 use Validator;
@@ -14,13 +16,16 @@ class ItineraryGroupController extends Controller
 {
     private $requestService;
     private $requestStatesService;
+    private $requestCostService;
 
 
-    public function __construct(RequestPService $requestService, RequestStatesService $requestStatesService)
+    public function __construct(RequestPService $requestService, RequestStatesService $requestStatesService, RequestCostService $requestCostService)
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
         $this->requestStatesService = $requestStatesService;
+        $this->requestCostService = $requestCostService;
+
 
         $this->rule = [
             'order_id' => 'required|string',
@@ -112,6 +117,7 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         } */
 
+        // TODO:需要是旅行社才可以新增團行程
         // 建立前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
         if(array_key_exists('code', $validated)){
             $filter["code"] = $validated['code'];
@@ -397,11 +403,16 @@ class ItineraryGroupController extends Controller
         // TODO381 : 比較狀態
         $itinerary_group_past_data = $this->requestService->get_one('itinerary_group', $validated['_id']);
         $itinerary_group_past_data = json_decode($itinerary_group_past_data->getContent(), true);
+        if ($itinerary_group_past_data['count'] === 0) {
+            return response()->json(['error' => "沒有這筆團行程id"], 400);
+        }
 
 
         //經由 itinerary_group id 去 order 找 order_status ?== 已成團
         $itinerary_group_order_data = $this->requestService->find_one('cus_orders', null, 'itinerary_group_id', $validated['_id']);
-        if($itinerary_group_order_data['document']['order_status'] !== "已成團") return response()->json(['error' => "訂單狀態不是已成團不可更改付款狀態"], 400);
+        if($itinerary_group_order_data['document']['order_status'] !== "已成團"){
+            return response()->json(['error' => "訂單狀態不是已成團不可更改付款狀態"], 400);
+        }
 
 
         // 必須是已成團後才可以修改付款狀態
@@ -467,6 +478,8 @@ class ItineraryGroupController extends Controller
         }
 
 
+        return $operator_data;
+
         // 當狀態須加上刪除判斷
         // 如果待退已退則刪除該obj放入刪除DB中
         if($to_deleted['booking_status'] === "待確認退訂"){
@@ -491,12 +504,19 @@ class ItineraryGroupController extends Controller
             //$find_name_no_dot 刪除欄位
             $to_deleted_itinerary[$find_name_no_dot] = null;
             $deleted_result = $this->requestService->delete_field('itinerary_group', $to_deleted_itinerary);
-            return $deleted_result;
 
             // TODO: 處理團行程中計算_不同物件要計算的方式不同
             // 保留運算項目
             // $to_deleted['pricing_detail']
             // $to_deleted['subtotal']
+
+            // 找以下兩筆位置
+            // accounting
+            // itinerary_group_cost 直接扣
+
+
+
+
 
 
 
