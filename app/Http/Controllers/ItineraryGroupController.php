@@ -400,15 +400,13 @@ class ItineraryGroupController extends Controller
         ({_id:ObjectId('62297152ee702c753257eb19')}, {'$set':{'itinerary_content.0.components.0.payment_status':30}})
         */
 
-        // TODO381 : 比較狀態
-        $itinerary_group_past_data = $this->requestService->get_one('itinerary_group', $validated['_id']);
-        $itinerary_group_past_data = json_decode($itinerary_group_past_data->getContent(), true);
-        if ($itinerary_group_past_data['count'] === 0) {
-            return response()->json(['error' => "沒有這筆團行程id"], 400);
-        }
+        // TODO381 : 確認是否有這筆團行程
+        $itinerary_group_past = $this->requestService->find_one('itinerary_group', $validated['_id'], null, null);
+        if(!$itinerary_group_past) return response()->json(['error' => "沒有這筆團行程"], 400);
+        $itinerary_group_past_data = $itinerary_group_past['document'];
 
 
-        //經由 itinerary_group id 去 order 找 order_status ?== 已成團
+        // order 找 order_status ?== 已成團
         $itinerary_group_order_data = $this->requestService->find_one('cus_orders', null, 'itinerary_group_id', $validated['_id']);
         if($itinerary_group_order_data['document']['order_status'] !== "已成團"){
             return response()->json(['error' => "訂單狀態不是已成團不可更改付款狀態"], 400);
@@ -416,8 +414,6 @@ class ItineraryGroupController extends Controller
 
 
         // 必須是已成團後才可以修改付款狀態
-
-
         // 設定修改內容名稱
         if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
             $find_day = floor((strtotime($validated["date"]) - strtotime($validated['travel_start'])) / (60*60*24)); //將 date 做轉換成第幾天
@@ -441,7 +437,6 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => 'date, sort are not defined.'], 400);
         }
 
-
         //抓到更新欄位
         $fixed['_id'] = $validated['_id'];
         $fixed[$find_name.'pay_deposit'] = $validated['pay_deposit'];
@@ -451,14 +446,14 @@ class ItineraryGroupController extends Controller
         $fixed[$find_name.'balance'] = $validated['balance'];
         $fixed[$find_name.'operator_note'] = $validated['operator_note'];
 
-        //如果是itinerary
+        //確認付款狀態及預訂狀態
         if($find_type === "itinerary_content"){
-            $result = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
-            if($result) return $result;
+            $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
+            if($result_payment) return $result_payment;
 
         }else if($find_type === "transportations" || $find_type === "guides"){
-            $result = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
-            if($result) return $result;
+            $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
+            if($result_payment) return $result_payment;
 
         }
 
@@ -513,6 +508,8 @@ class ItineraryGroupController extends Controller
             // 找以下兩筆位置
             // accounting
             // itinerary_group_cost 直接扣
+
+            // TODO: 若該筆資料已經不存在 不可以重複刪除
 
 
 
