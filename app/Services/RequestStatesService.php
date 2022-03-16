@@ -5,9 +5,10 @@ namespace App\Services;
 class RequestStatesService
 {
     public function payment_status($validated, $itinerary_group_past_data){
-            //return $find_name."payment_status";
+        //return $validated;
+        return $itinerary_group_past_data;
             if(array_key_exists("payment_status", $validated)){
-                if($itinerary_group_past_data['payment_status'] !== $validated["payment_status"]){
+                if($itinerary_group_past_data["payment_status"] !== $validated["payment_status"]){
                     // 都已符合預定狀態後的付款狀態改變
                     switch($itinerary_group_past_data["payment_status"]){
                         case "未付款"://0
@@ -44,9 +45,10 @@ class RequestStatesService
 
                 }
             }else{
-                return response()->json(['error' => "沒有 payment_status"]);
+                return response()->json(['error' => "沒有付款狀態"]);
             }
     }
+
     public function booking_status($validated, $itinerary_group_past_data){
         if(array_key_exists("booking_status", $validated) && $itinerary_group_past_data['payment_status'] !== $validated['payment_status']){
             switch($itinerary_group_past_data["booking_status"]){
