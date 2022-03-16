@@ -69,13 +69,6 @@ Route::group(['middleware'=>'api', 'prefix'=>'activities'], function($router){
     Route::post('/update', [ComponentActivityController::class, 'edit']);
 });
 
-Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
-    Route::post('/', [ItineraryController::class, 'add']);
-    Route::post('/list', [ItineraryController::class, 'list']);
-    Route::get('/{id}', [ItineraryController::class, 'get_by_id']);
-    Route::post('/update', [ItineraryController::class, 'edit']);
-});
-
 Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/city_town', [MiscController::class, 'cityTown']);
     Route::get('/bank_code', [MiscController::class, 'bankCode']);
@@ -114,13 +107,20 @@ Route::group(['middleware'=>'api', 'prefix'=>'order'], function($router){
 
 //團行程
 Route::group(['middleware'=>'api', 'prefix'=>'itinerary/group'], function($router){
+    Route::get('/', [ItineraryGroupController::class, 'get_by_id']);
     Route::post('/', [ItineraryGroupController::class, 'add']);
     Route::post('/list', [ItineraryGroupController::class, 'list']);
-    Route::get('/{id}', [ItineraryGroupController::class, 'get_by_id']);
     Route::post('/update', [ItineraryGroupController::class, 'edit']);
     Route::get('/component', [ItineraryGroupController::class, 'get_component_type']); // TODO 可以看到供應商分類表
-    Route::get('/operator/delete', [ItineraryGroupController::class, 'get_delete_items']); // TODO 可以看到供應商刪除類表
+    Route::get('/delete_component', [ItineraryGroupController::class, 'get_delete_items']); // TODO 可以看到供應商刪除類表
 
     Route::post('/operator', [ItineraryGroupController::class, 'operator']); // TODO 修改旅行社供應商控團預警
 
+});
+
+Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
+    Route::post('/', [ItineraryController::class, 'add']);
+    Route::post('/list', [ItineraryController::class, 'list']);
+    Route::get('/{id}', [ItineraryController::class, 'get_by_id']);
+    Route::post('/update', [ItineraryController::class, 'edit']);
 });

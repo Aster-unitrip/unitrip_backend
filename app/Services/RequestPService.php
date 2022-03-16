@@ -270,6 +270,52 @@ class RequestPService
         }
     }
 
+    public function delete_field($collection, $delete_data)
+    { //刪除整筆資料
+        $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/remove_field";
+        $id = $delete_data['_id'];
+        unset($delete_data['_id']);
+        $data = array(
+            "collection" => $collection,
+            "database" => "unitrip",
+            "dataSource" => "RealmCluster",
+            "filter" => array(
+                "_id" => $id
+            ),
+            "remove" => $delete_data
+        );
+        //dd($data);
+        $postdata = json_encode($data);
+        //return $postdata;
+
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                    'api-key:'.config('app.mongo_key'),
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        try{
+            $context = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+            $http_code = explode(' ', $http_response_header[0])[1];
+
+            if ($http_code == "200") {
+                $result = json_decode($result, true);
+                return response()->json("Deleted ID: ".$id, 200);
+            } else {
+                return response()->json($result, 400);
+            }
+        }
+        catch(\Exception $e) {
+            return response()->json($e->getMessage(), 400);
+        }
+    }
     /* 列出元件
         $collection: 查詢
         $projection: 要列出的欄位
@@ -396,54 +442,6 @@ class RequestPService
                 'count' => $second_query_filter
             ))
             );
-        // 格式轉換
-        array_push($data['pipeline'], array('$unwind' => array('path' => '$count')));
-        array_push($data['pipeline'], array('$set' => array('count' => '$count.totalCount')));
-
-
-        $postdata = json_encode($data);
-        //return $postdata;
-        // 顯示 MongoDB 的查詢語法
-        // dump($postdata);
-        $options = array(
-            'http' => array(
-                'method' => 'POST',
-                'header' => array(
-                    'Content-type:application/json',
-                    'Access-Control-Request-Headers: *',
-                    'api-key:'.config('app.mongo_key'),
-                ),
-                'content' => $postdata,
-                'timeout' => 10 // 超時時間（單位:s）
-            )
-        );
-        return $this->send_req($options, $url);
-    }
-
-
-    public function aggregate($collection, $filter=[]){
-        $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/aggregate";
-        $data = array(
-            "collection" => $collection,
-            "database" => "unitrip",
-            "dataSource" => "RealmCluster",
-            "pipeline" => null,
-        );
-        $query_filter = [];
-
-        // 用正規表達式查詢名稱
-        if ($filter != []) {
-            array_push($query_filter, array('$match' => $filter));
-        }
-
-        $second_query_filter[] = array('$count' => 'totalCount');
-        $data['pipeline'] =array( array(
-            '$facet' => array(
-                'docs' => $query_filter,
-                'count' => $second_query_filter
-            ))
-        );
-
         // 格式轉換
         array_push($data['pipeline'], array('$unwind' => array('path' => '$count')));
         array_push($data['pipeline'], array('$set' => array('count' => '$count.totalCount')));
