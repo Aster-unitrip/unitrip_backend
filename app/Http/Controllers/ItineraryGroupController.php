@@ -50,8 +50,9 @@ class ItineraryGroupController extends Controller
             'exclude_description' => 'nullable|string|max:150',
         ];
         $this->edit_rule = [
+            '_id'=>'required|string|max:24', //
+            'owned_by'=>'required|integer', //
             'order_id' => 'required|string',
-            '_id'=>'required|string|max:24',
             'name' => 'required|string|max:30',
             'summary' => 'nullable|string|max:150',
             'code' => 'nullable|string|max:20',
@@ -71,7 +72,6 @@ class ItineraryGroupController extends Controller
             'exclude_description' => 'nullable|string|max:150',
             'itinerary_group_cost' => 'required|numeric',
             'itinerary_group_price' => 'required|numeric',
-            'owned_by'=>'required|integer',
         ];
         $this->get_id_rule = [
             'user_company_id'=>'required',
@@ -312,6 +312,7 @@ class ItineraryGroupController extends Controller
 
         // 1-1 使用者公司必須是旅行社
         $user_company_id = auth()->user()->company_id;
+        $contact_name = auth()->user()->contact_name;
         $company_data = Company::find($user_company_id);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
@@ -343,19 +344,33 @@ class ItineraryGroupController extends Controller
             $itinerary_group_data_new['code'] = "";
             $itinerary_group_data_new['travel_start'] = "";
             $itinerary_group_data_new['travel_end'] = "";
-            $itinerary_group_data_new['total_day'] = "";
-            $itinerary_group_data_new['areas'] = "";
-            $itinerary_group_data_new['people_threshold'] = "";
-            $itinerary_group_data_new['people_full'] = "";
-            $itinerary_group_data_new['itinerary_content'] = "";
-            $itinerary_group_data_new['guides'] = "";
-            $itinerary_group_data_new['transportations'] = "";
-            $itinerary_group_data_new['misc'] = "";
-            $itinerary_group_data_new['accounting'] = "";
-            $itinerary_group_data_new['itinerary_group_cost'] = "";
-            $itinerary_group_data_new['itinerary_group_price'] = "";
+            $itinerary_group_data_new['total_day'] = 1;
+            $itinerary_group_data_new['areas'] = array("");
+            $itinerary_group_data_new['sub_categories'] = array("");
+            $itinerary_content_new['sort'] = 1;
+            $itinerary_content_new['name'] = "";
+            $itinerary_content_new['gather_time'] = "";
+            $itinerary_content_new['gather_location'] = "";
+            $itinerary_content_new['date'] = "";
+            $itinerary_content_new['day_summary'] = "";
+            $itinerary_content_new['components'] = array("");
+            $itinerary_group_data_new['itinerary_content'] = array($itinerary_content_new);
+            $itinerary_group_data_new['people_threshold'] = 1;
+            $itinerary_group_data_new['people_full'] = 10;
+            $itinerary_group_data_new['guides'] = array("");
+            $itinerary_group_data_new['transportations'] = array("");
+            $itinerary_group_data_new['misc'] = array("");
+            $account_array['cost'] = 0;
+            $account_array['estimation_price'] = 0;
+            $account['adult'] = array($account_array);
+            $account['child'] = array($account_array);
+            $itinerary_group_data_new['accounting'] = array($account);
+            $itinerary_group_data_new['itinerary_group_cost'] = 0;
+            $itinerary_group_data_new['itinerary_group_price'] = 0;
             $itinerary_group_data_new['include_description'] = "";
             $itinerary_group_data_new['exclude_description'] = "";
+            $itinerary_group_data_new['operator_note'] = "";
+            $itinerary_group_data_new['last_updated_on'] = $contact_name;
             return $itinerary_group_data_new;
 
         }
