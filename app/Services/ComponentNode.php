@@ -30,7 +30,7 @@ class ComponentNode
         $pricing_check = 0;
         foreach ($this->pricing_detail as $pricing) {
             if ($pricing['subtotal'] != $pricing['unit_price'] * $pricing['count']){
-                throw new Exception('Calculation not right. In '.$pricing['name']);    
+                throw new Exception('Calculation not right. In '.$pricing['name']);
             }
             $pricing_check += $pricing['subtotal'];
         }
@@ -82,7 +82,7 @@ class Activity extends ComponentNode
 {
     public function __construct($raw_data=null, $people_threshold=null)
     {
-        parent::__construct($raw_data, $people_threshold);        
+        parent::__construct($raw_data, $people_threshold);
     }
 }
 
@@ -153,7 +153,7 @@ class Restaurant extends ComponentNode
 //     }
 
 //     private function calculate_cost()
-//     {   
+//     {
 //         // 沒有除以成團人數
 //         $this->cost_per_person = $this->unit_price * $this->days;
 //     }
@@ -237,14 +237,14 @@ class Accounting
     }
 
     private static function check_price($cost, $price, $profit_percentage)
-    {   
+    {
         $percentage = (($price - $cost) / $cost)*100;
         // dump("profit_percentage: ".$profit_percentage);
         // dump("percentage: ".round($percentage, 2));
         if (round($percentage, 2) != $profit_percentage){
             throw new DataIncorrectException('profit_percentage is not correct');
         }
-    }   
+    }
 
     private static function check_percentage($cost, $percent, $final_price)
     {
