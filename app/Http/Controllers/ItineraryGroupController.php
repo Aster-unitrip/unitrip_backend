@@ -490,19 +490,10 @@ class ItineraryGroupController extends Controller
     }
 
 
-    public function get_component_type(Request $request)
+    public function get_component_type($id)
     {
-        //傳團行程
-        $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $this->get_rule);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
-        }
-        $validated = $validator->validated();
-
         // 非旅行社及該旅行社人員不可修改訂單
-        $data_before = $this->requestService->find_one('itinerary_group', $validated['_id'], null, null);
+        $data_before = $this->requestService->find_one('itinerary_group', $id, null, null);
         if($data_before===false){
             return response()->json(['error' => '沒有此id資料。'], 400);
         }
@@ -518,7 +509,7 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
-        $result = $this->requestService->get_one('itinerary_group_groupby_component_type', $validated["_id"]);
+        $result = $this->requestService->get_one('itinerary_group_groupby_component_type', $id);
 
         return $result;
 
