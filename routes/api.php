@@ -109,12 +109,10 @@ Route::group(['middleware'=>'api', 'prefix'=>'order'], function($router){
 //團行程
 Route::group(['middleware'=>'api', 'prefix'=>'itinerary/group'], function($router){
     Route::get('/{id}', [ItineraryGroupController::class, 'get_by_id']);
-    Route::post('/', [ItineraryGroupController::class, 'add']);
+    Route::post('/', [ItineraryGroupController::class, 'edit']);
     Route::post('/list', [ItineraryGroupController::class, 'list']);
-    Route::post('/update', [ItineraryGroupController::class, 'edit']);
-    Route::get('/component', [ItineraryGroupController::class, 'get_component_type']); // TODO 可以看到供應商分類表
-    Route::get('/delete_component', [ItineraryGroupController::class, 'get_delete_items']); // TODO 可以看到供應商刪除類表
-
+    Route::get('/component/{id}', [ItineraryGroupController::class, 'get_component_type']); // 可以看到供應商分類表
+    Route::get('/delete_component', [ItineraryGroupController::class, 'get_delete_items']); // 可以看到供應商刪除類表(all)
     Route::post('/operator', [ItineraryGroupController::class, 'operator']); // TODO 修改旅行社供應商控團預警
 
 });
