@@ -7,7 +7,7 @@ use App\Services\RequestPService;
 
 use Validator;
 
-class ComponentCarController extends Controller
+class ComponentCarTypeController extends Controller
 {
     private $requestService;
 
@@ -61,7 +61,7 @@ class ComponentCarController extends Controller
             "passenger_seats" => 1,
             "fee" => 1,
             "imgs" => 1,
-            "tel" => 1,
+            "tel" => "\$company_tel",
             "address" => array(
                 "\$concat" => array(
                     "\$address_city",
@@ -69,12 +69,9 @@ class ComponentCarController extends Controller
                     "\$address"
                 )
                 ),
-            // "address_city" => 1,    // 可能得從公司資料撈
-            // "address_town" => 1,    // 可能得從公司資料撈
-            // "address" => 1,         // 可能得從公司資料撈
             "private" => 1,
         );
-        $result = $this->requestService->aggregate_facet('viehcles_with_company', $projection, $company_id, $filter, $page, $query_private);
+        $result = $this->requestService->aggregate_facet('car_types_with_company', $projection, $company_id, $filter, $page, $query_private);
         return $result;
     }
 }
