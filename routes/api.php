@@ -107,7 +107,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'order'], function($router){
 
 //團行程
 Route::group(['middleware'=>'api', 'prefix'=>'itinerary/group'], function($router){
-    Route::get('/', [ItineraryGroupController::class, 'get_by_id']);
+    Route::get('/{id}', [ItineraryGroupController::class, 'get_by_id']);
     Route::post('/', [ItineraryGroupController::class, 'add']);
     Route::post('/list', [ItineraryGroupController::class, 'list']);
     Route::post('/update', [ItineraryGroupController::class, 'edit']);
