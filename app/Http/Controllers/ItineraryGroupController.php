@@ -396,15 +396,15 @@ class ItineraryGroupController extends Controller
         return $result;
     }
 
-    public function get_by_id(Request $request)
+    public function get_by_id($id)
     {
-        $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $this->get_id_rule);
+        //目標 取得團行程資訊
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
-        }
-        $validated = $validator->validated();
+        /*
+        user_company_id ->從 order_id
+        $id ->order_id
+        itinerary_group_id -> order_id
+        */
 
         // 1-1 使用者公司必須是旅行社
         $user_company_id = auth()->user()->company_id;
@@ -415,26 +415,28 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
 
-        // 1-2 限制只能同公司員工作修正
-        // 找團行程的company_id和使用者company_id
-        if($user_company_id !== $validated['user_company_id']){
-            return response()->json(['error' => 'you are not an employee of this company.'], 400);
-        }
-        $cus_order = $this->requestService->get_one('cus_orders', $validated['order_id']);
+        $cus_order = $this->requestService->get_one('cus_orders', $id);
         $cus_order_data =  json_decode($cus_order->content(), true);
 
-        if(array_key_exists('itinerary_group_id',$validated)){ //new or old
-            if($validated['itinerary_group_id'] !== $cus_order_data['itinerary_group_id']){ //error check
-                return response()->json(['error' => '團行程ID和訂單中團行程ID不同'], 400);
-            }else if($validated['itinerary_group_id'] === $cus_order_data['itinerary_group_id']){ //old
-                $itinerary_group = $this->requestService->get_one('itinerary_group', $validated['itinerary_group_id']);
-                $itinerary_group_data =  json_decode($itinerary_group->content(), true);
-                return $itinerary_group_data;
-            }
-        }else{ //new
+        //cus_order_data['user_company_id']
+        // cus_order_data['itinerary_group_id']
+
+
+        // 1-2 限制只能同公司員工作修正
+        // 找團行程的company_id和使用者company_id
+        if($user_company_id !== $cus_order_data['user_company_id']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+
+
+        if($cus_order_data['itinerary_group_id'] !== null){ //old
+            $itinerary_group = $this->requestService->get_one('itinerary_group', $cus_order_data['itinerary_group_id']);
+            $itinerary_group_data =  json_decode($itinerary_group->content(), true);
+            return $itinerary_group_data;
+        }elseif($cus_order_data['itinerary_group_id'] === null){ //new
 
             // TODO 這部分感覺可以優化
-            $itinerary_group_data_new['order_id'] = $validated['order_id'];
+            $itinerary_group_data_new['order_id'] = $cus_order_data['_id'];
             $itinerary_group_data_new['name'] = "";
             $itinerary_group_data_new['summary'] = "";
             $itinerary_group_data_new['code'] = "";
@@ -466,7 +468,7 @@ class ItineraryGroupController extends Controller
             $itinerary_group_data_new['include_description'] = "";
             $itinerary_group_data_new['exclude_description'] = "";
             $itinerary_group_data_new['last_updated_on'] = $contact_name;
-            $itinerary_group_data_new['own_by'] = $$user_company_id;
+            $itinerary_group_data_new['own_by'] = $user_company_id;
             return $itinerary_group_data_new;
 
         }
