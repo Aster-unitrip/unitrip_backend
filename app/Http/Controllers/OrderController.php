@@ -89,7 +89,6 @@ class OrderController extends Controller
 
         //預設
         $user_name = auth()->user()->contact_name;
-        $user_name = auth()->user()->contact_name;
 
 
         $now_date = date('Ymd');

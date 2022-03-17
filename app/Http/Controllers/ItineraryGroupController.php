@@ -50,8 +50,8 @@ class ItineraryGroupController extends Controller
             'exclude_description' => 'nullable|string|max:150',
         ];
         $this->edit_rule = [
-            '_id'=>'required|string|max:24', //
-            'owned_by'=>'required|integer', //
+            '_id'=>'string|max:24', //required
+            'owned_by'=>'required|integer',
             'order_id' => 'required|string',
             'name' => 'required|string|max:30',
             'summary' => 'nullable|string|max:150',
@@ -189,27 +189,123 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
 
-        // 1-2 限制只能同公司員工作修正
-        // 找團行程的company_id和使用者company_id
+        // 1-2 限制只能同公司員工作修正 -> 關聯 get_id
         if($user_company_id !== $validated['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
+        //  1.使用者公司必須是旅行社
+        //  2.此訂單必須是該旅行社的
+        // TODO : 3.1(新增團行程) - 沒有id -> 新增團行程格式，參考add => 須確定一推欄位何時該有
+        // TODO : 3.2(編輯團行程) - 有id -> 確定團行程為該旅行社
+        // TODO : 同間旅行社 [行程代碼] 必須唯一
+        // TODO : 如果_id、own_by 沒有設為 required ，會有甚麼問題
 
 
-        // 2.修改前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
+        // 修改前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
         if(array_key_exists('code', $validated)){
             $filter["code"] = $validated['code'];
             $filter["owned_by"] = $validated['owned_by'];
-            $validated['operator_note'] = null;
             $result_code = $this->requestService->aggregate_search('itinerary_group', null, $filter, $page=0);
             $result_code_data = json_decode($result_code->getContent(), true);
-            if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+        }else $validated['code'] = null;
+
+        if(!array_key_exists('_id', $validated)){
+            // 3.1(新增團行程)
+            // code 新建時 同公司不可有
+            if($result_code_data["count"] > 0){
+                return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+            }
+            // 處理時間
+            $validated['travel_start'] = $validated['travel_start']."T00:00:00";
+            $validated['travel_end'] = $validated['travel_end']."T23:59:59";
+            // travel_end 不可小於 travel_end
+            if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
+                return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
+            }
+
+            // 處理分割項目
+            if(array_key_exists('itinerary_content', $validated)){
+                for($i = 0; $i < count($validated['itinerary_content']); $i++){
+                    $validated['itinerary_content'][$i]['sort'] = $i+1;
+                    if(array_key_exists('components', $validated['itinerary_content'][$i])){
+                        for($j = 0; $j < count($validated['itinerary_content'][$i]['components']); $j++){
+                        $validated['itinerary_content'][$i]['components'][$j]['operator_note'] = null;
+                        $validated['itinerary_content'][$i]['components'][$j]['pay_deposit'] = false;
+                        $validated['itinerary_content'][$i]['components'][$j]['booking_status'] = "未預訂";
+                        $validated['itinerary_content'][$i]['components'][$j]['payment_status'] = "未付款";
+                        $validated['itinerary_content'][$i]['components'][$j]['deposit'] = 0;
+                        $validated['itinerary_content'][$i]['components'][$j]['balance'] = $validated['itinerary_content'][$i]['components'][$j]['sum'];$validated['itinerary_content'][$i]['components'][$j]['date'] = $validated['itinerary_content'][$i]['date'];
+                        }
+                    }
+                }
+            }
+            if(array_key_exists('guides', $validated)){
+                for($i = 0; $i < count($validated['guides']); $i++){
+                    $validated['guides'][$i]['sort'] = $i+1;
+                    $validated['guides'][$i]['operator_note'] = null;
+                    $validated['guides'][$i]['pay_deposit'] = false;
+                    $validated['guides'][$i]['booking_status'] = "未預訂"; //預定狀態
+                    $validated['guides'][$i]['payment_status'] = "未付款";
+                    $validated['guides'][$i]['deposit'] = 0;
+                    $validated['guides'][$i]['balance'] = $validated['guides'][$i]['subtotal'];
+                    $validated['guides'][$i]['date_start'] = $validated['guides'][$i]['date_start'];
+                    $validated['guides'][$i]['date_end'] = $validated['guides'][$i]['date_end'];
+                }
+            }
+            if(array_key_exists('transportations', $validated)){
+                for($i = 0; $i < count($validated['transportations']); $i++){
+                    $validated['transportations'][$i]['sort'] = $i+1;
+                    $validated['transportations'][$i]['operator_note'] = null;
+                    $validated['transportations'][$i]['pay_deposit'] = false;
+                    $validated['transportations'][$i]['booking_status'] = "未預訂"; //預定狀態
+                    $validated['transportations'][$i]['payment_status'] = "未付款";
+                    $validated['transportations'][$i]['deposit'] = 0;
+                    $validated['transportations'][$i]['balance'] = $validated['transportations'][$i]['sum'];
+                    $validated['transportations'][$i]['date_start'] = $validated['transportations'][$i]['date_start'];
+                    $validated['transportations'][$i]['date_end'] = $validated['transportations'][$i]['date_end'];
+                }
+            }
+            $itinerary_group_new = $this->requestService->insert_one('itinerary_group', $validated);
+            $result_data = json_decode($itinerary_group_new->getContent(), true);
+
+            // 找出團行程的 order_id，去修改 order itinerary_group_id、cus_group_code
+            $itinerary_group = $this->requestService->get_one('itinerary_group', $result_data['inserted_id']);
+            $itinerary_group_data = json_decode($itinerary_group->getContent(), true);
+            $order = $this->requestService->get_one('cus_orders', $validated["order_id"]);
+            $order_data = json_decode($order->getContent(), true);
+
+            //處理created_at:2022-03-09T17:52:30 -> 20220309_
+            $created_at_date = substr($order_data["created_at"], 0, 10);
+            $created_at_time = substr($order_data["created_at"], 11);
+            $created_at_date = preg_replace('/-/', "", $created_at_date);
+            $created_at_time = preg_replace('/:/', "", $created_at_time);
+
+            //CUS_"行程代碼"_"旅行社員工id"_"客製團訂單日期"_"客製團訂單時間"_"行程天數"_"第幾團"
+            if(array_key_exists('code', $itinerary_group_data)){
+                $fixed["cus_group_code"] = "CUS_".$itinerary_group_data['code']."_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
+            }else if(!array_key_exists('code', $itinerary_group_data) && $validated['code'] !== null){
+                $fixed["cus_group_code"] = "CUS_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
+            }
+
+            $fixed["_id"] = $order_data["_id"];
+            $result = $this->requestService->update_one('cus_orders', $fixed);
+            return $result;
+
+        }else if(array_key_exists('_id', $validated)){
+            //3.2(編輯團行程)
+            // code
+            if(($result_code_data["docs"][0]['_id'] !== $validated['_id'] && $result_code_data["count"] >= 1)){
+                return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+            }
+            // travel_end 不可小於 travel_end
+            if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
+                return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
+            }
+            $itinerary_group = $this->requestService->update('itinerary_group', $validated);
+            $result_data = json_decode($itinerary_group->getContent(), true);
         }
 
-        $itinerary = $this->requestService->update('itinerary_group', $validated);
-        return $itinerary;
 
-        //TODO 更新 order 版本
         //TODO 應該要擋住控團預警可以使用部分
 
     }
@@ -347,7 +443,7 @@ class ItineraryGroupController extends Controller
             $itinerary_group_data_new['total_day'] = 1;
             $itinerary_group_data_new['areas'] = array("");
             $itinerary_group_data_new['sub_categories'] = array("");
-            $itinerary_content_new['sort'] = 1;
+            $itinerary_content_new['type'] = "";
             $itinerary_content_new['name'] = "";
             $itinerary_content_new['gather_time'] = "";
             $itinerary_content_new['gather_location'] = "";
@@ -369,8 +465,8 @@ class ItineraryGroupController extends Controller
             $itinerary_group_data_new['itinerary_group_price'] = 0;
             $itinerary_group_data_new['include_description'] = "";
             $itinerary_group_data_new['exclude_description'] = "";
-            $itinerary_group_data_new['operator_note'] = "";
             $itinerary_group_data_new['last_updated_on'] = $contact_name;
+            $itinerary_group_data_new['own_by'] = $$user_company_id;
             return $itinerary_group_data_new;
 
         }
