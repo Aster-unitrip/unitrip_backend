@@ -584,8 +584,7 @@ class ItineraryGroupController extends Controller
 
 
 
-    public function operator(Request $request)
-    {
+    public function operator(Request $request){
         //傳團行程
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->operator_rule);
@@ -610,11 +609,6 @@ class ItineraryGroupController extends Controller
         }
 
         // 2.處理前端傳來的資料
-        /*
-        update_one
-        ({_id:ObjectId('62297152ee702c753257eb19')}, {'$set':{'itinerary_content.0.components.0.payment_status':30}})
-        */
-
         // TODO381 : 確認是否有這筆團行程
         $itinerary_group_past = $this->requestService->find_one('itinerary_group', $validated['_id'], null, null);
         if(!$itinerary_group_past) return response()->json(['error' => "沒有這筆團行程"], 400);
@@ -685,6 +679,7 @@ class ItineraryGroupController extends Controller
             $result_booking = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
             if($result_booking) return $result_booking;
         }
+
         // 確定沒錯後存入團行程中
         $this->requestService->update_one('itinerary_group', $fixed);
 
@@ -728,21 +723,22 @@ class ItineraryGroupController extends Controller
             return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
 
         }
-        if($to_deleted['booking_status'] === "已退訂"){
-            
-        }
         if($to_deleted['booking_status'] === "未預訂" || $to_deleted['booking_status'] === "已預訂"){
-
             // 儲存
             $result = $this->requestService->update_one('itinerary_group', $fixed);
             return $result;
-
         }
+    }
 
-        //TODO　訂金尾款驗算
-        // 團行程定價和總值售價要跟著修正
-        // 一旦 待退=>總值售價和成本會減少~
-        // TODO 確定可以一次修改兩筆不同資料
+    public function get_delete_items($id){
+        // 過濾出該[團行程]全部刪除內容
+
+        $filter['itinerary_group_id'] = $id;
+        $result_code = $this->requestService->aggregate_search('cus_delete_components', null, $filter, $page=0);
+        $result_code_data = json_decode($result_code->getContent(), true);
+        return $result_code_data;
 
     }
+
+
 }
