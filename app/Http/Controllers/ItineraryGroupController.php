@@ -195,7 +195,7 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
-        // 修改前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
+        // TODO :修改前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
         if(array_key_exists('code', $validated)){
             $filter_code["code"] = $validated['code'];
             $filter_code["owned_by"] = $validated['owned_by'];
@@ -332,18 +332,25 @@ class ItineraryGroupController extends Controller
             return $result;
 
         }else if(array_key_exists('_id', $validated)){
+
             //3.2(編輯團行程)
             // code
-            if(($result_code_data["docs"][0]['_id'] !== $validated['_id'] && $result_code_data["count"] >= 1)){
-                return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+
+            if($result_code_data["count"] > 1){
+                if($result_code_data["docs"][0]['_id'] !== $validated['_id']){
+                    return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+                }
             }
-            if(($result_itinerary_group_name_data["docs"][0]['_id'] !== $validated['_id'] && $result_itinerary_group_name_data["count"] >= 1)){
-                return response()->json(['error' => '同間公司不可有重複的行程名稱'], 400);
+            if($result_itinerary_group_name_data["count"] > 1){
+                if($result_itinerary_group_name_data["docs"][0]['_id'] !== $validated['_id']){
+                    return response()->json(['error' => '同間公司不可有重複的行程名稱'], 400);
+                }
             }
             // travel_end 不可小於 travel_end
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
             }
+
             $itinerary_group = $this->requestService->update('itinerary_group', $validated);
             $result_data = json_decode($itinerary_group->getContent(), true);
             return response()->json(['success' => 'update successfully.'], 200);
