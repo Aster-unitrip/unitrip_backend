@@ -513,7 +513,7 @@ class ItineraryGroupController extends Controller
             $itinerary_group_data_new['exclude_description'] = "";
             $itinerary_group_data_new['last_updated_on'] = $contact_name;
             $itinerary_group_data_new['itinerary_group_note'] = "";
-            $itinerary_group_data_new['ownd_by'] = $user_company_id;
+            $itinerary_group_data_new['owned_by'] = $user_company_id;
             return $itinerary_group_data_new;
 
         }
@@ -621,9 +621,10 @@ class ItineraryGroupController extends Controller
         $itinerary_group_past_data = $itinerary_group_past['document'];
 
 
+
         // order 找 order_status ?== 已成團
         $itinerary_group_order_data = $this->requestService->find_one('cus_orders', null, 'itinerary_group_id', $validated['_id']);
-        if($itinerary_group_order_data === Null){
+        if(!$itinerary_group_order_data){
             return response()->json(['error' => "團行程沒有關聯的訂單"], 400);
         }
         if($itinerary_group_order_data['document']['order_status'] !== "已成團"){
@@ -636,6 +637,7 @@ class ItineraryGroupController extends Controller
         if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
             $find_day = floor((strtotime($validated["date"]) - strtotime($validated['travel_start'])) / (60*60*24)); //將 date 做轉換成第幾天
             $find_sort = $validated["sort"]-1; // sort比原來少1
+            return $find_sort;
             if(array_key_exists("type", $validated)){
                 if($validated["type"] === "attractions" || $validated["type"] === "accomendations"|| $validated["type"] === "activities" || $validated["type"] === "restaurants"){
                     $find_type = 'itinerary_content';
