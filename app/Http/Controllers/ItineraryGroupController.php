@@ -195,7 +195,7 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
-        // 修改前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
+        // TODO :修改前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
         if(array_key_exists('code', $validated)){
             $filter_code["code"] = $validated['code'];
             $filter_code["owned_by"] = $validated['owned_by'];
@@ -332,18 +332,25 @@ class ItineraryGroupController extends Controller
             return $result;
 
         }else if(array_key_exists('_id', $validated)){
+
             //3.2(編輯團行程)
             // code
-            if(($result_code_data["docs"][0]['_id'] !== $validated['_id'] && $result_code_data["count"] >= 1)){
-                return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+
+            if($result_code_data["count"] > 1){
+                if($result_code_data["docs"][0]['_id'] !== $validated['_id']){
+                    return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
+                }
             }
-            if(($result_itinerary_group_name_data["docs"][0]['_id'] !== $validated['_id'] && $result_itinerary_group_name_data["count"] >= 1)){
-                return response()->json(['error' => '同間公司不可有重複的行程名稱'], 400);
+            if($result_itinerary_group_name_data["count"] > 1){
+                if($result_itinerary_group_name_data["docs"][0]['_id'] !== $validated['_id']){
+                    return response()->json(['error' => '同間公司不可有重複的行程名稱'], 400);
+                }
             }
             // travel_end 不可小於 travel_end
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
             }
+
             $itinerary_group = $this->requestService->update('itinerary_group', $validated);
             $result_data = json_decode($itinerary_group->getContent(), true);
             return response()->json(['success' => 'update successfully.'], 200);
@@ -584,8 +591,7 @@ class ItineraryGroupController extends Controller
 
 
 
-    public function operator(Request $request)
-    {
+    public function operator(Request $request){
         //傳團行程
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->operator_rule);
@@ -610,11 +616,6 @@ class ItineraryGroupController extends Controller
         }
 
         // 2.處理前端傳來的資料
-        /*
-        update_one
-        ({_id:ObjectId('62297152ee702c753257eb19')}, {'$set':{'itinerary_content.0.components.0.payment_status':30}})
-        */
-
         // TODO381 : 確認是否有這筆團行程
         $itinerary_group_past = $this->requestService->find_one('itinerary_group', $validated['_id'], null, null);
         if(!$itinerary_group_past) return response()->json(['error' => "沒有這筆團行程"], 400);
@@ -637,7 +638,6 @@ class ItineraryGroupController extends Controller
         if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
             $find_day = floor((strtotime($validated["date"]) - strtotime($validated['travel_start'])) / (60*60*24)); //將 date 做轉換成第幾天
             $find_sort = $validated["sort"]-1; // sort比原來少1
-            return $find_sort;
             if(array_key_exists("type", $validated)){
                 if($validated["type"] === "attractions" || $validated["type"] === "accomendations"|| $validated["type"] === "activities" || $validated["type"] === "restaurants"){
                     $find_type = 'itinerary_content';
@@ -646,7 +646,6 @@ class ItineraryGroupController extends Controller
                     if($itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
                         return response()->json(['error' => "找不到該筆元件資訊"], 400);
                     }
-
                 }else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
                     $find_type =$validated["type"];
                     $find_name = $find_type.".".$find_sort.".";
@@ -687,6 +686,7 @@ class ItineraryGroupController extends Controller
             $result_booking = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
             if($result_booking) return $result_booking;
         }
+
         // 確定沒錯後存入團行程中
         $this->requestService->update_one('itinerary_group', $fixed);
 
@@ -705,7 +705,6 @@ class ItineraryGroupController extends Controller
         // 當狀態須加上刪除判斷
         // 如果待退已退則刪除該obj放入刪除DB中
         if($to_deleted['booking_status'] === "待退訂"){
-
             // 1.拉出這筆團行程元件資料
             $to_deleted['to_be_deleted'] = date('Y-m-d H:i:s');
             $to_deleted['deleted_at'] = null;
@@ -713,62 +712,40 @@ class ItineraryGroupController extends Controller
             $to_deleted['order_id'] = $operator_data['order_id'];
             $to_deleted['itinerary_group_id'] = $operator_data['_id'];
             $to_deleted['component_id'] = $to_deleted['_id'];
+            $fixed_component_cost['_id'] =$to_deleted['_id'];
             unset($to_deleted['_id']);
 
-            // 2.加入刪除資料庫中
+            // 加入刪除資料庫中
             $deleted_result = $this->requestService->insert_one('cus_delete_components', $to_deleted);
 
-            // TODO: 處理團行程中計算_不同物件要計算的方式不同
-            // 保留運算項目
-            // $to_deleted['pricing_detail']
-            // $to_deleted['subtotal']
+            // 修改團行程成本
+            $delete_component_data = $this->requestCostService->after_delete_component_cost($itinerary_group_past_data['itinerary_group_cost'], $to_deleted);
+            $result = $this->requestService->update_one('itinerary_group', $delete_component_data);
 
-            // 找以下兩筆位置
-            // 甚麼元件
-            // accounting
-            // itinerary_group_cost 直接扣
-
-            $delete_component_cost = $this->requestCostService->after_delete_component_cost($to_deleted);
-            return $delete_component_cost;
-
-
-            // 3.刪除團行程該元件
+            // 刪除團行程該元件
             $to_deleted_itinerary['_id'] = $validated['_id']; // 需要要刪除欄位_id
             $to_deleted_itinerary[$find_name_no_dot] = null; // $find_name_no_dot 刪除欄位
-            $deleted_result = $this->requestService->delete_field('itinerary_group', $to_deleted_itinerary);
+            $this->requestService->delete_field('itinerary_group', $to_deleted_itinerary);
 
-            return $deleted_result;
+            return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
 
-            // 團行程價錢修改
-            // 訂單 amount 修改
-            // TODO: 若該筆資料已經不存在 不可以重複刪除
-
-
-
-
-
-
-
-
-
-
-
-
-        }
-        if($to_deleted['booking_status'] === "已退訂"){
         }
         if($to_deleted['booking_status'] === "未預訂" || $to_deleted['booking_status'] === "已預訂"){
-
             // 儲存
             $result = $this->requestService->update_one('itinerary_group', $fixed);
             return $result;
-
         }
+    }
 
-        //TODO　訂金尾款驗算
-        // 團行程定價和總值售價要跟著修正
-        // 一旦 待退=>總值售價和成本會減少~
-        // TODO 確定可以一次修改兩筆不同資料
+    public function get_delete_items($id){
+        // 過濾出該[團行程]全部刪除內容
+
+        $filter['itinerary_group_id'] = $id;
+        $result_code = $this->requestService->aggregate_search('cus_delete_components', null, $filter, $page=0);
+        $result_code_data = json_decode($result_code->getContent(), true);
+        return $result_code_data;
 
     }
+
+
 }
