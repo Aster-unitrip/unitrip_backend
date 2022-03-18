@@ -637,7 +637,6 @@ class ItineraryGroupController extends Controller
         if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
             $find_day = floor((strtotime($validated["date"]) - strtotime($validated['travel_start'])) / (60*60*24)); //將 date 做轉換成第幾天
             $find_sort = $validated["sort"]-1; // sort比原來少1
-            return $find_sort;
             if(array_key_exists("type", $validated)){
                 if($validated["type"] === "attractions" || $validated["type"] === "accomendations"|| $validated["type"] === "activities" || $validated["type"] === "restaurants"){
                     $find_type = 'itinerary_content';
@@ -646,7 +645,6 @@ class ItineraryGroupController extends Controller
                     if($itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
                         return response()->json(['error' => "找不到該筆元件資訊"], 400);
                     }
-
                 }else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
                     $find_type =$validated["type"];
                     $find_name = $find_type.".".$find_sort.".";
@@ -705,7 +703,6 @@ class ItineraryGroupController extends Controller
         // 當狀態須加上刪除判斷
         // 如果待退已退則刪除該obj放入刪除DB中
         if($to_deleted['booking_status'] === "待退訂"){
-
             // 1.拉出這筆團行程元件資料
             $to_deleted['to_be_deleted'] = date('Y-m-d H:i:s');
             $to_deleted['deleted_at'] = null;
@@ -713,49 +710,26 @@ class ItineraryGroupController extends Controller
             $to_deleted['order_id'] = $operator_data['order_id'];
             $to_deleted['itinerary_group_id'] = $operator_data['_id'];
             $to_deleted['component_id'] = $to_deleted['_id'];
+            $fixed_component_cost['_id'] =$to_deleted['_id'];
             unset($to_deleted['_id']);
 
-            // 2.加入刪除資料庫中
+            // 加入刪除資料庫中
             $deleted_result = $this->requestService->insert_one('cus_delete_components', $to_deleted);
 
-            // TODO: 處理團行程中計算_不同物件要計算的方式不同
-            // 保留運算項目
-            // $to_deleted['pricing_detail']
-            // $to_deleted['subtotal']
+            // 修改團行程成本
+            $delete_component_data = $this->requestCostService->after_delete_component_cost($itinerary_group_past_data['itinerary_group_cost'], $to_deleted);
+            $result = $this->requestService->update_one('itinerary_group', $delete_component_data);
 
-            // 找以下兩筆位置
-            // 甚麼元件
-            // accounting
-            // itinerary_group_cost 直接扣
-
-            $delete_component_cost = $this->requestCostService->after_delete_component_cost($to_deleted);
-            return $delete_component_cost;
-
-
-            // 3.刪除團行程該元件
+            // 刪除團行程該元件
             $to_deleted_itinerary['_id'] = $validated['_id']; // 需要要刪除欄位_id
             $to_deleted_itinerary[$find_name_no_dot] = null; // $find_name_no_dot 刪除欄位
-            $deleted_result = $this->requestService->delete_field('itinerary_group', $to_deleted_itinerary);
+            $this->requestService->delete_field('itinerary_group', $to_deleted_itinerary);
 
-            return $deleted_result;
-
-            // 團行程價錢修改
-            // 訂單 amount 修改
-            // TODO: 若該筆資料已經不存在 不可以重複刪除
-
-
-
-
-
-
-
-
-
-
-
+            return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
 
         }
         if($to_deleted['booking_status'] === "已退訂"){
+            
         }
         if($to_deleted['booking_status'] === "未預訂" || $to_deleted['booking_status'] === "已預訂"){
 
