@@ -14,13 +14,13 @@ class RequestCostService
         */
         // $delete_component['pricing_detail']
 
-        if($delete_component['type'] === "attraction" || $delete_component['type'] === "activity" || $delete_component['type'] === "accomendation" || $delete_component['type'] === "restaurant"){
-
-
+        if($delete_component['type'] === "attraction" || $delete_component['type'] === "activity" || $delete_component['type'] === "accomendation" || $delete_component['type'] === "restaurant" || $delete_component['type'] === "transportation"){
+            $delete_component_cost = $delete_component['sum'];
         }
-        if($delete_component['type'] === "transportation" || $delete_component['type'] === "guide"){
-
+        if($delete_component['type'] === "guide"){
+            $delete_component_cost = $delete_component['subtotal'];
         }
+        return $delete_component_cost;
     }
 }
 ?>
