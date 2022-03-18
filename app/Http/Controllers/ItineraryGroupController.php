@@ -473,11 +473,11 @@ class ItineraryGroupController extends Controller
         }
 
 
-        if($cus_order_data['itinerary_group_id'] !== null){ //old
+        if($cus_order_data['itinerary_group_id']){ //old
             $itinerary_group = $this->requestService->get_one('itinerary_group', $cus_order_data['itinerary_group_id']);
             $itinerary_group_data =  json_decode($itinerary_group->content(), true);
             return $itinerary_group_data;
-        }elseif($cus_order_data['itinerary_group_id'] === null){ //new
+        }elseif(!$cus_order_data['itinerary_group_id']){ //new
 
             // TODO 這部分感覺可以優化
             $itinerary_group_data_new['order_id'] = $cus_order_data['_id'];
@@ -513,7 +513,7 @@ class ItineraryGroupController extends Controller
             $itinerary_group_data_new['exclude_description'] = "";
             $itinerary_group_data_new['last_updated_on'] = $contact_name;
             $itinerary_group_data_new['itinerary_group_note'] = "";
-            $itinerary_group_data_new['own_by'] = $user_company_id;
+            $itinerary_group_data_new['ownd_by'] = $user_company_id;
             return $itinerary_group_data_new;
 
         }
