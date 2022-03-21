@@ -30,6 +30,7 @@ class RequestStatesService
             }
 
             if(array_key_exists('payment_status', $validated) && array_key_exists('booking_status', $validated)){
+                return $itinerary_group_past_data;
                 if($validated['booking_status'] === '未預定'){
                     if($validated['payment_status'] !== '未付款'){
                         return response()->json(['error' => "預定狀態為[已預訂]時，付款狀態只可為[未付款]。"], 400);
@@ -61,7 +62,11 @@ class RequestStatesService
 
     //未預定 已預定 待退訂 已退定
     public function booking_status($validated, $itinerary_group_past_data){
+        //return $itinerary_group_past_data;
+        //return $validated;
+
         if(array_key_exists("booking_status", $validated)){
+            return "111";
             if($validated['booking_status'] !== $itinerary_group_past_data['booking_status']){
                 if($itinerary_group_past_data["booking_status"] === "未預訂"){
                     if($validated['booking_status'] !== "已預訂"){
