@@ -98,7 +98,9 @@ class ItineraryGroupController extends Controller
             "owned_by" => 'required|integer',
         ];
         $this->edit_delete_items = [
-
+            "booking_status" => 'required|string',
+            "payment_status" => 'required|string',
+            "_id" => 'required|string'
         ];
     }
 
@@ -708,7 +710,7 @@ class ItineraryGroupController extends Controller
         // 當狀態須加上刪除判斷
         // 如果待退已退則刪除該obj放入刪除DB中
         if($to_deleted['booking_status'] === "待退訂"){
-            // 1.拉出這筆團行程元件資料
+            // 1.拉出這筆團行程元件資料，並將不必要的刪除
             $to_deleted['to_be_deleted'] = date('Y-m-d H:i:s');
             $to_deleted['deleted_at'] = null;
             $to_deleted['deleted_reason'] = null;
@@ -717,7 +719,17 @@ class ItineraryGroupController extends Controller
             $to_deleted['component_id'] = $to_deleted['_id'];
             $fixed_component_cost['_id'] =$to_deleted['_id'];
             unset($to_deleted['_id']);
-            return $to_deleted;
+            unset($to_deleted['sort']);
+
+            if($to_deleted['deposit'] === 0) $to_deleted['refund'] = 0;
+            if($to_deleted['deposit'] !== 0) $to_deleted['refund'] = $to_deleted['deposit'];
+
+            if($to_deleted['sum'] !== $to_deleted['deposit'] + $to_deleted['balance']){ //之前訂金+尾款 = sum
+                return response()->json(['error' => '訂金加尾款不等於此項總價。'], 400);
+            }
+
+            unset($to_deleted['balance']);
+
 
             // 加入刪除資料庫中
             $deleted_result = $this->requestService->insert_one('cus_delete_components', $to_deleted);
@@ -754,6 +766,9 @@ class ItineraryGroupController extends Controller
 
         // 1-2 限制只能同公司員工作修正
         $data = $this->requestService->find_one('itinerary_group', $id, null, null);
+        if(!$data){
+            return response()->json(['error' => '沒有這筆團行程資料。'], 400);
+        }
         if($user_company_id !== $data['document']['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
@@ -766,7 +781,13 @@ class ItineraryGroupController extends Controller
     }
 
     public function edit_delete_items(Request $request){
-        // 過濾出該[團行程]全部刪除內容
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->edit_delete_items);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validated = $validator->validated();
 
         // 1-1 使用者公司必須是旅行社
         $user_company_id = auth()->user()->company_id;
@@ -777,15 +798,54 @@ class ItineraryGroupController extends Controller
         }
 
         // 1-2 限制只能同公司員工作修正
-        $data = $this->requestService->find_one('itinerary_group', $id, null, null);
-        if($user_company_id !== $data['document']['owned_by']){
+        $data_before = $this->requestService->find_one('cus_delete_components', $validated['_id'], null, null);
+        $data_of_itinerary_group_before = $this->requestService->find_one('itinerary_group', $data_before['document']['itinerary_group_id'], null, null);
+        if($user_company_id !== $data_of_itinerary_group_before['document']['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
-        $filter['itinerary_group_id'] = $id;
-        $result_code = $this->requestService->aggregate_search('cus_delete_components', null, $filter, $page=0);
-        $result_code_data = json_decode($result_code->getContent(), true);
-        return $result_code_data;
+        // 直接針對待退已退做判斷
+        if(array_key_exists("payment_status", $validated) && array_key_exists("booking_status", $validated)){
+            if($data_before['document']['booking_status'] === "待退訂"){ //待退改已退
+                if($validated['booking_status'] !== "待退訂" && $validated['booking_status'] !== "已退訂"){ //booking_status
+                    return response()->json(['error' => '預定狀態[待退訂]只可以維持[待退訂]或是改成[已退訂]。'] , 400);
+                }
+                if($validated['booking_status'] === '待退訂'){
+                    if($validated['payment_status'] !== '已棄單，待退款' && $validated['payment_status'] !== '已棄單，免退款'){
+                        return response()->json(['error' => '預定狀態[待退訂]，付款狀態不可為[未付款]、[已付訂金]、[已付全額]、[已棄單，已退款]。'] , 400);
+                    }
+                }
+                if($validated['booking_status'] === '已退訂'){
+                    if($validated['payment_status'] !== '已棄單，已退款' && $validated['payment_status'] !== '已棄單，免退款'){
+                        return response()->json(['error' => '預定狀態[待退訂]，付款狀態不可為[未付款]、[已付訂金]、[已付全額]、[已棄單，已退款]。'] , 400);
+                    }
+                }
+            }else if($data_before['document']['booking_status'] === "已退訂"){
+                if($validated['booking_status'] !== "已退訂"){
+                    return response()->json(['error' => '預定狀態只可以維持[已退訂]。'], 400);
+                }
+                if($validated['payment_status'] !== "已棄單，已退款" && $validated['payment_status'] !== "已棄單，免退款"){
+                    return response()->json(['error' => '預定狀態[已退訂]，付款狀態只可為[已棄單，已退款]、[已棄單，免退款]。'] , 400);
+                }
+            }
+        }
+
+        //針對付款狀態做判斷
+        if($data_before['document']['payment_status'] === "已棄單，待退款"){
+            if($validated['payment_status'] !== "已棄單，待退款" && $validated['payment_status'] !== "已棄單，已退款"){
+                return response()->json(['error' => "付款狀態只可更改為[已棄單，待退款]或[已棄單，已退款]"], 400);
+            }
+        }
+        if($data_before['document']['payment_status'] === "已棄單，已退款" && $validated['payment_status'] !== "已棄單，已退款"){
+            return response()->json(['error' => "付款狀態只可更改為[已棄單，待退款]或[已棄單，已退款]"], 400);
+        }
+        if($data_before['document']['payment_status'] === "已棄單，免退款" && $validated['payment_status'] !== "已棄單，免退款"){
+            return response()->json(['error' => "付款狀態只可更改為[已棄單，免退款]"], 400);
+        }
+
+        $result = $this->requestService->update_one('cus_delete_components', $validated);
+        return $result;
+
 
     }
 
