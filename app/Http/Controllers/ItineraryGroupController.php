@@ -97,6 +97,9 @@ class ItineraryGroupController extends Controller
             "travel_start" => 'required|date',
             "owned_by" => 'required|integer',
         ];
+        $this->edit_delete_items = [
+
+        ];
     }
 
     public function add(Request $request)
@@ -675,16 +678,16 @@ class ItineraryGroupController extends Controller
 
         //確認付款狀態及預訂狀態
         if($find_type === "itinerary_content"){
-            $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
-            if($result_payment) return $result_payment;
             $result_booking = $this->requestStatesService->booking_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
             if($result_booking) return $result_booking;
+            $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
+            if($result_payment) return $result_payment;
 
         }else if(($find_type === "transportations" || $find_type === "guides")){
-            $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
-            if($result_payment) return $result_payment;
             $result_booking = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
             if($result_booking) return $result_booking;
+            $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
+            if($result_payment) return $result_payment;
         }
 
         // 確定沒錯後存入團行程中
@@ -714,6 +717,7 @@ class ItineraryGroupController extends Controller
             $to_deleted['component_id'] = $to_deleted['_id'];
             $fixed_component_cost['_id'] =$to_deleted['_id'];
             unset($to_deleted['_id']);
+            return $to_deleted;
 
             // 加入刪除資料庫中
             $deleted_result = $this->requestService->insert_one('cus_delete_components', $to_deleted);
@@ -740,6 +744,20 @@ class ItineraryGroupController extends Controller
     public function get_delete_items($id){
         // 過濾出該[團行程]全部刪除內容
 
+        // 1-1 使用者公司必須是旅行社
+        $user_company_id = auth()->user()->company_id;
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+        // 1-2 限制只能同公司員工作修正
+        $data = $this->requestService->find_one('itinerary_group', $id, null, null);
+        if($user_company_id !== $data['document']['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+
         $filter['itinerary_group_id'] = $id;
         $result_code = $this->requestService->aggregate_search('cus_delete_components', null, $filter, $page=0);
         $result_code_data = json_decode($result_code->getContent(), true);
@@ -747,5 +765,28 @@ class ItineraryGroupController extends Controller
 
     }
 
+    public function edit_delete_items(Request $request){
+        // 過濾出該[團行程]全部刪除內容
+
+        // 1-1 使用者公司必須是旅行社
+        $user_company_id = auth()->user()->company_id;
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+        // 1-2 限制只能同公司員工作修正
+        $data = $this->requestService->find_one('itinerary_group', $id, null, null);
+        if($user_company_id !== $data['document']['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+
+        $filter['itinerary_group_id'] = $id;
+        $result_code = $this->requestService->aggregate_search('cus_delete_components', null, $filter, $page=0);
+        $result_code_data = json_decode($result_code->getContent(), true);
+        return $result_code_data;
+
+    }
 
 }
