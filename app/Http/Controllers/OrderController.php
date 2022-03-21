@@ -415,6 +415,7 @@ class OrderController extends Controller
 
         // TODO381 如有要改付款狀態 必須在訂單狀態為 已成團才可以修改
 
+        
         if($cus_orders_past['order_status'] === "已成團"){
             if(array_key_exists('payment_status', $validated)){
                 if($cus_orders_past['payment_status'] !== $validated['payment_status']){

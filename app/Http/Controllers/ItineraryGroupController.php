@@ -740,6 +740,20 @@ class ItineraryGroupController extends Controller
     public function get_delete_items($id){
         // 過濾出該[團行程]全部刪除內容
 
+        // 1-1 使用者公司必須是旅行社
+        $user_company_id = auth()->user()->company_id;
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+        // 1-2 限制只能同公司員工作修正
+        $data = $this->requestService->find_one('itinerary_group', $id, null, null);
+        if($user_company_id !== $data['document']['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+
         $filter['itinerary_group_id'] = $id;
         $result_code = $this->requestService->aggregate_search('cus_delete_components', null, $filter, $page=0);
         $result_code_data = json_decode($result_code->getContent(), true);
