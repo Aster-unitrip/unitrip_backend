@@ -569,20 +569,93 @@ class ItineraryGroupController extends Controller
 
     public function save_to_itinerary(Request $request)
     { //將團行程存回行程範本
-        //傳入資訊
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $this->rule);
+        $validator = Validator::make($data, $this->edit_rule);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
-        $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
-        $validated['owned_by'] = $company_id;
 
-        // TODO 將團行程處理成行程存下來 刪除一些欄位
+        // 1-1 使用者公司必須是旅行社
+        $user_company_id = auth()->user()->company_id;
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+        // 1-2 限制只能同公司員工作修正
+        // 找團行程的company_id和使用者company_id
+        if($user_company_id !== $validated['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+
+        // TODO 團行程[名稱]、[代碼]必須和行程不同
+        //$filter['company_id'] = $user_company_id;
+        $filter['code'] = $validated['code'];
+        $filter['name'] = $validated['name'];
+        $result_code = $this->requestService->aggregate_search('itineraries', null, $filter, $page=0);
+        $result_code_data = json_decode($result_code->getContent(), true);
+        if($result_code_data["count"] > 0){
+            // 代表有重複的
+            return response()->json(['error' => "[行程代碼]或是[行程編號]已重複。"], 400);
+        }
 
 
+        // TODO 將團行程處理成行程存下來
+        // 1.刪除一些第一層欄位
+        unset($validated['order_id']);
+        unset($validated['travel_start']);
+        unset($validated['travel_end']);
+        unset($validated['itinerary_group_cost']);
+        unset($validated['itinerary_group_price']);
+        unset($validated['itinerary_group_note']);
+
+        // 2.刪除guides
+        if(array_key_exists('guides', $validated)){
+            for($i = 0; $i < count($validated['guides']); $i++){
+                unset($validated['guides'][$i]['date_start']);
+                unset($validated['guides'][$i]['date_end']);
+                unset($validated['guides'][$i]['pay_deposit']);
+                unset($validated['guides'][$i]['booking_status']);
+                unset($validated['guides'][$i]['payment_status']);
+                unset($validated['guides'][$i]['deposit']);
+                unset($validated['guides'][$i]['balance']);
+            }
+        }
+        // 2.刪除transportations
+        if(array_key_exists('transportations', $validated)){
+            for($i = 0; $i < count($validated['transportations']); $i++){
+                unset($validated['guides'][$i]['date_start']);
+                unset($validated['guides'][$i]['date_end']);
+                unset($validated['guides'][$i]['pay_deposit']);
+                unset($validated['guides'][$i]['booking_status']);
+                unset($validated['guides'][$i]['payment_status']);
+                unset($validated['guides'][$i]['deposit']);
+                unset($validated['guides'][$i]['balance']);
+            }
+        }
+        // 3.刪除 itinerary_content
+        if(array_key_exists('itinerary_content', $validated)){
+            unset($validated['itinerary_content']['date']);
+            if(array_key_exists('components', $validated['itinerary_content'])){
+                for($i = 0; $i < count($validated['itinerary_content']['components']); $i++){
+                    unset($validated['itinerary_content']['components'][$i]['date']);
+                    unset($validated['itinerary_content']['components'][$i]['pay_deposit']);
+                    unset($validated['itinerary_content']['components'][$i]['booking_status']);
+                    unset($validated['itinerary_content']['components'][$i]['payment_status']);
+                    unset($validated['itinerary_content']['components'][$i]['deposit']);
+                    unset($validated['itinerary_content']['components'][$i]['balance']);
+                    unset($validated['itinerary_content']['components'][$i]['operator_note']);
+
+                }
+            }
+        }
+        //return $validated;
+        // 4.將行程存下來 // 無法成功存下來
+        $itinerary_new = $this->requestService->insert_one('itineraries', $validated);
+        return $itinerary_new;
 
     }
 

@@ -114,6 +114,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'itinerary/group'], function($route
     Route::get('/{id}', [ItineraryGroupController::class, 'get_by_id']);
     Route::post('/', [ItineraryGroupController::class, 'edit']);
     Route::post('/list', [ItineraryGroupController::class, 'list']);
+    Route::post('/save-itinerary', [ItineraryGroupController::class, 'save_to_itinerary']); // 將團行程存回行程範本
     Route::get('/component/{id}', [ItineraryGroupController::class, 'get_component_type']); // 可以看到供應商分類表
     Route::get('/delete-component/{id}', [ItineraryGroupController::class, 'get_delete_items']); // 可以看到供應商刪除類表(all) {id} 團行程ID
     Route::post('/delete-component', [ItineraryGroupController::class, 'edit_delete_items']); // 修改旅行社供應商 待退款改成已退款
