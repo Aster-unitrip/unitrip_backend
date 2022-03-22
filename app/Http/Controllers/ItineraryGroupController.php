@@ -454,14 +454,6 @@ class ItineraryGroupController extends Controller
 
     public function get_by_id($id)
     {
-        //目標 取得團行程資訊
-
-        /*
-        user_company_id ->從 order_id
-        $id ->order_id
-        itinerary_group_id -> order_id
-        */
-
         // 1-1 使用者公司必須是旅行社
         $user_company_id = auth()->user()->company_id;
         $contact_name = auth()->user()->contact_name;
@@ -588,7 +580,7 @@ class ItineraryGroupController extends Controller
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
 
-        // TODO 將團行程處理成行程存下來 (等parker)
+        // TODO 將團行程處理成行程存下來 刪除一些欄位
 
 
 
@@ -822,7 +814,7 @@ class ItineraryGroupController extends Controller
                 }
             }else if($data_before['document']['booking_status'] === "已退訂"){
                 if($validated['booking_status'] !== "已退訂"){
-                    return response()->json(['error' => '預定狀態只可以維持[已退訂]。'], 400);
+                    return response()->json(['error' => '預定狀態只可以維持[已退訂]，不可更改。'], 400);
                 }
                 if($validated['payment_status'] !== "已棄單，已退款" && $validated['payment_status'] !== "已棄單，免退款"){
                     return response()->json(['error' => '預定狀態[已退訂]，付款狀態只可為[已棄單，已退款]、[已棄單，免退款]。'] , 400);
@@ -840,9 +832,11 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => "付款狀態只可更改為[已棄單，待退款]或[已棄單，已退款]"], 400);
         }
         if($data_before['document']['payment_status'] === "已棄單，免退款" && $validated['payment_status'] !== "已棄單，免退款"){
-            return response()->json(['error' => "付款狀態只可更改為[已棄單，免退款]"], 400);
+            return response()->json(['error' => "付款狀態只可維持[已棄單，免退款]"], 400);
         }
-
+        if($data_before['document']['payment_status'] !== $validated['payment_status'] || $data_before['document']['booking_status'] !== $validated['booking_status']){
+            $validated['deleted_at'] = date('Y-m-d H:i:s');
+        }
         $result = $this->requestService->update_one('cus_delete_components', $validated);
         return $result;
 
