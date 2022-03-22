@@ -16,6 +16,8 @@ use App\Http\Controllers\ComponentTransportationController;
 use App\Http\Controllers\ComponentGuideController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ItineraryGroupController;
+use App\Http\Controllers\PassengerController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -112,10 +114,13 @@ Route::group(['middleware'=>'api', 'prefix'=>'itinerary/group'], function($route
     Route::post('/list', [ItineraryGroupController::class, 'list']);
     Route::get('/component/{id}', [ItineraryGroupController::class, 'get_component_type']); // 可以看到供應商分類表
     Route::get('/delete-component/{id}', [ItineraryGroupController::class, 'get_delete_items']); // 可以看到供應商刪除類表(all) {id} 團行程ID
-    Route::post('/delete-component', [ItineraryGroupController::class, 'edit_delete_items']); // TODO 修改旅行社供應商 待退款改成已退款
+    Route::post('/delete-component', [ItineraryGroupController::class, 'edit_delete_items']); // 修改旅行社供應商 待退款改成已退款
     Route::post('/operator', [ItineraryGroupController::class, 'operator']); // 修改旅行社供應商控團預警
+});
 
-
+Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
+    Route::get('/{id}', [PassengerController::class, 'get_by_id']); // 取得訂單ID的旅客資料
+    Route::post('/update', [PassengerController::class, 'edit']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
