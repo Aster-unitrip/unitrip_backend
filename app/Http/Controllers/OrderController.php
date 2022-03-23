@@ -378,7 +378,7 @@ class OrderController extends Controller
             }else return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
         }
 
-        $result = $this->requestService->aggregate_search('cus_orders', null, $filter, $page=0);
+        $result = $this->requestService->aggregate_search('cus_orders', null, $filter, $page);
         return $result;
 
     }

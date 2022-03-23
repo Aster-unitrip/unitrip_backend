@@ -481,8 +481,6 @@ class ItineraryGroupController extends Controller
             if($itinerary_group_data['count'] === 0){
                 return response()->json(['error' => '訂單中團行程id可能已過期(團行程刪除)。'], 400);
             }
-
-
             return $itinerary_group_data;
         }elseif(!$cus_order_data['itinerary_group_id']){ //new
 
