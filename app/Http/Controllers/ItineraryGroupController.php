@@ -556,7 +556,8 @@ class ItineraryGroupController extends Controller
 
         // 非旅行社及該旅行社人員不可修改訂單
         $data_before = $this->requestService->find_one('itinerary_group_groupby_component_type', $id, null, null);
-        if($data_before===false){
+        //return $data_before;
+        if(!$data_before){
             return response()->json(['error' => '輸入id搜尋不到團行程。'], 400);
         }
 
