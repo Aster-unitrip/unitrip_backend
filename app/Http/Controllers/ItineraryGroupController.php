@@ -313,7 +313,6 @@ class ItineraryGroupController extends Controller
             //return $validated;
 
             $itinerary_group_new = $this->requestService->insert_one('itinerary_group', $validated);
-            return $itinerary_group_new;
             $result_data = json_decode($itinerary_group_new->getContent(), true);
 
 
@@ -555,8 +554,7 @@ class ItineraryGroupController extends Controller
     public function get_component_type($id){ //團行程ID
 
         // 非旅行社及該旅行社人員不可修改訂單
-        $data_before = $this->requestService->find_one('itinerary_group_groupby_component_type', $id, null, null);
-        //return $data_before;
+        $data_before = $this->requestService->find_one('itinerary_group', $id, null, null);
         if(!$data_before){
             return response()->json(['error' => '輸入id搜尋不到團行程。'], 400);
         }
