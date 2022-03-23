@@ -434,9 +434,12 @@ class OrderController extends Controller
         }
 
         // TODO381 是否付訂金此欄必須為true後才可以更改
-        if($validated['pay_deposit'] === false && $validated['payment_status'] === "已付訂金"){
-            return response()->json(['error' => "當不須預付訂金時，付款狀態不可以為已付訂金"], 400);
+        if(array_key_exists('pay_deposit', $validated) && $validated['pay_deposit'] === false){
+            if($validated['payment_status'] === "已付訂金"){
+                return response()->json(['error' => "當不須預付訂金時，付款狀態不可以為已付訂金"], 400);
+            }
         }
+
 
         // TODO381 如有要改付款狀態 必須在訂單狀態為 已成團才可以修改
 
@@ -474,7 +477,8 @@ class OrderController extends Controller
             return response()->json(['error' => '付款狀態必須是已成團，才可以更改付款狀態'], 400);
         }
 
-        //TODO 驗算
+        //TODO未完成 驗算
+        return $validated;
 
 
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);

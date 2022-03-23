@@ -206,6 +206,7 @@ class ItineraryGroupController extends Controller
             $filter_code["owned_by"] = $validated['owned_by'];
             $result_code = $this->requestService->aggregate_search('itinerary_group', null, $filter_code, $page=0);
             $result_code_data = json_decode($result_code->getContent(), true);
+
         }else $validated['code'] = null;
 
         if(array_key_exists('name', $validated)){
@@ -221,7 +222,7 @@ class ItineraryGroupController extends Controller
         if(!array_key_exists('_id', $validated)){
             // 3.1(新增團行程)
             // code 新建時 同公司不可有
-            if($result_code_data["count"] > 0){
+            if($validated['code']!== null && $result_code_data["count"] > 0){
                 return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
             }
             if($result_itinerary_group_name_data["count"] > 0){
@@ -309,8 +310,13 @@ class ItineraryGroupController extends Controller
             if(!array_key_exists('itinerary_group_note', $validated)){
                 $validated['itinerary_group_note'] = null;
             }
+            //return $validated;
+
             $itinerary_group_new = $this->requestService->insert_one('itinerary_group', $validated);
+            return $itinerary_group_new;
             $result_data = json_decode($itinerary_group_new->getContent(), true);
+
+
 
             // 找出團行程的 order_id，去修改 order itinerary_group_id、cus_group_code
             $itinerary_group = $this->requestService->get_one('itinerary_group', $result_data['inserted_id']);
