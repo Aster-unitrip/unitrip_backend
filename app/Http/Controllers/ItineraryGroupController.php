@@ -466,9 +466,6 @@ class ItineraryGroupController extends Controller
         $cus_order = $this->requestService->get_one('cus_orders', $id);
         $cus_order_data =  json_decode($cus_order->content(), true);
 
-        //cus_order_data['user_company_id']
-        // cus_order_data['itinerary_group_id']
-
 
         // 1-2 限制只能同公司員工作修正
         // 找團行程的company_id和使用者company_id
@@ -480,6 +477,12 @@ class ItineraryGroupController extends Controller
         if($cus_order_data['itinerary_group_id']){ //old
             $itinerary_group = $this->requestService->get_one('itinerary_group', $cus_order_data['itinerary_group_id']);
             $itinerary_group_data =  json_decode($itinerary_group->content(), true);
+            // TODO 如果已經沒有該團行程 需要額外處理
+            if($itinerary_group_data['count'] === 0){
+                return response()->json(['error' => '訂單中團行程id可能已過期(團行程刪除)。'], 400);
+            }
+
+
             return $itinerary_group_data;
         }elseif(!$cus_order_data['itinerary_group_id']){ //new
 
@@ -544,7 +547,7 @@ class ItineraryGroupController extends Controller
         // 非旅行社及該旅行社人員不可修改訂單
         $data_before = $this->requestService->find_one('itinerary_group', $id, null, null);
         if($data_before===false){
-            return response()->json(['error' => '沒有此id資料。'], 400);
+            return response()->json(['error' => '輸入id搜尋不到團行程。'], 400);
         }
 
         $data_before = $data_before['document'];

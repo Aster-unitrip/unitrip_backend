@@ -189,7 +189,7 @@ class OrderController extends Controller
         $id = $validated['_id'];
         $data_before = $this->requestService->find_one('cus_orders', $id, null, null);
         if($data_before===false){
-            return response()->json(['error' => '沒有此id資料。'], 400);
+            return response()->json(['error' => '輸入id搜尋不到訂單。'], 400);
         }
 
         $data_before = $data_before['document'];
@@ -394,7 +394,7 @@ class OrderController extends Controller
         }
         $data_before = $this->requestService->find_one('cus_orders', $id, null, null);
         if($data_before===false){
-            return response()->json(['error' => '沒有此id資料。'], 400);
+            return response()->json(['error' => '輸入id搜尋不到訂單。'], 400);
         }
 
         $data_before = $data_before['document'];
@@ -496,7 +496,7 @@ class OrderController extends Controller
         }
         $data_before = $this->requestService->find_one('cus_orders', $validated['_id'], null, null);
         if($data_before===false){
-            return response()->json(['error' => '沒有此id資料。'], 400);
+            return response()->json(['error' => '輸入id搜尋不到訂單。'], 400);
         }
 
         $data_before = $data_before['document'];
