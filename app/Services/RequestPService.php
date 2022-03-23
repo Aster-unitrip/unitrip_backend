@@ -391,7 +391,7 @@ class RequestPService
 
         $postdata = json_encode($data);
         // 顯示 MongoDB 的查詢語法
-        // dump($postdata);
+        //dump($postdata);
         $options = array(
             'http' => array(
                 'method' => 'POST',
@@ -408,6 +408,7 @@ class RequestPService
     }
 
     public function aggregate_search($collection, $projection, $filter=[], $page=0){
+
         $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/aggregate";
         $limit = 10;
         $data = array(
@@ -450,7 +451,7 @@ class RequestPService
         $postdata = json_encode($data);
         //return $postdata;
         // 顯示 MongoDB 的查詢語法
-        // dump($postdata);
+        //dump($postdata);
         $options = array(
             'http' => array(
                 'method' => 'POST',
