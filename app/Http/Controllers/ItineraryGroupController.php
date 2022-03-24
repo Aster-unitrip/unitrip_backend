@@ -93,7 +93,7 @@ class ItineraryGroupController extends Controller
             'payment_status' => 'required|string',
             'deposit' => 'required|numeric',
             'balance' => 'required|numeric',
-            "operator_note" => 'required|string',
+            "operator_note" => 'string',
             "travel_start" => 'required|date',
             "owned_by" => 'required|integer',
         ];
