@@ -738,6 +738,9 @@ class ItineraryGroupController extends Controller
         // 必須是已成團後才可以修改付款狀態
         // 設定修改內容名稱
         if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
+            if($validated["sort"]<=0){
+                return response()->json(['error' => "sort 必須大於0。"]);
+            }
             $find_day = floor((strtotime($validated["date"]) - strtotime($validated['travel_start'])) / (60*60*24)); //將 date 做轉換成第幾天
             $find_sort = $validated["sort"]-1; // sort比原來少1
             if(array_key_exists("type", $validated)){
@@ -746,14 +749,14 @@ class ItineraryGroupController extends Controller
                     $find_name = $find_type.".".$find_day.".components.".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_day.".components.".$find_sort;
                     if($itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
-                        return response()->json(['error' => "找不到該筆元件資訊"], 400);
+                        return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，找不到該筆元件資訊"], 400);
                     }
                 }else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
                     $find_type =$validated["type"];
                     $find_name = $find_type.".".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_sort;
-                    if($itinerary_group_past_data[$find_type][$find_sort] !== null){
-                        return response()->json(['error' => "找不到該筆元件資訊"], 400);
+                    if($itinerary_group_past_data[$find_type][$find_sort] === null){
+                        return response()->json(['error' => "位於[交通工具]或[導遊]元件中，找不到該筆元件資訊"], 400);
                     }
                 }
             }else{
