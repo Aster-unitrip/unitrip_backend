@@ -231,6 +231,7 @@ class ItineraryGroupController extends Controller
             // 處理時間
             $validated['travel_start'] = $validated['travel_start']."T00:00:00";
             $validated['travel_end'] = $validated['travel_end']."T23:59:59";
+
             // travel_end 不可小於 travel_end
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
@@ -346,7 +347,7 @@ class ItineraryGroupController extends Controller
             //3.2(編輯團行程)
             // code
 
-            if($result_code_data["count"] > 1){
+            if($validated['code']!== null && $result_code_data["count"] > 1){
                 if($result_code_data["docs"][0]['_id'] !== $validated['_id']){
                     return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
                 }
@@ -357,13 +358,18 @@ class ItineraryGroupController extends Controller
                 }
             }
             // travel_end 不可小於 travel_end
+            // 處理時間
+            $validated['travel_start'] = $validated['travel_start']."T00:00:00";
+            $validated['travel_end'] = $validated['travel_end']."T23:59:59";
+
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
             }
 
             $itinerary_group = $this->requestService->update('itinerary_group', $validated);
             $result_data = json_decode($itinerary_group->getContent(), true);
-            return response()->json(['success' => 'update successfully.'], 200);
+            return $result_data;
+
         }
 
 
