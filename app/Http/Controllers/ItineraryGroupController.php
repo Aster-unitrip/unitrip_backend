@@ -218,7 +218,16 @@ class ItineraryGroupController extends Controller
         }else{
             return response()->json(['error' => '沒有填團行程名稱', 400]);
         }
-
+        // 確定給的order_id是有的
+        if(array_key_exists('order_id', $validated)){
+            $cus_orders_data = $this->requestService->get_one('cus_orders', $validated['order_id']);
+            $cus_orders_data = json_decode($cus_orders_data->getContent(), true);
+            if(array_key_exists('count', $cus_orders_data) && $cus_orders_data['count'] === 0){
+                return response()->json(['error' => '不存在這筆 [order_id]。'], 400);
+            }
+        }else{
+            return response()->json(['error' => '請補上 [order_id] 這個欄位。'], 400);
+        }
         if(!array_key_exists('_id', $validated)){
             // 3.1(新增團行程)
             // code 新建時 同公司不可有
@@ -231,12 +240,10 @@ class ItineraryGroupController extends Controller
             // 處理時間
             $validated['travel_start'] = $validated['travel_start']."T00:00:00";
             $validated['travel_end'] = $validated['travel_end']."T23:59:59";
-
             // travel_end 不可小於 travel_end
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
             }
-
             // 處理分割項目
             if(array_key_exists('itinerary_content', $validated)){
                 for($i = 0; $i < count($validated['itinerary_content']); $i++){
@@ -311,12 +318,9 @@ class ItineraryGroupController extends Controller
             if(!array_key_exists('itinerary_group_note', $validated)){
                 $validated['itinerary_group_note'] = null;
             }
-            //return $validated;
 
             $itinerary_group_new = $this->requestService->insert_one('itinerary_group', $validated);
             $result_data = json_decode($itinerary_group_new->getContent(), true);
-
-
 
             // 找出團行程的 order_id，去修改 order itinerary_group_id、cus_group_code
             $itinerary_group = $this->requestService->get_one('itinerary_group', $result_data['inserted_id']);
@@ -339,6 +343,9 @@ class ItineraryGroupController extends Controller
 
             $fixed["_id"] = $order_data["_id"];
             $fixed["itinerary_group_id"] = $result_data['inserted_id'];
+            $fixed["amount"] = $itinerary_group_data['itinerary_group_price'];
+
+
             $result = $this->requestService->update_one('cus_orders', $fixed);
             return $result;
 
@@ -366,9 +373,16 @@ class ItineraryGroupController extends Controller
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
             }
 
-            $itinerary_group = $this->requestService->update('itinerary_group', $validated);
-            $result_data = json_decode($itinerary_group->getContent(), true);
-            return $result_data;
+            $this->requestService->update('itinerary_group', $validated);
+
+
+            $fixed["_id"] = $validated["order_id"];
+            $fixed["itinerary_group_id"] = $validated['_id'];
+            $fixed["amount"] = $validated['itinerary_group_price'];
+
+
+            $result = $this->requestService->update_one('cus_orders', $fixed);
+            return $result;
 
         }
 
