@@ -123,7 +123,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'itinerary/group'], function($route
 
 Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
     Route::get('/{id}', [PassengerController::class, 'get_by_id']); // 取得訂單ID的旅客資料
-    Route::post('/update', [PassengerController::class, 'edit']);
+    Route::post('/', [PassengerController::class, 'edit']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
