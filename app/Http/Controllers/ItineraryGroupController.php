@@ -654,35 +654,40 @@ class ItineraryGroupController extends Controller
                 unset($validated['guides'][$i]['payment_status']);
                 unset($validated['guides'][$i]['deposit']);
                 unset($validated['guides'][$i]['balance']);
+                unset($validated['guides'][$i]['operator_note']);
             }
         }
         // 2.刪除transportations
         if(array_key_exists('transportations', $validated)){
             for($i = 0; $i < count($validated['transportations']); $i++){
-                unset($validated['guides'][$i]['date_start']);
-                unset($validated['guides'][$i]['date_end']);
-                unset($validated['guides'][$i]['pay_deposit']);
-                unset($validated['guides'][$i]['booking_status']);
-                unset($validated['guides'][$i]['payment_status']);
-                unset($validated['guides'][$i]['deposit']);
-                unset($validated['guides'][$i]['balance']);
+                unset($validated['transportations'][$i]['date_start']);
+                unset($validated['transportations'][$i]['date_end']);
+                unset($validated['transportations'][$i]['pay_deposit']);
+                unset($validated['transportations'][$i]['booking_status']);
+                unset($validated['transportations'][$i]['payment_status']);
+                unset($validated['transportations'][$i]['deposit']);
+                unset($validated['transportations'][$i]['balance']);
+                unset($validated['transportations'][$i]['operator_note']);
             }
         }
         // 3.刪除 itinerary_content
         if(array_key_exists('itinerary_content', $validated)){
-            unset($validated['itinerary_content']['date']);
-            if(array_key_exists('components', $validated['itinerary_content'])){
-                for($i = 0; $i < count($validated['itinerary_content']['components']); $i++){
-                    unset($validated['itinerary_content']['components'][$i]['date']);
-                    unset($validated['itinerary_content']['components'][$i]['pay_deposit']);
-                    unset($validated['itinerary_content']['components'][$i]['booking_status']);
-                    unset($validated['itinerary_content']['components'][$i]['payment_status']);
-                    unset($validated['itinerary_content']['components'][$i]['deposit']);
-                    unset($validated['itinerary_content']['components'][$i]['balance']);
-                    unset($validated['itinerary_content']['components'][$i]['operator_note']);
-
+            for($i = 0; $i < count($validated['itinerary_content']); $i++){
+                unset($validated['itinerary_content'][$i]['date']);
+                if(array_key_exists('components', $validated['itinerary_content'][$i])){
+                    for($j = 0; $j < count($validated['itinerary_content'][$i]['components']); $j++){
+                        unset($validated['itinerary_content'][$i]['components'][$j]['date']);
+                        unset($validated['itinerary_content'][$i]['components'][$j]['pay_deposit']);
+                        unset($validated['itinerary_content'][$i]['components'][$j]['booking_status']);
+                        unset($validated['itinerary_content'][$i]['components'][$j]['payment_status']);
+                        unset($validated['itinerary_content'][$i]['components'][$j]['deposit']);
+                        unset($validated['itinerary_content'][$i]['components'][$j]['balance']);
+                        unset($validated['itinerary_content'][$i]['components'][$j]['operator_note']);
+                    }
                 }
             }
+
+
         }
         //return $validated;
         // 4.將行程存下來 // 無法成功存下來
@@ -776,8 +781,6 @@ class ItineraryGroupController extends Controller
         $fixed[$find_name.'operator_note'] = $validated['operator_note'];
 
         // 先確定該欄位是否有值
-
-
         //確認付款狀態及預訂狀態
         if($find_type === "itinerary_content"){
             $result_booking = $this->requestStatesService->booking_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
@@ -793,11 +796,12 @@ class ItineraryGroupController extends Controller
         }
 
         // 確定沒錯後存入團行程中
-        $this->requestService->update_one('itinerary_group', $fixed);
+        $update = $this->requestService->update_one('itinerary_group', $fixed);
 
         // 取得存後資料
         $operator_data = $this->requestService->get_one('itinerary_group', $validated['_id']);
         $operator_data = json_decode($operator_data->getContent(), true);
+
 
 
         // 判斷該筆資料type，欲處理待退訂項目
