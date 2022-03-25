@@ -122,6 +122,7 @@ class OrderController extends Controller
         $validated['deposit'] = 0;
         $validated['balance'] = 0;
         $validated['amount'] = 0;
+        $validated['actual_payment'] = 0; //旅客實際支付金額
         $validated['cancel_at'] = null;
         $validated['deleted_at'] = null;
         $validated['cus_group_code'] = null;
@@ -212,7 +213,6 @@ class OrderController extends Controller
             //客製化訂單狀態: 0.收到需求單 -> 1 4 / 1.已規劃行程&詢價 ->2 4 / 2.已回覆旅客 ->1 3 4 / 3.已成團 -> 4 / 4.棄單 -> X
             switch($data_before['order_status']){
                 case "收到需求單":
-                    //return $validated['order_status'];
                     if($validated['order_status'] !== "已規劃行程&詢價" && $validated['order_status'] !== "棄單"){
                         return response()->json(['error' => "[訂單狀態]只可改到[已規劃行程&詢價]、[棄單]"], 400);
                     }
@@ -236,6 +236,20 @@ class OrderController extends Controller
             //TODO381 處理成團狀態
             if($validated['order_status'] === "已成團") $validated['group_status'] = "成團";
 
+            // 預定狀態關聯付款狀態
+            if($validated['order_status'] === "收到需求單" || $validated['order_status'] === "已規劃行程&詢價" || $validated['order_status'] === "已回覆旅客"){
+                if($validated['payment_status'] !== "未付款"){
+                    return response()->json(['error' => "[訂單狀態]為[收到需求單]或[已規劃行程&詢價]或[已回覆旅客]時，[付款狀態]只可為[未付款]。"]);
+                }
+            }elseif($validated['order_status'] === "已成團"){
+                if($validated['payment_status'] !== "未付款" || $validated['payment_status'] !== "已付訂金" || $validated['payment_status'] !== "已付全額"){
+                    return response()->json(['error' => "[訂單狀態]為[已成團]時，[付款狀態]只可為[未付款]或[已付訂金]或[已付全額]。"]);
+                }
+            }elseif($validated['order_status'] === "已棄單"){
+                if($validated['payment_status'] !== "已棄單，待退款" || $validated['payment_status'] !== "已棄單，已退款" || $validated['payment_status'] !== "已棄單，免退款"){
+                    return response()->json(['error' => "[訂單狀態]為[已棄單]時，[付款狀態]只可為[已棄單，待退款]或[已棄單，已退款]或[已棄單，免退款]。"]);
+                }
+            }
 
             //存入 order_record
             $order_record_add_order_status = array(
@@ -273,7 +287,6 @@ class OrderController extends Controller
                     }
                     break;
             }
-            return $validated['payment_status'];
         }
 
         // TODO381 6. 出團狀態 需寫判斷
@@ -434,14 +447,6 @@ class OrderController extends Controller
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
-        // TODO381 是否付訂金此欄必須為true後才可以更改
-        if(array_key_exists('pay_deposit', $validated) && $validated['pay_deposit'] === false){
-            if($validated['payment_status'] === "已付訂金"){
-                return response()->json(['error' => "當不須預付訂金時，付款狀態不可以為已付訂金"], 400);
-            }
-        }
-
-
         // TODO381 如有要改付款狀態 必須在訂單狀態為 已成團才可以修改
 
         if($cus_orders_past['order_status'] === "已成團"){
@@ -473,11 +478,17 @@ class OrderController extends Controller
             }else{
                 return response()->json(['error' =>'沒有[付款狀態]欄位', 400]);
             }
+            // TODO381 是否付訂金此欄必須為true後才可以更改
+            if(array_key_exists('pay_deposit', $validated) && $validated['pay_deposit'] === false && $validated['payment_status'] === "已付訂金"){
+                return response()->json(['error' => "當不須預付訂金時，付款狀態不可以為已付訂金"], 400);
+            }
         }else{
             return response()->json(['error' => '[付款狀態]必須是[已成團]，才可以更改[付款狀態]'], 400);
         }
 
         //TODO未完成 驗算
+        if($validated['payment_status'] === "已付訂金") $validated['actual_payment'] = $validated['amount'] - $validated['deposit'];
+        elseif($validated['payment_status'] === "已付全額") $validated['actual_payment'] = $validated['amount'];
 
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
