@@ -39,7 +39,7 @@ class OrderController extends Controller
             'baby_number' => 'required|integer',
             'source' => 'required|string',
             'needs' => 'nullable|string',
-            'note' => 'nullable|string',
+            'company_note' => 'nullable|string',
             'travel_start' => 'required|date',
             'travel_end' => 'required|date',
         ];
@@ -65,14 +65,15 @@ class OrderController extends Controller
             'baby_number' => 'required|integer',
             'source' => 'required|string',
             'needs' => 'string',
-            'note' => 'string'
+            'company_note' => 'string'
         ];
         $this->operator_rule = [
             '_id'=>'required|string|max:24',
             'pay_deposit' => 'boolean',
             'payment_status' => 'string',
             'deposit' => 'numeric',
-            'balance' => 'numeric'
+            'balance' => 'numeric',
+            'amount' => 'numeric'
         ];
     }
 
