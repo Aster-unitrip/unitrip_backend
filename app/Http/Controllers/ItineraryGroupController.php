@@ -550,8 +550,8 @@ class ItineraryGroupController extends Controller
     }
 
 
-    public function get_component_type($id){ //團行程ID
-
+    public function get_component_type($id)
+    { //團行程ID
         // 非旅行社及該旅行社人員不可修改訂單
         $data_before = $this->requestService->find_one('itinerary_group', $id, null, null);
         if(!$data_before){
@@ -753,17 +753,17 @@ class ItineraryGroupController extends Controller
         // 先確定該欄位是否有值 確認付款狀態及預訂狀態
         if($find_type === "itinerary_content"){
             $result_booking = $this->requestStatesService->booking_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
-            if($result_booking) return $result_booking;
+            if($result_booking !== 1) return $result_booking;
             $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
-            if($result_payment) return $result_payment;
+            if($result_payment !== 1) return $result_payment;
 
-        }else if(($find_type === "transportations" || $find_type === "guides")){
-            //return "find_type: ".$find_type;
-            $result_booking = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
-            if($result_booking) return $result_booking;
+        }else if($find_type === "transportations" || $find_type === "guides"){
+            $result_booking = $this->requestStatesService->booking_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
+            if($result_booking !== 1) return $result_booking;
             $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
-            if($result_payment) return $result_payment;
+            if($result_payment !== 1) return $result_payment;
         }
+
 
         if($validated['payment_status'] === "已付訂金"){
             $fixed[$find_name.'actual_payment'] = $validated['deposit'];
@@ -775,9 +775,11 @@ class ItineraryGroupController extends Controller
         // 確定沒錯後存入團行程中
         $update = $this->requestService->update_one('itinerary_group', $fixed);
 
+
         // 取得存後資料
         $operator_data = $this->requestService->get_one('itinerary_group', $validated['_id']);
         $operator_data = json_decode($operator_data->getContent(), true);
+
 
         // 判斷該筆資料type，欲處理待退訂項目
         if($find_type === "itinerary_content"){
@@ -830,7 +832,8 @@ class ItineraryGroupController extends Controller
         }
         if($to_deleted['booking_status'] === "未預訂" || $to_deleted['booking_status'] === "已預訂"){
             // 儲存
-            $result = $this->requestService->update_one('itinerary_group', $fixed);
+            $to_deleted['_id'] = $validated['_id'];
+            $result = $this->requestService->update_one('itinerary_group', $to_deleted);
             return $result;
         }
     }
