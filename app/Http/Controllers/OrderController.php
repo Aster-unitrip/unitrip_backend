@@ -34,9 +34,9 @@ class OrderController extends Controller
             'languages' => 'required|array',
             'budget_min' => 'required|numeric',
             'budget_max' => 'required|numeric',
-            'adult_num' => 'required|integer',
-            'child_num' => 'required|integer',
-            'baby_num' => 'required|integer',
+            'adult_number' => 'required|integer',
+            'child_number' => 'required|integer',
+            'baby_number' => 'required|integer',
             'source' => 'required|string',
             'needs' => 'nullable|string',
             'note' => 'nullable|string',
@@ -60,9 +60,9 @@ class OrderController extends Controller
             'budget_max' => 'required|numeric',
             'travel_start' => 'required|date',
             'travel_end' => 'required|date',
-            'adult_num' => 'required|integer',
-            'child_num' => 'required|integer',
-            'baby_num' => 'required|integer',
+            'adult_number' => 'required|integer',
+            'child_number' => 'required|integer',
+            'baby_number' => 'required|integer',
             'source' => 'required|string',
             'needs' => 'string',
             'note' => 'string'
@@ -128,8 +128,13 @@ class OrderController extends Controller
         $validated['cus_group_code'] = null;
         $validated['operator_note'] = null;
         $validated['group_status'] = "未成團";
-        $validated['total_people'] = $validated['adult_num'] + $validated['child_num'] + $validated['baby_num'];
-        if(!array_key_exists('company',$validated)) $validated['company'] = null;
+
+        if(!array_key_exists('adult_number', $validated)) $validated['adult_number'] = 0;
+        if(!array_key_exists('child_number', $validated)) $validated['child_number'] = 0;
+        if(!array_key_exists('baby_number', $validated)) $validated['baby_number'] = 0;
+        $validated['total_people'] = $validated['adult_number'] + $validated['child_number'] + $validated['baby_number'];
+
+        if(!array_key_exists('company', $validated)) $validated['company'] = null;
 
 
 
@@ -320,7 +325,7 @@ class OrderController extends Controller
         }
 
         //總人數 = 各項人數相加
-        $validated['total_people'] = $validated['adult_num'] + $validated['child_num'] + $validated['baby_num'];
+        $validated['total_people'] = $validated['adult_number'] + $validated['child_number'] + $validated['baby_number'];
 
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
