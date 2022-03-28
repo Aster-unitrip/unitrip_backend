@@ -18,6 +18,7 @@ class PassengerController extends Controller
         $this->middleware('auth');
         $this->requestService = $requestService;
         $this->rule = [
+            '_id' => 'string',
             'order_id' => 'required|string',
             'name' => 'required|string|max:30',
             'name_en' => 'required|string|max:30',
@@ -75,6 +76,8 @@ class PassengerController extends Controller
         }
         $validated = $validator->validated();
 
+
+
         //array 中每一筆單的 order_id 都要是一樣的
 
         $user_company_id = auth()->user()->company_id;
@@ -85,9 +88,11 @@ class PassengerController extends Controller
         }
 
         // 1-2 限制只能同公司員工作修正
-        // 找團行程的company_id和使用者company_id
         $order = $this->requestService->get_one('cus_orders', $validated['order_id']);
         $order_data = json_decode($order->getContent(), true);
+        if(array_key_exists('count', $order_data) && $order_data['count'] === 0){
+            return response()->json(['error' => '沒有這筆訂單(no order_id)']);
+        }
         if($user_company_id !== $order_data['user_company_id']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
@@ -96,7 +101,8 @@ class PassengerController extends Controller
         if(array_key_exists("_id", $validated)){ //修改
             $result = $this->requestService->update_one('passengers', $validated);
             return $result;
-        }else if(!array_key_exists("_id", $validated)){ //新增
+        }
+        if(!array_key_exists("_id", $validated)){ //新增
             $validated['is_representative'] = false;
             $validated['owned_by'] = $user_company_id;
             $passengers_new = $this->requestService->insert_one('passengers', $validated);
