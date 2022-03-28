@@ -92,7 +92,8 @@ class ItineraryGroupController extends Controller
             'booking_status' => 'required|string',
             'payment_status' => 'required|string',
             'deposit' => 'required|numeric',
-            'balance' => 'required|numeric',
+            /* 'balance' => 'required|numeric', */
+            "amount" => 'required|numeric',
             "operator_note" => 'string',
             "travel_start" => 'required|date',
             "owned_by" => 'required|integer',
@@ -684,6 +685,8 @@ class ItineraryGroupController extends Controller
         }
         $validated = $validator->validated();
 
+        $validated['balance'] = $validated['amount'] - $validated['deposit'];
+
         // 1-1 使用者公司必須是旅行社
         $user_company_id = auth()->user()->company_id;
         $company_data = Company::find($user_company_id);
@@ -764,12 +767,14 @@ class ItineraryGroupController extends Controller
             if($result_payment !== 1) return $result_payment;
         }
 
-
         if($validated['payment_status'] === "已付訂金"){
+            if($validated['deposit'] <= 0){
+                return response()->json(['error' => "當[付款狀態]為[已付訂金]，訂金必須大於0"], 400);
+            }
+            $validated['balance'] = $validated["amount"] - $validated['deposit'];
             $fixed[$find_name.'actual_payment'] = $validated['deposit'];
-        }
-        if($validated['payment_status'] === "已付全額"){
-            $fixed[$find_name.'actual_payment'] = $validated['balance'];
+        }elseif($validated['payment_status'] === "已付全額"){
+            $fixed[$find_name.'actual_payment'] = $validated['amount'];
         }
 
         // 確定沒錯後存入團行程中
