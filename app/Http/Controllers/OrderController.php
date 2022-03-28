@@ -25,7 +25,7 @@ class OrderController extends Controller
 
         // 前端條件
         $this->rule = [
-            'order_passenger' => 'required|string|max:30',
+            'representative' => 'required|string|max:30',
             'company' => 'nullable|string|max:50',
             'email' => 'required|email',
             'phone' => 'required|string',
@@ -49,7 +49,7 @@ class OrderController extends Controller
             'out_status' => 'required|string',
             'payment_status' => 'required|string',
             'cus_group_code' => 'string',
-            'order_passenger' => 'required|string|max:30',
+            'representative' => 'required|string|max:30',
             'company' => 'string|max:50',
             'email' => 'required|email',
             'phone' => 'required|string',
@@ -149,7 +149,7 @@ class OrderController extends Controller
         // 新增旅客代表人資料
         $cus_orders_data = json_decode($cus_orders->content(), true);
         $passenger_data['order_id'] = $cus_orders_data['inserted_id'];
-        $passenger_data['name'] = $validated['order_passenger'];
+        $passenger_data['name'] = $validated['representative'];
         $passenger_data['name_en'] = "";
         $passenger_data['nationality'] = $validated['nationality'];
         $passenger_data['company'] = "";
@@ -335,7 +335,7 @@ class OrderController extends Controller
 
     // filter: 訂單編號, 參團編號, 旅客代表人姓名, 來源, 訂購期間(ordertime_start、ordertime_end), 行程期間, 負責人, 出團狀態, 付款狀態, 頁數
 
-    // order_number, code, order_passenger, source, order_status, travel_start, travel_end, user_name, payment_status, out_status, page
+    // order_number, code, representative, source, order_status, travel_start, travel_end, user_name, payment_status, out_status, page
     // code, out_status
 
     public function list(Request $request)

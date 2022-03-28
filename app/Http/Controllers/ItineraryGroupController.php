@@ -169,7 +169,6 @@ class ItineraryGroupController extends Controller
             $fixed["cus_group_code"] = "CUS_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
         }
 
-
         $fixed["_id"] = $order_data["_id"];
         $result = $this->requestService->update_one('cus_orders', $fixed);
         return $result;
