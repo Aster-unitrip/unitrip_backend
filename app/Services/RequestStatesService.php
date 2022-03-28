@@ -27,7 +27,7 @@ class RequestStatesService
                         return response()->json(['error' => "付款狀態只可改到狀態[已棄單，待退款]、[已棄單，已退款]"], 400);
                     }
                 }
-            }
+            }else return null;
 
             if(array_key_exists('payment_status', $validated) && array_key_exists('booking_status', $validated)){
                 if($validated['booking_status'] === '未預定'){
@@ -53,7 +53,7 @@ class RequestStatesService
                         return response()->json(['error' => "付款狀態為[已棄單，已退款]或[已棄單，免退款]時，預定狀態必須為[已退訂]。"], 400);
                     }
                 }
-            }
+            }else return null;
         }else{
             return response()->json(['error' => "沒有付款狀態"]);
         }

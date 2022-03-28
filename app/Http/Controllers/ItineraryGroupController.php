@@ -711,7 +711,6 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => "訂單狀態不是已成團不可更改付款狀態"], 400);
         }
 
-
         // 必須是已成團後才可以修改付款狀態
         if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
             if($validated["sort"]<=0){
@@ -759,6 +758,7 @@ class ItineraryGroupController extends Controller
             if($result_payment) return $result_payment;
 
         }else if(($find_type === "transportations" || $find_type === "guides")){
+            //return "find_type: ".$find_type;
             $result_booking = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
             if($result_booking) return $result_booking;
             $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
