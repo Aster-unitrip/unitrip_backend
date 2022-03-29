@@ -93,7 +93,7 @@ class OrderController extends Controller
 
 
         $now_date = date('Ymd');
-        $now_time = date ("His" , mktime(date('H')+8, date('i'), date('s')));
+        $now_time = date("His" , mktime(date('H')+8, date('i'), date('s')));
 
         $validated = $validator->validated();
         //$travel_days = round((strtotime($validated['travel_end']) - strtotime($validated['travel_start']))/3600/24)+1 ;
@@ -119,7 +119,7 @@ class OrderController extends Controller
         $validated['order_record'] = array();
         $order_record_add_order_status = array(
             "event" =>  $validated['order_status'],
-            "date" => date('Y-m-d')."T".date('H:i:s'),
+            "date" => date('Y-m-d')."T".date("H:i:s" , mktime(date('H')+8, date('i'), date('s'))),
             "modified_by" => $user_name
         );
         array_push($validated['order_record'], $order_record_add_order_status);
@@ -327,7 +327,7 @@ class OrderController extends Controller
             //存入 order_record
             $order_record_add_order_status = array(
                 "event" =>  $validated['order_status'],
-                "date" => date('Y-m-d')."T".date('H:i:s'),
+                "date" => date('Y-m-d')."T".date("H:i:s" , mktime(date('H')+8, date('i'), date('s'))),
                 "modified_by" => $user_name
             );
             $validated['order_record'] = $data_before['order_record'];
