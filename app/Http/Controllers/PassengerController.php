@@ -21,7 +21,7 @@ class PassengerController extends Controller
             '_id' => 'string',
             'order_id' => 'required|string',
             'name' => 'required|string|max:30',
-            'name_en' => 'required|string|max:30',
+            'name_en' => 'string|max:30',
             'nationality' => 'required|string',
             'company' => 'string|max:50',
             'gender' => 'required|string|max:50',
@@ -33,7 +33,7 @@ class PassengerController extends Controller
             'phone' => 'required|string',
             'job' => 'string|max:50',
             'needs' => 'string|max:500',
-            'address' => 'required|array',
+            'address' => 'array',
         ];
     }
 
