@@ -204,6 +204,7 @@ class ItineraryGroupController extends Controller
             $filter_code["owned_by"] = $validated['owned_by'];
             $result_code = $this->requestService->aggregate_search('itinerary_group', null, $filter_code, $page=0);
             $result_code_data = json_decode($result_code->getContent(), true);
+            return $result_code_data;
         }else $validated['code'] = null;
 
         if(array_key_exists('name', $validated)){

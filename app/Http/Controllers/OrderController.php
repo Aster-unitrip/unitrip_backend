@@ -143,8 +143,6 @@ class OrderController extends Controller
         $validated['travel_start'] = $validated['travel_start']."T00:00:00";
         $validated['travel_end'] = $validated['travel_end']."T23:59:59";
 
-
-
         $cus_orders = $this->requestService->insert_one('cus_orders', $validated);
 
         // 新增旅客代表人資料
@@ -188,15 +186,13 @@ class OrderController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
-
         $validated = $validator->validated();
-
 
         // 3.用id抓編輯前資料及前端給的資料，之後需要比較(4.5.6.)
         $id = $validated['_id'];
         $data_before = $this->requestService->find_one('cus_orders', $id, null, null);
         if($data_before===false){
-            return response()->json(['error' => '輸入id搜尋不到訂單。'], 400);
+            return response()->json(['error' => '此[_id]搜尋不到這筆訂單。'], 400);
         }
 
         $data_before = $data_before['document'];
@@ -329,16 +325,23 @@ class OrderController extends Controller
             array_push($validated['order_record'], $order_record_add_order_status);
         }
 
-
-
-
         $validated['last_updated_on'] = $user_name;
 
         // 參團編號需擋重複
         if(array_key_exists('cus_group_code', $validated)){
-            $cus_orders_past = $this->requestService->find_one('cus_orders', null, 'cus_group_code', $validated['cus_group_code']);
-            if($cus_orders_past !== False) return response()->json(['error' => "已存在此參團編號"], 400);
+            // 需檔自己公司
+            $find_one['user_company_id'] = $user_company_id;
+            $find_one['cus_group_code'] = $validated['cus_group_code'];
+            $cus_orders_past = $this->requestService->aggregate_search('cus_orders', null, $find_one, $page=0);
+            $cus_orders_past_data = json_decode($cus_orders_past->getContent(), true);
+            //如果只有一筆，判斷是否為重複
+            if($cus_orders_past_data['count'] === 1 && $cus_orders_past_data['docs'][0]['_id'] !== $validated['_id']){
+                return response()->json(['error' => "已存在此參團編號"], 400);
+            }elseif($cus_orders_past_data['count'] > 1){ //如果有一筆以上，則確定有重複
+                return response()->json(['error' => "已存在此參團編號"], 400);
+            }
         }
+        return response()->json(['success' => "有嘞"], 200);
 
         //總人數 = 各項人數相加
         $validated['total_people'] = $validated['adult_number'] + $validated['child_number'] + $validated['baby_number'];
