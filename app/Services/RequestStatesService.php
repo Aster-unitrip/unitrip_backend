@@ -10,19 +10,19 @@ class RequestStatesService
             if($validated['payment_status'] !== $itinerary_group_past_data['payment_status']){
                 if($itinerary_group_past_data["payment_status"] === '未付款'){
                     if($validated['payment_status'] === '已棄單，待退款' || $validated['payment_status'] === '已棄單，已退款'){
-                        return response()->json(['error' => "付款狀態[未付款]，只可改到[未付款]、[已付訂金]、[已付全額]、[已棄單，待退款]、[已棄單，免退款]"], 400);
+                        return response()->json(['error' => "過去付款狀態[未付款]，只可改到[未付款]、[已付訂金]、[已付全額]、[已棄單，待退款]、[已棄單，免退款]"], 400);
                     }
                 }elseif($itinerary_group_past_data["payment_status"] === '已付訂金'){
                     if($validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，待退款"){
-                        return response()->json(['error' => "付款狀態[已付訂金]，只可改到[已付訂金]、[已付全額]、[已棄單，待退款]"], 400);
+                        return response()->json(['error' => "過去付款狀態[已付訂金]，只可改到[已付訂金]、[已付全額]、[已棄單，待退款]"], 400);
                     }
                 }elseif($itinerary_group_past_data["payment_status"] === '已付全額'){
                     if($validated['payment_status'] !== "已棄單，待退款"){
-                        return response()->json(['error' => "付款狀態[已付全額]只可改到狀態[已付全額]、[已棄單，待退款]"], 400);
+                        return response()->json(['error' => "過去付款狀態[已付全額]只可改到狀態[已付全額]、[已棄單，待退款]"], 400);
                     }
                 }elseif($itinerary_group_past_data["payment_status"] === '已棄單，待退款'){
                     if($validated['payment_status'] !== "已棄單，已退款"){
-                        return response()->json(['error' => "付款狀態[已棄單，待退款]只可改到狀態[已棄單，待退款]、[已棄單，已退款]"], 400);
+                        return response()->json(['error' => "過去付款狀態[已棄單，待退款]只可改到狀態[已棄單，待退款]、[已棄單，已退款]"], 400);
                     }
                 }
             }
