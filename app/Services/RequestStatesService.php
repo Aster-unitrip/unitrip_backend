@@ -30,12 +30,10 @@ class RequestStatesService
             if(array_key_exists('payment_status', $validated) && array_key_exists('booking_status', $validated)){
                 if($validated['booking_status'] === '未預訂'){
                     if($validated['payment_status'] !== '未付款'){
-                        return response()->json(['error' => "預定狀態為[未預定]時，付款狀態只可為[未付款]。"], 400);
+                        return response()->json(['error' => "預定狀態為[未預訂]時，付款狀態只可為[未付款]。"], 400);
                     }
                 }elseif($validated['booking_status'] === '已預訂'){
-                    if($validated['payment_status'] === '未付款'){
-                        return response()->json(['error' => "預定狀態為[已預訂]時，付款狀態不可為[未付款]。"], 400);
-                    }elseif($validated['payment_status'] === '已棄單，待退款'){
+                    if($validated['payment_status'] === '已棄單，待退款'){
                         return response()->json(['error' => "預定狀態為[已預訂]時，付款狀態不可為[已棄單，待退款]。"], 400);
                     }elseif($validated['payment_status'] === '已棄單，已退款'){
                         return response()->json(['error' => "預定狀態為[已預訂]時，付款狀態不可為[已棄單，已退款]。"], 400);
