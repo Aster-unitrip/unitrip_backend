@@ -754,7 +754,22 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => 'date, sort are not defined.'], 400);
         }
 
-        //抓到更新欄位
+        // 判斷狀態
+        if($validated['payment_status'] === "已付訂金"){
+            if(array_key_exists("deposit", $validated)){
+                if($validated['deposit'] <= 0){
+                    return response()->json(['error' => "當[付款狀態]為[已付訂金]，訂金必須大於0"], 400);
+                }
+                $validated['balance'] = $validated["amount"] - $validated['deposit'];
+                $fixed[$find_name.'actual_payment'] = $validated['deposit'];
+            }else{
+                return response()->json(['error' => '當付款狀態為[已付訂金]，訂金存在。']);
+            }
+        }elseif($validated['payment_status'] === "已付全額"){
+            $fixed[$find_name.'actual_payment'] = $validated['amount'];
+        }
+
+        // 抓到更新欄位
         $fixed['_id'] = $validated['_id'];
         $fixed[$find_name.'pay_deposit'] = $validated['pay_deposit'];
         $fixed[$find_name.'booking_status'] = $validated['booking_status'];
@@ -777,15 +792,7 @@ class ItineraryGroupController extends Controller
             if($result_payment !== 1) return $result_payment;
         }
 
-        if($validated['payment_status'] === "已付訂金"){
-            if($validated['deposit'] <= 0){
-                return response()->json(['error' => "當[付款狀態]為[已付訂金]，訂金必須大於0"], 400);
-            }
-            $validated['balance'] = $validated["amount"] - $validated['deposit'];
-            $fixed[$find_name.'actual_payment'] = $validated['deposit'];
-        }elseif($validated['payment_status'] === "已付全額"){
-            $fixed[$find_name.'actual_payment'] = $validated['amount'];
-        }
+
 
         // 確定沒錯後存入團行程中
         $update = $this->requestService->update_one('itinerary_group', $fixed);
