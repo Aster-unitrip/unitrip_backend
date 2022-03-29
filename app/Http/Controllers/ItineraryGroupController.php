@@ -671,8 +671,8 @@ class ItineraryGroupController extends Controller
     }
 
 
-    public function operator(Request $request){
-        //傳團行程
+    public function operator(Request $request)
+    { //傳團行程
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->operator_rule);
 
@@ -724,8 +724,8 @@ class ItineraryGroupController extends Controller
         if(!$itinerary_group_order_data){
             return response()->json(['error' => "團行程沒有關聯的訂單"], 400);
         }
-        if($itinerary_group_order_data['document']['order_status'] !== "已成團"){
-            return response()->json(['error' => "訂單狀態不是已成團不可更改付款狀態"], 400);
+        if($itinerary_group_order_data['document']['order_status'] !== "已成團" || $itinerary_group_order_data['document']['order_status'] !== "棄單"){
+            return response()->json(['error' => "訂單狀態不是[已成團]或[棄單]不可更改付款狀態"], 400);
         }
 
 
