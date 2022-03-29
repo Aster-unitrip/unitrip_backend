@@ -341,7 +341,6 @@ class OrderController extends Controller
                 return response()->json(['error' => "已存在此參團編號"], 400);
             }
         }
-        return response()->json(['success' => "有嘞"], 200);
 
         //總人數 = 各項人數相加
         $validated['total_people'] = $validated['adult_number'] + $validated['child_number'] + $validated['baby_number'];
