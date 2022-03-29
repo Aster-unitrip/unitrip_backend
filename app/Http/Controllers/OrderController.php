@@ -98,6 +98,11 @@ class OrderController extends Controller
         $validated = $validator->validated();
         //$travel_days = round((strtotime($validated['travel_end']) - strtotime($validated['travel_start']))/3600/24)+1 ;
 
+        // budget_max > 0
+        if(array_key_exists("budget_max", $validated) && $validated['budget_max'] <= 0){
+            return response()->json(['error' => "預算最大值必須大於0。"], 400);
+        }
+
         $validated['user_company_id'] = auth()->user()->company_id;
         $validated['own_by_id'] = auth()->user()->id;
 
@@ -207,6 +212,10 @@ class OrderController extends Controller
         }
         if($user_company_id !== $data_before['user_company_id']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+        // budget_max > 0
+        if(array_key_exists("budget_max", $validated) && $validated['budget_max'] <= 0){
+            return response()->json(['error' => "預算最大值必須大於0。"], 400);
         }
 
         // TODO381 6. 出團狀態 需寫判斷
