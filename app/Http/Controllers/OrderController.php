@@ -213,6 +213,56 @@ class OrderController extends Controller
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
+        // TODO381 6. 出團狀態 需寫判斷
+        if(array_key_exists('out_status',$validated) && $data_before['out_status'] !== $validated['out_status']){
+            //客製化付款狀態: 0.未出團 ->1 / 1.出團中 ->2 3 / 2.已出團，未結團 ->3 / 3.已結團 -> X
+            switch($data_before['out_status']){
+                case "未出團":
+                    if($validated['out_status'] !== "出團中"){
+                        return response()->json(['error' => "[出團狀態]只可改到[出團中]"], 400);
+                    }
+                    break;
+                case "出團中":
+                    if($validated['out_status'] !== "已出團，未結團" && $validated['out_status'] !== "已結團"){
+                        return response()->json(['error' => "[出團狀態]只可改到[已出團，未結團]、[已結團]"], 400);
+                    }
+                    break;
+                case "已出團，未結團":
+                    if($validated['out_status'] !== "已結團"){
+                        return response()->json(['error' => "[出團狀態]只可改到[已結團]"], 400);
+                    }
+                    break;
+            }
+        }
+
+        // TODO381 5. 付款狀態 需寫判斷
+        if(array_key_exists('payment_status',$validated) && $data_before['payment_status'] !== $validated['payment_status']){
+            //客製化付款狀態: 0.未付款 -> 1 2 5 / 1.已付訂金 ->2 3 / 2.已付全額 -> 3 / 3.已棄單，待退款 -> 4 / 4.已棄單，已退款 -> X / 5.已棄單，免退款 -> X
+
+            switch($data_before['payment_status']){
+                case "未付款":
+                    if($validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，免退款"){
+                        return response()->json(['error' => "[付款狀態]只可改到狀態[已付訂金]、[已付全額]、[已棄單，免退款]"], 400);
+                    }
+                    break;
+                case "已付訂金":
+                    if($validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，待退款"){
+                        return response()->json(['error' => "[付款狀態]只可改到狀態[已付全額]、[已棄單，待退款]"], 400);
+                    }
+                    break;
+                case "已付全額":
+                    if($validated['payment_status'] !== "已棄單，待退款"){
+                        return response()->json(['error' => "[付款狀態]只可改到狀態[已棄單，待退款]"], 400);
+                    }
+                    break;
+                case "已棄單，待退款":
+                    if($validated['payment_status'] !== "已棄單，已退款"){
+                        return response()->json(['error' => "[付款狀態]只可改到狀態[已棄單，已退款]"], 400);
+                    }
+                    break;
+            }
+        }
+
         // TODO381 4. 訂單狀態->參團號碼 需寫判斷
         // 寫入資料 $validated / 比較資料(在資料庫) $data_before
         if(array_key_exists('order_status',$validated) && $data_before['order_status'] !== $validated['order_status']){
@@ -247,13 +297,25 @@ class OrderController extends Controller
                 if($validated['payment_status'] !== "未付款"){
                     return response()->json(['error' => "[訂單狀態]為[收到需求單]或[已規劃行程&詢價]或[已回覆旅客]時，[付款狀態]只可為[未付款]。"]);
                 }
+                if($validated['out_status'] !== "未出團"){
+                    return response()->json(['error' => "[訂單狀態]為[收到需求單]或[已規劃行程&詢價]或[已回覆旅客]時，[出團狀態]只可為[未出團]。"]);
+                }
             }elseif($validated['order_status'] === "已成團"){
                 if($validated['payment_status'] !== "未付款" || $validated['payment_status'] !== "已付訂金" || $validated['payment_status'] !== "已付全額"){
                     return response()->json(['error' => "[訂單狀態]為[已成團]時，[付款狀態]只可為[未付款]或[已付訂金]或[已付全額]。"]);
                 }
+                if($validated['out_status'] !== "出團中" && $validated['out_status'] !== "已出團，未結團" && $validated['out_status'] !== "已結團"){
+                    return response()->json(['error' => "[訂單狀態]為[已成團]時，[出團狀態]只可為[出團中]或[已出團，未結團]或[已結團]。"]);
+                }
+                if($validated['payment_status'] !== "已付全額" && $validated['out_status'] === "已結團"){
+                    return response()->json(['error' => "[訂單狀態]為[已成團]且[出團狀態]為[已結團]，[付款狀態]必須為[已付全額]。"]);
+                }
             }elseif($validated['order_status'] === "已棄單"){
                 if($validated['payment_status'] !== "已棄單，待退款" || $validated['payment_status'] !== "已棄單，已退款" || $validated['payment_status'] !== "已棄單，免退款"){
                     return response()->json(['error' => "[訂單狀態]為[已棄單]時，[付款狀態]只可為[已棄單，待退款]或[已棄單，已退款]或[已棄單，免退款]。"]);
+                }
+                if($validated['out_status'] !== "未出團"){
+                    return response()->json(['error' => "[訂單狀態]為[已棄單]時，[出團狀態]只可為[未出團]。"]);
                 }
             }
 
@@ -267,55 +329,8 @@ class OrderController extends Controller
             array_push($validated['order_record'], $order_record_add_order_status);
         }
 
-        // TODO381 5. 付款狀態 需寫判斷
-        if(array_key_exists('payment_status',$validated) && $data_before['payment_status'] !== $validated['payment_status']){
-            //客製化付款狀態: 0.未付款 -> 1 2 5 / 1.已付訂金 ->2 3 / 2.已付全額 -> 3 / 3.已棄單，待退款 -> 4 / 4.已棄單，已退款 -> X / 5.已棄單，免退款 -> X
 
-            switch($data_before['payment_status']){
-                case "未付款":
-                    if($validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，免退款"){
-                        return response()->json(['error' => "[付款狀態]只可改到狀態[已付訂金]、[已付全額]、[已棄單，免退款]"], 400);
-                    }
-                    break;
-                case "已付訂金":
-                    if($validated['payment_status'] !== "已付全額" && $validated['payment_status'] !== "已棄單，待退款"){
-                        return response()->json(['error' => "[付款狀態]只可改到狀態[已付全額]、[已棄單，待退款]"], 400);
-                    }
-                    break;
-                case "已付全額":
-                    if($validated['payment_status'] !== "已棄單，待退款"){
-                        return response()->json(['error' => "[付款狀態]只可改到狀態[已棄單，待退款]"], 400);
-                    }
-                    break;
-                case "已棄單，待退款":
-                    if($validated['payment_status'] !== "已棄單，已退款"){
-                        return response()->json(['error' => "[付款狀態]只可改到狀態[已棄單，已退款]"], 400);
-                    }
-                    break;
-            }
-        }
 
-        // TODO381 6. 出團狀態 需寫判斷
-        if(array_key_exists('out_status',$validated) && $data_before['out_status'] !== $validated['out_status']){
-            //客製化付款狀態: 0.未出團 ->1 / 1.出團中 ->2 3 / 2.已出團，未結團 ->3 / 3.已結團 -> X
-            switch($data_before['out_status']){
-                case "未出團":
-                    if($validated['out_status'] !== "出團中"){
-                        return response()->json(['error' => "[出團狀態]只可改到[出團中]"], 400);
-                    }
-                    break;
-                case "出團中":
-                    if($validated['out_status'] !== "已出團，未結團" && $validated['out_status'] !== "已結團"){
-                        return response()->json(['error' => "[出團狀態]只可改到[已出團，未結團]、[已結團]"], 400);
-                    }
-                    break;
-                case "已出團，未結團":
-                    if($validated['out_status'] !== "已結團"){
-                        return response()->json(['error' => "[出團狀態]只可改到[已結團]"], 400);
-                    }
-                    break;
-            }
-        }
 
         $validated['last_updated_on'] = $user_name;
 

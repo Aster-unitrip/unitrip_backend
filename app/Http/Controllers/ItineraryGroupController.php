@@ -180,7 +180,6 @@ class ItineraryGroupController extends Controller
     {
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->edit_rule);
-
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
@@ -353,8 +352,7 @@ class ItineraryGroupController extends Controller
             $result = $this->requestService->update_one('cus_orders', $fixed);
             return $result;
 
-        }else if(array_key_exists('_id', $validated)){
-
+        }elseif(array_key_exists('_id', $validated)){
             //3.2(編輯團行程)
             if($validated['code']!== null && $result_code_data["count"] > 1){
                 if($result_code_data["docs"][0]['_id'] !== $validated['_id']){
@@ -390,7 +388,7 @@ class ItineraryGroupController extends Controller
 
     // project: ID, 名稱, 子類別, 行程天數, 成團人數, 建立日期
 
-    // TODO
+    // TODO 尚未修改
     public function list(Request $request)
     {
         $filter = json_decode($request->getContent(), true);
@@ -444,17 +442,13 @@ class ItineraryGroupController extends Controller
         $company_type = auth()->payload()->get('company_type');
         $company_id = auth()->payload()->get('company_id');
         if ($company_type == 1){
-
-        }
-        else if ($company_type == 2){
+        }elseif ($company_type == 2){
             $query_private = false;
             $filter['owned_by'] = auth()->user()->company_id;
             // $filter['is_display'] = true;
-        }
-        else{
+        }else{
             return response()->json(['error' => 'company_type must be 1 or 2'], 400);
         }
-
 
         $projection = array(
                 // "_id" => 1,
@@ -737,7 +731,7 @@ class ItineraryGroupController extends Controller
             $find_day = floor((strtotime($validated["date"]) - strtotime($validated['travel_start'])) / (60*60*24)); //將 date 做轉換成第幾天
             $find_sort = $validated["sort"]-1; // sort比原來少1
             if(array_key_exists("type", $validated)){
-                if($validated["type"] === "attractions" || $validated["type"] === "accomendations"|| $validated["type"] === "activities" || $validated["type"] === "restaurants"){
+                if($validated["type"] === "attractions" || $validated["type"] === "accomendations" || $validated["type"] === "activities" || $validated["type"] === "restaurants"){
                     $find_type = 'itinerary_content';
                     $find_name = $find_type.".".$find_day.".components.".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_day.".components.".$find_sort;
