@@ -762,6 +762,7 @@ class ItineraryGroupController extends Controller
                 }
                 $validated['balance'] = $validated["amount"] - $validated['deposit'];
                 $fixed[$find_name.'actual_payment'] = $validated['deposit'];
+                $fixed[$find_name.'deposit'] = $validated['deposit'];
             }else{
                 return response()->json(['error' => '當付款狀態為[已付訂金]，訂金存在。']);
             }
@@ -774,8 +775,6 @@ class ItineraryGroupController extends Controller
         $fixed[$find_name.'pay_deposit'] = $validated['pay_deposit'];
         $fixed[$find_name.'booking_status'] = $validated['booking_status'];
         $fixed[$find_name.'payment_status'] = $validated['payment_status'];
-        $fixed[$find_name.'deposit'] = $validated['deposit'];
-        $fixed[$find_name.'balance'] = $validated['balance'];
         $fixed[$find_name.'operator_note'] = $validated['operator_note'];
 
         // 先確定該欄位是否有值 確認付款狀態及預訂狀態
