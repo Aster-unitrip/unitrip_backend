@@ -93,7 +93,7 @@ class OrderController extends Controller
 
 
         $now_date = date('Ymd');
-        $now_time = date('His');
+        $now_time = date ("His" , mktime(date('H')+8, date('i'), date('s')));
 
         $validated = $validator->validated();
         //$travel_days = round((strtotime($validated['travel_end']) - strtotime($validated['travel_start']))/3600/24)+1 ;
