@@ -73,7 +73,6 @@ class ItineraryController extends Controller
         }
         $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
-        return $validated;
         $validated['owned_by'] = $company_id;
 
         // 檢查行程內容
