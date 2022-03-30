@@ -280,7 +280,6 @@ class ItineraryGroupController extends Controller
                         return response()->json(['error' => '(導遊)結束時間不可早於開始時間'], 400);
                     }
                     if(strtotime($validated['guides'][$i]['date_end']) - strtotime($validated['travel_end']) > 0){
-                        return strtotime($validated['guides'][$i]['date_end']) - strtotime($validated['travel_end']);
                         return response()->json(['error' => '導遊結束時間不可晚於旅程期間'], 400);
                     }
                     if(strtotime($validated['guides'][$i]['date_start']) - strtotime($validated['travel_start']) < 0){
@@ -315,7 +314,6 @@ class ItineraryGroupController extends Controller
             if(array_key_exists('misc', $validated)){
                 for($i = 0; $i < count($validated['misc']); $i++){
                     $validated['transportations'][$i]['sort'] = $i+1;
-
                 }
             }
             $validated['operator_note']= null;
