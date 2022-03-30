@@ -188,8 +188,7 @@ class RequestPService
             "filter" => array(
                 "_id" => $id
             ),
-            "replacement" => $update_data,
-            "upsert" => false
+            "replacement" => $update_data
         );
         //dd($data);
         $postdata = json_encode($data);
@@ -236,8 +235,7 @@ class RequestPService
             "filter" => array(
                 "_id" => $id
             ),
-            "update" => $update_data,
-            "upsert" => false
+            "update" => $update_data
         );
         //dump($data);
         $postdata = json_encode($data);
