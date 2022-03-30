@@ -48,9 +48,9 @@ class OrderController extends Controller
             'order_status' => 'required|string',
             'out_status' => 'required|string',
             'payment_status' => 'required|string',
-            'cus_group_code' => 'string',
+            'cus_group_code' => 'nullable|string',
             'representative' => 'required|string|max:30',
-            'company' => 'string|max:50',
+            'company' => 'nullable|string|max:50',
             'email' => 'required|email',
             'phone' => 'required|string',
             'nationality' => 'required|string',
@@ -64,12 +64,12 @@ class OrderController extends Controller
             'child_number' => 'required|integer',
             'baby_number' => 'required|integer',
             'source' => 'required|string',
-            'needs' => 'string',
-            'company_note' => 'string'
+            'needs' => 'nullable|string',
+            'company_note' => 'nullable|string'
         ];
         $this->operator_rule = [
             '_id'=>'required|string|max:24',
-            'pay_deposit' => 'boolean',
+            'pay_deposit' => 'string',
             'payment_status' => 'string',
             'deposit' => 'numeric',
             'balance' => 'numeric',
@@ -124,7 +124,7 @@ class OrderController extends Controller
         );
         array_push($validated['order_record'], $order_record_add_order_status);
 
-        $validated['pay_deposit'] = false;
+        $validated['pay_deposit'] = 'false';
         $validated['deposit'] = 0;
         $validated['balance'] = 0;
         $validated['amount'] = 0;
@@ -166,7 +166,7 @@ class OrderController extends Controller
         $passenger_data['email'] = $validated['email'];
         $passenger_data['job'] = "";
         $passenger_data['needs'] = "";
-        $passenger_data['is_representative'] = true; // 代表人
+        $passenger_data['is_representative'] = 'true'; // 代表人
         $address["city"] = "";
         $address["town"] = "";
         $address["address"] = "";
@@ -510,7 +510,7 @@ class OrderController extends Controller
                 return response()->json(['error' =>'沒有[付款狀態]欄位', 400]);
             }
             // TODO381 是否付訂金此欄必須為true後才可以更改
-            if(array_key_exists('pay_deposit', $validated) && $validated['pay_deposit'] === false && $validated['payment_status'] === "已付訂金"){
+            if(array_key_exists('pay_deposit', $validated) && $validated['pay_deposit'] === 'false' && $validated['payment_status'] === "已付訂金"){
                 return response()->json(['error' => "當不須預付訂金時，付款狀態不可以為已付訂金"], 400);
             }
         }else{

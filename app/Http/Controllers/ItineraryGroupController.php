@@ -88,7 +88,7 @@ class ItineraryGroupController extends Controller
             'type' => 'required|string',
             'date' => 'required|date',
             'sort' => 'required|integer',
-            'pay_deposit' => 'required|boolean',
+            'pay_deposit' => 'required|string',
             'booking_status' => 'required|string',
             'payment_status' => 'required|string',
             'deposit' => 'numeric',
@@ -254,7 +254,7 @@ class ItineraryGroupController extends Controller
                         for($j = 0; $j < count($validated['itinerary_content'][$i]['components']); $j++){
                             $validated['itinerary_content'][$i]['components'][$j]['sort'] = $j+1;
                             $validated['itinerary_content'][$i]['components'][$j]['operator_note'] = null;
-                            $validated['itinerary_content'][$i]['components'][$j]['pay_deposit'] = false;
+                            $validated['itinerary_content'][$i]['components'][$j]['pay_deposit'] = 'false';
                             $validated['itinerary_content'][$i]['components'][$j]['booking_status'] = "未預訂";
                             $validated['itinerary_content'][$i]['components'][$j]['payment_status'] = "未付款";
                             $validated['itinerary_content'][$i]['components'][$j]['deposit'] = 0;
@@ -271,7 +271,7 @@ class ItineraryGroupController extends Controller
                 for($i = 0; $i < count($validated['guides']); $i++){
                     $validated['guides'][$i]['sort'] = $i+1;
                     $validated['guides'][$i]['operator_note'] = null;
-                    $validated['guides'][$i]['pay_deposit'] = false;
+                    $validated['guides'][$i]['pay_deposit'] = 'false';
                     $validated['guides'][$i]['booking_status'] = "未預訂"; //預定狀態
                     $validated['guides'][$i]['payment_status'] = "未付款";
                     $validated['guides'][$i]['deposit'] = 0;
@@ -296,7 +296,7 @@ class ItineraryGroupController extends Controller
                 for($i = 0; $i < count($validated['transportations']); $i++){
                     $validated['transportations'][$i]['sort'] = $i+1;
                     $validated['transportations'][$i]['operator_note'] = null;
-                    $validated['transportations'][$i]['pay_deposit'] = false;
+                    $validated['transportations'][$i]['pay_deposit'] = 'false';
                     $validated['transportations'][$i]['booking_status'] = "未預訂"; //預定狀態
                     $validated['transportations'][$i]['payment_status'] = "未付款";
                     $validated['transportations'][$i]['deposit'] = 0;
@@ -692,7 +692,7 @@ class ItineraryGroupController extends Controller
 
         // 如果需要付訂金 有改訂金
         if(array_key_exists("pay_deposit", $validated)){
-            if($validated['pay_deposit'] === true){
+            if($validated['pay_deposit'] === 'true'){
                 if(array_key_exists("deposit", $validated) && $validated['deposit'] > 0){//要付訂金
                     if($validated['deposit'] > $validated['amount']){// 訂金不可大於總額
                         return response()->json(['error' => "訂金不可以大於總額"], 400);
@@ -701,7 +701,7 @@ class ItineraryGroupController extends Controller
                 }else{
                     return response()->json(['error' => '訂金金額必須大於0'], 400);
                 }
-            }elseif($validated['pay_deposit'] === false){
+            }elseif($validated['pay_deposit'] === 'false'){
                 if(array_key_exists("deposit", $validated) && $validated['deposit'] > 0){
                     return response()->json(['error' => "當是否預付訂金為否時，不可以有訂金"], 400);
                 }
