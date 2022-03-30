@@ -145,8 +145,8 @@ class OrderController extends Controller
 
 
         $validated['itinerary_group_id'] = null; //團行程一開始沒有(versions)
-        $validated['travel_start'] = $validated['travel_start']."T00:00:00";
-        $validated['travel_end'] = $validated['travel_end']."T23:59:59";
+        $validated['travel_start'] = $validated['travel_start']."T00:00:00.000+08:00";
+        $validated['travel_end'] = $validated['travel_end']."T23:59:59.000+08:00";
 
         $cus_orders = $this->requestService->insert_one('cus_orders', $validated);
 
