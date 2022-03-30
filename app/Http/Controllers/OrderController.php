@@ -398,8 +398,8 @@ class OrderController extends Controller
         //訂購期間為 order_start<= created_at <=order_end
         if(array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
             if(strtotime($filter['order_end']) - strtotime($filter['order_start']) >= 0){
-                $filter['created_at'] = array('$gte' => $filter['order_start']."T00:00:00"
-                , '$lte' => $filter['order_end']."T23:59:59");
+                $filter['created_at'] = array('$gte' => $filter['order_start']."T00:00:00.000+08:00"
+                , '$lte' => $filter['order_end']."T23:59:59.000+08:00");
             }
             else return response()->json(['error' => '訂購結束時間不可早於訂購開始時間'], 400);
         }
@@ -415,10 +415,10 @@ class OrderController extends Controller
 
         if(array_key_exists("travel_start", $filter) && array_key_exists('travel_end', $filter)){
             if(strtotime($filter['travel_end']) - strtotime($filter['travel_start']) > 0){
-                $filter['travel_start'] = array('$gte' => $filter['travel_start']."T00:00:00"
-                , '$lte' => $filter['travel_start']."T23:59:59");
-                $filter['travel_end'] = array('$gte' => $filter['travel_end']."T00:00:00"
-                , '$lte' => $filter['travel_end']."T23:59:59");
+                $filter['travel_start'] = array('$gte' => $filter['travel_start']."T00:00:00.000+08:00"
+                , '$lte' => $filter['travel_start']."T23:59:59.000+08:00");
+                $filter['travel_end'] = array('$gte' => $filter['travel_end']."T00:00:00.000+08:00"
+                , '$lte' => $filter['travel_end']."T23:59:59.000+08:00");
             }else return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
         }
 
