@@ -76,11 +76,11 @@ class ItineraryController extends Controller
         $validated['owned_by'] = $company_id;
 
         // 檢查行程內容
-        try{
+/*         try{
             $is = new ItineraryService($validated);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
-        }
+        } */
 
         $itinerary = $this->requestService->insert_one('itineraries', $validated);
         return $itinerary;
