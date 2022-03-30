@@ -110,7 +110,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'order'], function($router){
 });
 
 //團行程
-Route::group(['middleware'=>'api', 'prefix'=>'itinerary/group'], function($router){
+Route::group(['middleware'=>'api', 'prefix'=>'group-itinerary'], function($router){
     Route::get('/component/{id}', [ItineraryGroupController::class, 'get_component_type']); // 可以看到供應商分類表
     Route::get('/{id}', [ItineraryGroupController::class, 'get_by_id']);
     Route::post('/', [ItineraryGroupController::class, 'edit']);
@@ -126,6 +126,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
     Route::post('/', [PassengerController::class, 'edit']);
 });
 
+// 行程
 Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
     Route::post('/', [ItineraryController::class, 'add']);
     Route::post('/list', [ItineraryController::class, 'list']);

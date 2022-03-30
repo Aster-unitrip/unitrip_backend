@@ -471,7 +471,7 @@ class ItineraryGroupController extends Controller
     }
 
     public function get_by_id($id)
-    {
+    { //傳入訂單id
         // 1-1 使用者公司必須是旅行社
         $user_company_id = auth()->user()->company_id;
         $contact_name = auth()->user()->contact_name;
