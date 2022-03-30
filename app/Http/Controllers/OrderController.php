@@ -346,8 +346,6 @@ class OrderController extends Controller
             //如果只有一筆，判斷是否為重複
             if($cus_orders_past_data['count'] === 1 && $cus_orders_past_data['docs'][0]['_id'] !== $validated['_id']){
                 return response()->json(['error' => "已存在此參團編號"], 400);
-            }elseif($cus_orders_past_data['count'] > 1){ //如果有一筆以上，則確定有重複
-                return response()->json(['error' => "已存在此參團編號"], 400);
             }
         }
 
