@@ -236,8 +236,8 @@ class ItineraryGroupController extends Controller
                 return response()->json(['error' => '同間公司不可有重複的行程名稱'], 400);
             }
             // 處理時間
-            $validated['travel_start'] = $validated['travel_start']."T00:00:00";
-            $validated['travel_end'] = $validated['travel_end']."T23:59:59";
+            $validated['travel_start'] = $validated['travel_start']."T00:00:00.000+08:00";
+            $validated['travel_end'] = $validated['travel_end']."T23:59:59.000+08:00";
             // travel_end 不可小於 travel_end
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
@@ -274,8 +274,8 @@ class ItineraryGroupController extends Controller
                     $validated['guides'][$i]['balance'] = $validated['guides'][$i]['subtotal'];
                     $validated['guides'][$i]['amount'] = $validated['guides'][$i]['subtotal'];
                     $validated['guides'][$i]['actual_payment'] = 0;
-                    $validated['guides'][$i]['date_start'] = $validated['guides'][$i]['date_start']."T00:00:00";
-                    $validated['guides'][$i]['date_end'] = $validated['guides'][$i]['date_end']."T23:59:59";
+                    $validated['guides'][$i]['date_start'] = $validated['guides'][$i]['date_start']."T00:00:00.000+08:00";
+                    $validated['guides'][$i]['date_end'] = $validated['guides'][$i]['date_end']."T23:59:59.000+08:00";
                     if(strtotime($validated['guides'][$i]['date_end']) - strtotime($validated['guides'][$i]['date_start']) <= 0){
                         return response()->json(['error' => '(導遊)結束時間不可早於開始時間'], 400);
                     }
@@ -298,8 +298,8 @@ class ItineraryGroupController extends Controller
                     $validated['transportations'][$i]['balance'] = $validated['transportations'][$i]['sum'];
                     $validated['transportations'][$i]['amount'] = $validated['transportations'][$i]['sum'];
                     $validated['transportations'][$i]['actual_payment'] = 0;
-                    $validated['transportations'][$i]['date_start'] = $validated['transportations'][$i]['date_start']."T00:00:00";
-                    $validated['transportations'][$i]['date_end'] = $validated['transportations'][$i]['date_end']."T23:59:59";
+                    $validated['transportations'][$i]['date_start'] = $validated['transportations'][$i]['date_start']."T00:00:00.000+08:00";
+                    $validated['transportations'][$i]['date_end'] = $validated['transportations'][$i]['date_end']."T23:59:59.000+08:00";
                     if(strtotime($validated['transportations'][$i]['date_end']) - strtotime($validated['transportations'][$i]['date_start']) <= 0){
                         return response()->json(['error' => '(交通工具)結束時間不可早於開始時間'], 400);
                     }
@@ -363,8 +363,8 @@ class ItineraryGroupController extends Controller
                 }
             }
             // 處理時間
-            $validated['travel_start'] = $validated['travel_start']."T00:00:00";
-            $validated['travel_end'] = $validated['travel_end']."T23:59:59";
+            $validated['travel_start'] = $validated['travel_start']."T00:00:00.000+08:00";
+            $validated['travel_end'] = $validated['travel_end']."T23:59:59.000+08:00";
 
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
