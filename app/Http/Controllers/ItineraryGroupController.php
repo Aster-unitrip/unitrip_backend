@@ -242,7 +242,10 @@ class ItineraryGroupController extends Controller
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
             }
-            // 處理分割項目
+            // 處理分割項目，順便處理價錢
+            // 所有項目總合
+            $amount_total = 0;
+
             if(array_key_exists('itinerary_content', $validated)){
                 for($i = 0; $i < count($validated['itinerary_content']); $i++){
                     $validated['itinerary_content'][$i]['sort'] = $i+1;
@@ -259,6 +262,7 @@ class ItineraryGroupController extends Controller
                             $validated['itinerary_content'][$i]['components'][$j]['amount'] = $validated['itinerary_content'][$i]['components'][$j]['sum'];
                             $validated['itinerary_content'][$i]['components'][$j]['actual_payment'] = 0;
                             $validated['itinerary_content'][$i]['components'][$j]['date'] = $validated['itinerary_content'][$i]['date'];
+                            $amount_total += $validated['itinerary_content'][$i]['components'][$j]['sum'];
                         }
                     }
                 }
@@ -276,6 +280,7 @@ class ItineraryGroupController extends Controller
                     $validated['guides'][$i]['actual_payment'] = 0;
                     $validated['guides'][$i]['date_start'] = $validated['guides'][$i]['date_start']."T00:00:00.000+08:00";
                     $validated['guides'][$i]['date_end'] = $validated['guides'][$i]['date_end']."T23:59:59.000+08:00";
+                    $amount_total += $validated['guides'][$i]['subtotal'];
                     if(strtotime($validated['guides'][$i]['date_end']) - strtotime($validated['guides'][$i]['date_start']) <= 0){
                         return response()->json(['error' => '(導遊)結束時間不可早於開始時間'], 400);
                     }
@@ -300,6 +305,7 @@ class ItineraryGroupController extends Controller
                     $validated['transportations'][$i]['actual_payment'] = 0;
                     $validated['transportations'][$i]['date_start'] = $validated['transportations'][$i]['date_start']."T00:00:00.000+08:00";
                     $validated['transportations'][$i]['date_end'] = $validated['transportations'][$i]['date_end']."T23:59:59.000+08:00";
+                    $amount_total += $validated['transportations'][$i]['sum'];
                     if(strtotime($validated['transportations'][$i]['date_end']) - strtotime($validated['transportations'][$i]['date_start']) <= 0){
                         return response()->json(['error' => '(交通工具)結束時間不可早於開始時間'], 400);
                     }
@@ -313,7 +319,8 @@ class ItineraryGroupController extends Controller
             }
             if(array_key_exists('misc', $validated)){
                 for($i = 0; $i < count($validated['misc']); $i++){
-                    $validated['transportations'][$i]['sort'] = $i+1;
+                    $validated['misc'][$i]['sort'] = $i+1;
+                    $amount_total += $validated['misc'][$i]['subtotal'];
                 }
             }
             $validated['operator_note']= null;
