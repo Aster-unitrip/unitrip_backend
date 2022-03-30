@@ -54,5 +54,70 @@ class RequestCostService
         }
         return $delete_component_data;
     }
+    public function validated_cost($cus_orders_data, $type, $validated_item){
+        //$cus_orders_data["adult_number"]、$cus_orders_data["child_number"]
+        $order_people_not_included_baby = $cus_orders_data["adult_number"]+$cus_orders_data["child_number"];
+        if($type === "attractions" || $type === "activities"){
+            //分全票半票
+            for($i = 0; $i < count($validated_item["pricing_detail"]); $i++){
+                if($validated_item['pricing_detail'][$i]['name'] === "全票"){
+                    $validated_item_data["adult"] = $validated_item['pricing_detail'][$i]['unit_price'];
+                }
+                elseif($validated_item['pricing_detail'][$i]['name'] === "半票"){
+                    $validated_item_data['child'] = $validated_item['pricing_detail'][$i]['unit_price'];
+                }
+            }
+            if(!array_key_exists('adult', $validated_item_data)){
+                $validated_item_data['adult'] = 0;
+            }
+            if(!array_key_exists('child', $validated_item_data)){
+                $validated_item_data['child'] = 0;
+            }
+            $validated_item_data['total'] = $validated_item['sum'];
+        }
+
+        if($type === "accomendations" || $type === "restaurants" || $type === "transportations"){
+            $validated_item_data['total'] = $validated_item['sum'];
+            if(array_key_exists('child_number', $cus_orders_data) && $cus_orders_data['child_number'] > 0){
+                $validated_item_data['child'] = ceil($validated_item['sum'] / $order_people_not_included_baby);
+            }else{
+                $validated_item_data['child'] = 0;
+            }
+            if(array_key_exists('adult_number', $cus_orders_data) && $cus_orders_data['adult_number'] > 0){
+                $validated_item_data['adult'] = ceil($validated_item['sum'] / $order_people_not_included_baby);
+            }else{
+                $validated_item_data['adult'] = 0;
+            }
+        }
+
+        if($type === "guides"){
+            //導遊總價
+            $validated_item_data['total'] = $validated_item['subtotal'];
+            if(array_key_exists('child_number', $cus_orders_data) && $cus_orders_data['child_number'] > 0){
+                $validated_item_data['child'] = ceil($validated_item['subtotal'] / $order_people_not_included_baby);
+            }else{
+                $validated_item_data['child'] = 0;
+            }
+            if(array_key_exists('adult_number', $cus_orders_data) && $cus_orders_data['adult_number'] > 0){
+                $validated_item_data['adult'] = ceil($validated_item['subtotal'] / $order_people_not_included_baby);
+            }else{
+                $validated_item_data['adult'] = 0;
+            }
+        }
+        if($type === "misc"){
+            $validated_item_data['total'] = $validated_item['subtotal'];
+            if(array_key_exists('child_number', $cus_orders_data) && $cus_orders_data['child_number'] > 0){
+                $validated_item_data['child'] = ceil($validated_item['subtotal'] / $order_people_not_included_baby);
+            }else{
+                $validated_item_data['child'] = 0;
+            }
+            if(array_key_exists('adult_number', $cus_orders_data) && $cus_orders_data['adult_number'] > 0){
+                $validated_item_data['adult'] = ceil($validated_item['subtotal'] / $order_people_not_included_baby);
+            }else{
+                $validated_item_data['adult'] = 0;
+            }
+        }
+        return $validated_item_data;
+    }
 }
 ?>

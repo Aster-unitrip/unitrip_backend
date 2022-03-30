@@ -74,15 +74,6 @@ class ItineraryGroupController extends Controller
             'itinerary_group_price' => 'required|numeric',
             'itinerary_group_note' => 'string|max:150'
         ];
-        $this->get_id_rule = [
-            'user_company_id'=>'required',
-            'itinerary_group_id'=>'string',
-            'order_id'=>'required|string|max:24',
-        ];
-        $this->get_rule = [
-            '_id'=>'required|string|max:24',
-            'owned_by'=>'required|integer',
-        ];
         $this->operator_rule = [
             '_id' => 'required|string|max:24',
             'type' => 'required|string',
@@ -226,6 +217,7 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => '請補上 [order_id] 這個欄位。'], 400);
         }
 
+
         if(!array_key_exists('_id', $validated)){
             // 3.1(新增團行程)
             // code 新建時 同公司不可有
@@ -244,7 +236,9 @@ class ItineraryGroupController extends Controller
             }
             // 處理分割項目，順便處理價錢
             // 所有項目總合
-            $amount_total = 0;
+            $amount_validated["total"] = 0;
+            $amount_validated["adult"] = 0;
+            $amount_validated["child"] = 0;
 
             if(array_key_exists('itinerary_content', $validated)){
                 for($i = 0; $i < count($validated['itinerary_content']); $i++){
@@ -262,7 +256,9 @@ class ItineraryGroupController extends Controller
                             $validated['itinerary_content'][$i]['components'][$j]['amount'] = $validated['itinerary_content'][$i]['components'][$j]['sum'];
                             $validated['itinerary_content'][$i]['components'][$j]['actual_payment'] = 0;
                             $validated['itinerary_content'][$i]['components'][$j]['date'] = $validated['itinerary_content'][$i]['date'];
-                            $amount_total += $validated['itinerary_content'][$i]['components'][$j]['sum'];
+                            $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['itinerary_content'][$i]['components'][$j]['type'], $validated['itinerary_content'][$i]['components'][$j]);
+                            $amount_validated['total'] += $amount['total'];
+
                         }
                     }
                 }
@@ -280,7 +276,6 @@ class ItineraryGroupController extends Controller
                     $validated['guides'][$i]['actual_payment'] = 0;
                     $validated['guides'][$i]['date_start'] = $validated['guides'][$i]['date_start']."T00:00:00.000+08:00";
                     $validated['guides'][$i]['date_end'] = $validated['guides'][$i]['date_end']."T23:59:59.000+08:00";
-                    $amount_total += $validated['guides'][$i]['subtotal'];
                     if(strtotime($validated['guides'][$i]['date_end']) - strtotime($validated['guides'][$i]['date_start']) <= 0){
                         return response()->json(['error' => '(導遊)結束時間不可早於開始時間'], 400);
                     }
@@ -290,6 +285,8 @@ class ItineraryGroupController extends Controller
                     if(strtotime($validated['guides'][$i]['date_start']) - strtotime($validated['travel_start']) < 0){
                         return response()->json(['error' => '導遊開始時間不可早於旅程期間'], 400);
                     }
+                    $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['guides'][$i]['type'], $validated['guides'][$i]);
+                    $amount_validated['total'] += $amount['total'];
                 }
             }
             if(array_key_exists('transportations', $validated)){
@@ -305,7 +302,7 @@ class ItineraryGroupController extends Controller
                     $validated['transportations'][$i]['actual_payment'] = 0;
                     $validated['transportations'][$i]['date_start'] = $validated['transportations'][$i]['date_start']."T00:00:00.000+08:00";
                     $validated['transportations'][$i]['date_end'] = $validated['transportations'][$i]['date_end']."T23:59:59.000+08:00";
-                    $amount_total += $validated['transportations'][$i]['sum'];
+                    $amount_validated["total"] += $validated['transportations'][$i]['sum'];
                     if(strtotime($validated['transportations'][$i]['date_end']) - strtotime($validated['transportations'][$i]['date_start']) <= 0){
                         return response()->json(['error' => '(交通工具)結束時間不可早於開始時間'], 400);
                     }
@@ -315,17 +312,24 @@ class ItineraryGroupController extends Controller
                     if(strtotime($validated['transportations'][$i]['date_start']) - strtotime($validated['travel_start']) < 0){
                         return response()->json(['error' => '交通工具開始時間不可早於旅程期間'], 400);
                     }
+                    $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['transportations'][$i]['type'], $validated['transportations'][$i]);
+                    $amount_validated['total'] += $amount['total'];
                 }
             }
             if(array_key_exists('misc', $validated)){
                 for($i = 0; $i < count($validated['misc']); $i++){
                     $validated['misc'][$i]['sort'] = $i+1;
-                    $amount_total += $validated['misc'][$i]['subtotal'];
+                    $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['misc'][$i]['type'], $validated['misc'][$i]);
+                    $amount_validated['total'] += $amount['total'];
                 }
             }
             $validated['operator_note']= null;
             if(!array_key_exists('itinerary_group_note', $validated)){
                 $validated['itinerary_group_note'] = null;
+            }
+
+            if($amount_validated['total'] !== $validated['itinerary_group_cost']){
+                return response()->json(['error' => "所有元件加總不等於總直成本(itinerary_group_cost)"], 400);
             }
 
             $itinerary_group_new = $this->requestService->insert_one('itinerary_group', $validated);
@@ -375,6 +379,38 @@ class ItineraryGroupController extends Controller
 
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
+            }
+
+            $amount_validated["total"] = 0;
+
+            if(array_key_exists('itinerary_content', $validated)){
+                for($i = 0; $i < count($validated['itinerary_content']); $i++){
+                    if(array_key_exists('components', $validated['itinerary_content'][$i])){
+                        for($j = 0; $j < count($validated['itinerary_content'][$i]['components']); $j++){
+                            $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['itinerary_content'][$i]['components'][$j]['type'], $validated['itinerary_content'][$i]['components'][$j]);
+                            $amount_validated['total'] += $amount['total'];
+
+                        }
+                    }
+                }
+            }
+            if(array_key_exists('guides', $validated)){
+                for($i = 0; $i < count($validated['guides']); $i++){
+                    $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['guides'][$i]['type'], $validated['guides'][$i]);
+                    $amount_validated['total'] += $amount['total'];
+                }
+            }
+            if(array_key_exists('transportations', $validated)){
+                for($i = 0; $i < count($validated['transportations']); $i++){
+                    $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['transportations'][$i]['type'], $validated['transportations'][$i]);
+                    $amount_validated['total'] += $amount['total'];
+                }
+            }
+            if(array_key_exists('misc', $validated)){
+                for($i = 0; $i < count($validated['misc']); $i++){
+                    $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['misc'][$i]['type'], $validated['misc'][$i]);
+                    $amount_validated['total'] += $amount['total'];
+                }
             }
 
             $this->requestService->update('itinerary_group', $validated);
