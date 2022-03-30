@@ -204,7 +204,6 @@ class ItineraryGroupController extends Controller
             $filter_code["owned_by"] = $validated['owned_by'];
             $result_code = $this->requestService->aggregate_search('itinerary_group', null, $filter_code, $page=0);
             $result_code_data = json_decode($result_code->getContent(), true);
-            return $result_code_data;
         }else $validated['code'] = null;
 
         if(array_key_exists('name', $validated)){
@@ -483,7 +482,6 @@ class ItineraryGroupController extends Controller
         if(array_key_exists('count', $cus_order_data) && $cus_order_data['count'] === 0){
             return response()->json(['error' => '訂單中團行程id可能不存在或已刪除。'], 400);
         }
-
 
         // 1-2 限制只能同公司員工作修正
         if($user_company_id !== $cus_order_data['user_company_id']){
