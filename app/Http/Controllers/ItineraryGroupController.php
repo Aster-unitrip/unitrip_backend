@@ -672,15 +672,13 @@ class ItineraryGroupController extends Controller
         }
         $validated = $validator->validated();
 
-        // 1-1 使用者公司必須是旅行社
+        // 1-1 使用者公司必須是旅行社、限制只能同公司員工作修正
         $user_company_id = auth()->user()->company_id;
         $company_data = Company::find($user_company_id);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-
-        // 1-2 限制只能同公司員工作修正
         if($user_company_id !== $validated['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
@@ -688,10 +686,8 @@ class ItineraryGroupController extends Controller
         // 如果需要付訂金 有改訂金
         if(array_key_exists("pay_deposit", $validated)){
             if($validated['pay_deposit'] === true){
-                //要付訂金
-                if(array_key_exists("deposit", $validated) && $validated['deposit'] > 0){
-                    // 訂金不可大於總額
-                    if($validated['deposit'] > $validated['amount']){
+                if(array_key_exists("deposit", $validated) && $validated['deposit'] > 0){//要付訂金
+                    if($validated['deposit'] > $validated['amount']){// 訂金不可大於總額
                         return response()->json(['error' => "訂金不可以大於總額"], 400);
                     }
                     $validated['balance'] = $validated['amount'] - $validated['deposit'];
@@ -699,7 +695,7 @@ class ItineraryGroupController extends Controller
                     return response()->json(['error' => '訂金金額必須大於0'], 400);
                 }
             }elseif($validated['pay_deposit'] === false){
-                if(array_key_exists("deposit", $validated)){
+                if(array_key_exists("deposit", $validated) && $validated['deposit'] > 0){
                     return response()->json(['error' => "當是否預付訂金為否時，不可以有訂金"], 400);
                 }
             }
@@ -718,7 +714,6 @@ class ItineraryGroupController extends Controller
         if($itinerary_group_order_data['document']['order_status'] !== "已成團" && $itinerary_group_order_data['document']['order_status'] !== "棄單"){
             return response()->json(['error' => "訂單狀態不是[已成團]或[棄單]不可更改付款狀態"], 400);
         }
-
 
         // 必須是已成團後才可以修改付款狀態
         if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
@@ -744,7 +739,7 @@ class ItineraryGroupController extends Controller
                     }
                 }
             }else{
-                return response()->json(['error' => '沒有傳回修改項目名稱'], 400);
+                return response()->json(['error' => '沒有傳回修改項目名稱(type)'], 400);
             }
         }else{
             return response()->json(['error' => 'date, sort are not defined.'], 400);
@@ -758,7 +753,6 @@ class ItineraryGroupController extends Controller
                 }
                 $validated['balance'] = $validated["amount"] - $validated['deposit'];
                 $fixed[$find_name.'actual_payment'] = $validated['deposit'];
-                $fixed[$find_name.'deposit'] = $validated['deposit'];
             }else{
                 return response()->json(['error' => '當付款狀態為[已付訂金]，訂金存在。']);
             }
@@ -787,10 +781,10 @@ class ItineraryGroupController extends Controller
             if($result_payment !== 1) return $result_payment;
         }
 
-
-
         // 確定沒錯後存入團行程中
         $update = $this->requestService->update_one('itinerary_group', $fixed);
+
+        return $fixed;
 
 
         // 取得存後資料
@@ -812,10 +806,8 @@ class ItineraryGroupController extends Controller
         $to_deleted["total_people"] = $cus_orders_data['total_people'];
 
 
-        // 當狀態須加上刪除判斷
-        // 如果待退已退則刪除該obj放入刪除DB中
+        // 當狀態須加上刪除判斷 如果待退已退則刪除該obj放入刪除DB中
         if($to_deleted['booking_status'] === "待退訂"){
-            // 1.拉出這筆團行程元件資料，並將不必要的刪除
             $to_deleted['to_be_deleted'] = date('Y-m-d H:i:s');
             $to_deleted['deleted_at'] = null;
             $to_deleted['deleted_reason'] = null;
@@ -824,37 +816,24 @@ class ItineraryGroupController extends Controller
             $to_deleted['component_id'] = $validated['_id'];
             $fixed_component_cost['_id'] = $validated['_id'];
             unset($to_deleted['sort']);
-
             if($to_deleted['deposit'] === 0) $to_deleted['refund'] = 0;
             if($to_deleted['deposit'] !== 0) $to_deleted['refund'] = $to_deleted['actual_payment'];
-
-            if($validated['type'] === "guides"){
-                if($to_deleted['subtotal'] !== $to_deleted['deposit'] + $to_deleted['balance']){
-                    return response()->json(['error' => '訂金(deposit)加尾款(balance)不等於此項總價(subtotal)。'], 400);
-                }
-            }
             unset($to_deleted['balance']);
-
-            // TODO: 確定待刪除欄位乾淨
-            // TODO 如果付款狀態為未付款，刪除後直接變成已棄單，免退款?(那預定狀態應該是待退訂還是已退訂)
-
 
             // 加入刪除資料庫中
             $deleted_result = $this->requestService->insert_one('cus_delete_components', $to_deleted);
 
-            // TODO　修改團行程成本
+            // 修改團行程成本
             $delete_component_data = $this->requestCostService->after_delete_component_cost($itinerary_group_past_data['itinerary_group_cost'], $to_deleted);
             $result = $this->requestService->update_one('itinerary_group', $delete_component_data);
 
             // 刪除團行程該元件
-            $to_deleted_itinerary['_id'] = $validated['_id']; // 需要要刪除欄位_id
-            $to_deleted_itinerary[$find_name_no_dot] = null; // $find_name_no_dot 刪除欄位
+            $to_deleted_itinerary['_id'] = $validated['_id'];
+            $to_deleted_itinerary[$find_name_no_dot] = null;
             $this->requestService->delete_field('itinerary_group', $to_deleted_itinerary);
-
             return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
 
         }elseif($to_deleted['booking_status'] === "未預訂" || $to_deleted['booking_status'] === "已預訂"){
-            // 儲存
             $to_deleted['_id'] = $validated['_id'];
             $result = $this->requestService->update_one('itinerary_group', $to_deleted);
             return $result;
