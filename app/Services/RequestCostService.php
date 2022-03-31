@@ -68,10 +68,10 @@ class RequestCostService
                     $validated_item_data['child'] = $validated_item['pricing_detail'][$i]['unit_price'];
                 }
             }
-            if(!$validated_item_data['adult']){
+            if(!array_key_exists('adult', $validated_item_data)){
                 $validated_item_data['adult'] = 0;
             }
-            if(!$validated_item_data['child']){
+            if(!array_key_exists('child', $validated_item_data)){
                 $validated_item_data['child'] = 0;
             }
             $validated_item_data['total'] = $validated_item['sum'];

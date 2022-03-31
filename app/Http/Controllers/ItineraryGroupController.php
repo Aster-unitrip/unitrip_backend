@@ -413,6 +413,10 @@ class ItineraryGroupController extends Controller
                 }
             }
 
+            if($amount_validated['total'] !== $validated['itinerary_group_cost']){
+                return response()->json(['error' => "所有元件加總不等於總直成本(itinerary_group_cost)"], 400);
+            }
+
             $this->requestService->update('itinerary_group', $validated);
 
             $fixed["_id"] = $validated["order_id"];
@@ -859,7 +863,7 @@ class ItineraryGroupController extends Controller
             $to_deleted['itinerary_group_id'] = $operator_data['_id'];
             $to_deleted['component_id'] = $validated['_id'];
             unset($to_deleted['sort']);
-            
+
             // 加入刪除資料庫中
             $deleted_result = $this->requestService->insert_one('cus_delete_components', $to_deleted);
 
