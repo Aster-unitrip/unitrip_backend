@@ -306,7 +306,7 @@ class OrderController extends Controller
                     return response()->json(['error' => "[訂單狀態]為[收到需求單]或[已規劃行程&詢價]或[已回覆，待旅客確認]時，[出團狀態]只可為[未出團]。"]);
                 }
             }elseif($validated['order_status'] === "已成團"){
-                if($validated['payment_status'] !== "未付款" || $validated['payment_status'] !== "已付訂金" || $validated['payment_status'] !== "已付全額"){
+                if($validated['payment_status'] !== "未付款" && $validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額"){
                     return response()->json(['error' => "[訂單狀態]為[已成團]時，[付款狀態]只可為[未付款]或[已付訂金]或[已付全額]。"]);
                 }
                 if($validated['out_status'] !== "出團中" && $validated['out_status'] !== "已出團，未結團" && $validated['out_status'] !== "已結團"){
