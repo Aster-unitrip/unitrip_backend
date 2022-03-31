@@ -413,6 +413,7 @@ class ItineraryGroupController extends Controller
                 }
             }
 
+
             if($amount_validated['total'] !== $validated['itinerary_group_cost']){
                 return response()->json(['error' => "所有元件加總不等於總直成本(itinerary_group_cost)"], 400);
             }
