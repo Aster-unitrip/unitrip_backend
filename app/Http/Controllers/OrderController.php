@@ -271,7 +271,7 @@ class OrderController extends Controller
         // TODO381 4. 訂單狀態->參團號碼 需寫判斷
         // 寫入資料 $validated / 比較資料(在資料庫) $data_before
         if(array_key_exists('order_status',$validated) && $data_before['order_status'] !== $validated['order_status']){
-            //客製化訂單狀態: 0.收到需求單 -> 1 4 / 1.已規劃行程&詢價 ->2 4 / 2.已回覆旅客 ->1 3 4 / 3.已成團 -> 4 / 4.棄單 -> X
+            //客製化訂單狀態: 0.收到需求單 -> 1 4 / 1.已規劃行程&詢價 ->2 4 / 2.已回覆，待旅客確認 ->1 3 4 / 3.已成團 -> 4 / 4.棄單 -> X
             switch($data_before['order_status']){
                 case "收到需求單":
                     if($validated['order_status'] !== "已規劃行程&詢價" && $validated['order_status'] !== "棄單"){
@@ -279,11 +279,11 @@ class OrderController extends Controller
                     }
                     break;
                 case "已規劃行程&詢價":
-                    if($validated['order_status'] !== "已回覆旅客" && $validated['order_status'] !== "棄單"){
-                        return response()->json(['error' => "[訂單狀態]只可改到[已回覆旅客]、[棄單]"], 400);
+                    if($validated['order_status'] !== "已回覆，待旅客確認" && $validated['order_status'] !== "棄單"){
+                        return response()->json(['error' => "[訂單狀態]只可改到[已回覆，待旅客確認]、[棄單]"], 400);
                     }
                     break;
-                case "已回覆旅客":
+                case "已回覆，待旅客確認":
                     if($validated['order_status'] !== "已規劃行程&詢價" && $validated['order_status'] !== "棄單" && $validated['order_status'] !== "已成團"){
                         return response()->json(['error' => "[訂單狀態]只可改到[已規劃行程&詢價]、[已成團]、[棄單]"], 400);
                     }
@@ -298,12 +298,12 @@ class OrderController extends Controller
             if($validated['order_status'] === "已成團") $validated['group_status'] = "成團";
 
             // 預定狀態關聯付款狀態
-            if($validated['order_status'] === "收到需求單" || $validated['order_status'] === "已規劃行程&詢價" || $validated['order_status'] === "已回覆旅客"){
+            if($validated['order_status'] === "收到需求單" || $validated['order_status'] === "已規劃行程&詢價" || $validated['order_status'] === "已回覆，待旅客確認"){
                 if($validated['payment_status'] !== "未付款"){
-                    return response()->json(['error' => "[訂單狀態]為[收到需求單]或[已規劃行程&詢價]或[已回覆旅客]時，[付款狀態]只可為[未付款]。"]);
+                    return response()->json(['error' => "[訂單狀態]為[收到需求單]或[已規劃行程&詢價]或[已回覆，待旅客確認]時，[付款狀態]只可為[未付款]。"]);
                 }
                 if($validated['out_status'] !== "未出團"){
-                    return response()->json(['error' => "[訂單狀態]為[收到需求單]或[已規劃行程&詢價]或[已回覆旅客]時，[出團狀態]只可為[未出團]。"]);
+                    return response()->json(['error' => "[訂單狀態]為[收到需求單]或[已規劃行程&詢價]或[已回覆，待旅客確認]時，[出團狀態]只可為[未出團]。"]);
                 }
             }elseif($validated['order_status'] === "已成團"){
                 if($validated['payment_status'] !== "未付款" || $validated['payment_status'] !== "已付訂金" || $validated['payment_status'] !== "已付全額"){
