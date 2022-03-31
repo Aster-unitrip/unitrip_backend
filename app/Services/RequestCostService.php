@@ -61,20 +61,18 @@ class RequestCostService
         if($type === "attractions" || $type === "activities"){
             //分全票半票
             for($i = 0; $i < count($validated_item["pricing_detail"]); $i++){
+                $validated_item_data['total'] = $validated_item['sum'];
                 if($validated_item['pricing_detail'][$i]['name'] === "全票"){
                     $validated_item_data["adult"] = $validated_item['pricing_detail'][$i]['unit_price'];
-                }
-                elseif($validated_item['pricing_detail'][$i]['name'] === "半票"){
+                }elseif($validated_item['pricing_detail'][$i]['name'] === "半票"){
                     $validated_item_data['child'] = $validated_item['pricing_detail'][$i]['unit_price'];
                 }
             }
-            if(!array_key_exists('adult', $validated_item_data)){
+            if(!$validated_item_data["adult"]){
                 $validated_item_data['adult'] = 0;
-            }
-            if(!array_key_exists('child', $validated_item_data)){
+            }elseif($validated_item_data['child']){
                 $validated_item_data['child'] = 0;
             }
-            $validated_item_data['total'] = $validated_item['sum'];
         }
 
         if($type === "accomendations" || $type === "restaurants" || $type === "transportations"){
