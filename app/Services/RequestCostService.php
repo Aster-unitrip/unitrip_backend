@@ -4,7 +4,7 @@ namespace App\Services;
 
 class RequestCostService
 {
-    public function after_delete_component_cost($itinerary_group_cost, $delete_component){
+    public function after_delete_component_cost($itinerary_group_accounting, $itinerary_group_cost, $delete_component){
         $delete_component_data['_id'] = $delete_component['itinerary_group_id'];
         if($delete_component['type'] === "attractions" || $delete_component['type'] === "activities"){
             $delete_component_data['itinerary_group_cost'] = $itinerary_group_cost - $delete_component['sum'];
@@ -52,6 +52,9 @@ class RequestCostService
             $delete_component_data['accounting.child.cost'] = ceil($delete_component["subtotal"] / $delete_component['total_people']);
             $delete_component_data['accounting.adult.cost'] = ceil($delete_component["subtotal"] / $delete_component['total_people']);
         }
+
+        unset($delete_component_data['accounting.adult.cost']);
+        unset($delete_component_data['accounting.child.cost']);
         return $delete_component_data;
     }
 

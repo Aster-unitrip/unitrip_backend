@@ -82,7 +82,7 @@ class ItineraryGroupController extends Controller
             'pay_deposit' => 'required|string',
             'booking_status' => 'required|string',
             'payment_status' => 'required|string',
-            'deposit' => 'nullable|numeric',
+            'deposit' => 'numeric',
             /* 'balance' => 'required|numeric', */
             "amount" => 'required|numeric',
             "operator_note" => 'string',
@@ -765,7 +765,7 @@ class ItineraryGroupController extends Controller
                     if($itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
                         return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，找不到該筆元件資訊"], 400);
                     }
-                }else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
+                }elseif($validated["type"] === "transportations" || $validated["type"] === "guides"){
                     $find_type =$validated["type"];
                     $find_name = $find_type.".".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_sort;
