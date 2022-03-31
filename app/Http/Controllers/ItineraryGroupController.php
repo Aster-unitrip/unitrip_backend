@@ -732,7 +732,7 @@ class ItineraryGroupController extends Controller
         }
 
         // TODO Validation 基本驗證 所有和金額有關必須不小於0
-        if($validated['deposit'] < 0 && $validated['balance'] < 0 && $validated['amount'] < 0){
+        if($validated['deposit'] < 0 && $validated['amount'] < 0){
             return response()->json(['error' => '金額相關不會小於0']);
         }
 
