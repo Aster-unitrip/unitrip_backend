@@ -858,11 +858,8 @@ class ItineraryGroupController extends Controller
             $to_deleted['order_id'] = $operator_data['order_id'];
             $to_deleted['itinerary_group_id'] = $operator_data['_id'];
             $to_deleted['component_id'] = $validated['_id'];
-            if($to_deleted['deposit'] === 0) $to_deleted['refund'] = 0;
-            if($to_deleted['deposit'] !== 0) $to_deleted['refund'] = $to_deleted['actual_payment'];
             unset($to_deleted['sort']);
-            unset($to_deleted['balance']);
-
+            
             // 加入刪除資料庫中
             $deleted_result = $this->requestService->insert_one('cus_delete_components', $to_deleted);
 
@@ -916,7 +913,7 @@ class ItineraryGroupController extends Controller
         }
         $validated = $validator->validated();
 
-        // 1-1 使用者公司必須是旅行社
+        // 1.使用者公司必須是旅行社
         $user_company_id = auth()->user()->company_id;
         $company_data = Company::find($user_company_id);
         $company_type = $company_data['company_type'];
@@ -931,8 +928,8 @@ class ItineraryGroupController extends Controller
 
         // 直接針對待退已退做判斷
         if(array_key_exists("payment_status", $validated) && array_key_exists("booking_status", $validated)){
-            if($data_before['document']['booking_status'] === "待退訂"){ //待退改已退
-                if($validated['booking_status'] !== "待退訂" && $validated['booking_status'] !== "已退訂"){ //booking_status
+            if($data_before['document']['booking_status'] === "待退訂"){
+                if($validated['booking_status'] !== "待退訂" && $validated['booking_status'] !== "已退訂"){
                     return response()->json(['error' => '預定狀態[待退訂]只可以維持[待退訂]或是改成[已退訂]。'] , 400);
                 }
                 if($validated['booking_status'] === '待退訂'){
@@ -944,7 +941,7 @@ class ItineraryGroupController extends Controller
                         return response()->json(['error' => '預定狀態[待退訂]，付款狀態不可為[未付款]、[已付訂金]、[已付全額]、[已棄單，已退款]。'] , 400);
                     }
                 }
-            }else if($data_before['document']['booking_status'] === "已退訂"){
+            }elseif($data_before['document']['booking_status'] === "已退訂"){
                 if($validated['booking_status'] !== "已退訂"){
                     return response()->json(['error' => '預定狀態只可以維持[已退訂]，不可更改。'], 400);
                 }
@@ -965,9 +962,6 @@ class ItineraryGroupController extends Controller
         }
         if($data_before['document']['payment_status'] === "已棄單，免退款" && $validated['payment_status'] !== "已棄單，免退款"){
             return response()->json(['error' => "付款狀態只可維持[已棄單，免退款]"], 400);
-        }
-        if($data_before['document']['payment_status'] !== $validated['payment_status'] || $data_before['document']['booking_status'] !== $validated['booking_status']){
-            $validated['deleted_at'] = date('Y-m-d H:i:s');
         }
         if($data_before['document']['payment_status'] === "已棄單，待退款" && $validated['payment_status'] === "已棄單，已退款"){
             $validated['deleted_at'] = date('Y-m-d H:i:s');
