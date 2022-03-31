@@ -57,7 +57,7 @@ class RequestCostService
 
     public function validated_cost($cus_orders_data, $type, $validated_item){
         //$cus_orders_data["adult_number"]、$cus_orders_data["child_number"]
-        $order_people_not_included_baby = $cus_orders_data["adult_number"]+$cus_orders_data["child_number"];
+        $order_people_not_included_baby = $cus_orders_data["adult_number"] + $cus_orders_data["child_number"];
         if($type === "attractions" || $type === "activities"){
             //分全票半票
             for($i = 0; $i < count($validated_item["pricing_detail"]); $i++){
@@ -68,10 +68,10 @@ class RequestCostService
                     $validated_item_data['child'] = $validated_item['pricing_detail'][$i]['unit_price'];
                 }
             }
-            if(!array_key_exists('adult', $validated_item_data)){
+            if(!$validated_item_data['adult']){
                 $validated_item_data['adult'] = 0;
             }
-            if(!array_key_exists('child', $validated_item_data)){
+            if(!$validated_item_data['child']){
                 $validated_item_data['child'] = 0;
             }
             $validated_item_data['total'] = $validated_item['sum'];
