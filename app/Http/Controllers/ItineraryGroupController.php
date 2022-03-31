@@ -827,9 +827,6 @@ class ItineraryGroupController extends Controller
         // 確定沒錯後存入團行程中
         $update = $this->requestService->update_one('itinerary_group', $fixed);
 
-        return $fixed;
-
-
         // 取得存後資料
         $operator_data = $this->requestService->get_one('itinerary_group', $validated['_id']);
         $operator_data = json_decode($operator_data->getContent(), true);
@@ -868,6 +865,8 @@ class ItineraryGroupController extends Controller
 
             // 修改團行程成本
             $delete_component_data = $this->requestCostService->after_delete_component_cost($itinerary_group_past_data['itinerary_group_cost'], $to_deleted);
+            return $delete_component_data;
+
             $result = $this->requestService->update_one('itinerary_group', $delete_component_data);
 
             // 刪除團行程該元件
@@ -876,10 +875,6 @@ class ItineraryGroupController extends Controller
             $this->requestService->delete_field('itinerary_group', $to_deleted_itinerary);
             return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
 
-        }elseif($to_deleted['booking_status'] === "未預訂" || $to_deleted['booking_status'] === "已預訂"){
-            $to_deleted['_id'] = $validated['_id'];
-            $result = $this->requestService->update_one('itinerary_group', $to_deleted);
-            return $result;
         }
     }
 
@@ -893,8 +888,6 @@ class ItineraryGroupController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-
-        // 1-2 限制只能同公司員工作修正
         $data = $this->requestService->find_one('itinerary_group', $id, null, null);
         if(!$data){
             return response()->json(['error' => '沒有這筆團行程資料。'], 400);
@@ -928,8 +921,6 @@ class ItineraryGroupController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-
-        // 1-2 限制只能同公司員工作修正
         $data_before = $this->requestService->find_one('cus_delete_components', $validated['_id'], null, null);
         $data_of_itinerary_group_before = $this->requestService->find_one('itinerary_group', $data_before['document']['itinerary_group_id'], null, null);
         if($user_company_id !== $data_of_itinerary_group_before['document']['owned_by']){
