@@ -385,13 +385,13 @@ class ItineraryGroupController extends Controller
 
             if(array_key_exists('itinerary_content', $validated)){
                 for($i = 0; $i < count($validated['itinerary_content']); $i++){
-                    if($validated['itinerary_content'][$i]['sort']=== null){
+                    if(!array_key_exists('sort', $validated['itinerary_content'][$i])){
                         $validated['itinerary_content'][$i]['sort'] = $i+1;
                         $validated['itinerary_content'][$i]['date'] = date("Y-m-d H:i:s", strtotime($validated['travel_start'].$i."day"));
                     }
                     if(array_key_exists('components', $validated['itinerary_content'][$i])){
                         for($j = 0; $j < count($validated['itinerary_content'][$i]['components']); $j++){
-                            if($validated['itinerary_content'][$i]['components'][$j]['sort']===null){
+                            if(!array_key_exists('sort', $validated['itinerary_content'][$i]['components'][$j])){
                                 $validated['itinerary_content'][$i]['components'][$j]['sort'] = $j+1;
                                 $validated['itinerary_content'][$i]['components'][$j]['operator_note'] = null;
                                 $validated['itinerary_content'][$i]['components'][$j]['pay_deposit'] = 'false';
@@ -417,7 +417,7 @@ class ItineraryGroupController extends Controller
 
             if(array_key_exists('guides', $validated)){
                 for($i = 0; $i < count($validated['guides']); $i++){
-                    if($validated['guides'][$i]['sort'] === null){
+                    if(!array_key_exists('sort', $validated['guides'][$i])){
                         $validated['guides'][$i]['sort'] = $i+1;
                         $validated['guides'][$i]['operator_note'] = null;
                         $validated['guides'][$i]['pay_deposit'] = 'false';
@@ -448,7 +448,7 @@ class ItineraryGroupController extends Controller
 
             if(array_key_exists('transportations', $validated)){
                 for($i = 0; $i < count($validated['transportations']); $i++){
-                    if($validated['transportations'][$i]['sort'] === null){
+                    if(!array_key_exists('sort', $validated['transportations'][$i])){
                         $validated['transportations'][$i]['sort'] = $i+1;
                         $validated['transportations'][$i]['operator_note'] = null;
                         $validated['transportations'][$i]['pay_deposit'] = 'false';
@@ -480,10 +480,9 @@ class ItineraryGroupController extends Controller
             }
             if(array_key_exists('misc', $validated)){
                 for($i = 0; $i < count($validated['misc']); $i++){
-                    if($validated['misc'][$i]['sort']){
+                    if(!array_key_exists('sort', $validated['misc'][$i])){
                         $validated['misc'][$i]['sort'] = $i+1;
                     }
-
                 }
                 for($i = 0; $i < count($validated['misc']); $i++){
                     $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['misc'][$i]['type'], $validated['misc'][$i]);
