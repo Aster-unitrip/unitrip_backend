@@ -52,7 +52,7 @@ class RequestStatesService
                     return response()->json(['error' => "預訂狀態可能輸入錯誤!"], 400);
                 }
             }
-            return 1;
+            return true;
         }else{
             return response()->json(['error' => "沒有付款狀態"]);
         }
@@ -80,7 +80,7 @@ class RequestStatesService
                     return response()->json(['error' => "預定狀態可能輸入錯誤!"], 400);
                 }
             }
-            return 1;
+            return true;
         }else{
             return response()->json(['error' => "沒有預定狀態。"]);
         }

@@ -835,15 +835,28 @@ class ItineraryGroupController extends Controller
                     $find_type = 'itinerary_content';
                     $find_name = $find_type.".".$find_day.".components.".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_day.".components.".$find_sort;
+<<<<<<< HEAD
                     if($itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
                         return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，找不到該筆元件資訊。"], 400);
+=======
+                    /* if($itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
+                        return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]." ，找不到該筆元件資訊。"], 400);
+                    } */
+                    if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type][$find_day]['components']) &&$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
+                        return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]." ，找不到該筆元件資訊。"], 400);
+>>>>>>> dev
                     }
                 }elseif($validated["type"] === "transportations" || $validated["type"] === "guides"){
                     $find_type =$validated["type"];
                     $find_name = $find_type.".".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_sort;
+<<<<<<< HEAD
                     if($itinerary_group_past_data[$find_type][$find_sort] === null){
                         return response()->json(['error' => "位於[交通工具]或[導遊]元件中，找不到該筆元件資訊。"], 400);
+=======
+                    if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type]) &&$itinerary_group_past_data[$find_type][$find_sort] === null){
+                        return response()->json(['error' => "位於[交通工具]或[導遊]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_sort]." ，找不到該筆元件資訊。"], 400);
+>>>>>>> dev
                     }
                 }
             }else{
@@ -893,16 +906,15 @@ class ItineraryGroupController extends Controller
         // 先確定該欄位是否有值 確認付款狀態及預訂狀態
         if($find_type === "itinerary_content"){
             $result_booking = $this->requestStatesService->booking_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
-            return $result_booking;
-            if($result_booking !== 1) return $result_booking;
+            if($result_booking !== true) return $result_booking;
             $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
-            if($result_payment !== 1) return $result_payment;
+            if($result_payment !== true) return $result_payment;
 
         }else if($find_type === "transportations" || $find_type === "guides"){
             $result_booking = $this->requestStatesService->booking_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
-            if($result_booking !== 1) return $result_booking;
+            if($result_booking !== true) return $result_booking;
             $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
-            if($result_payment !== 1) return $result_payment;
+            if($result_payment !== true) return $result_payment;
         }
 
         // 確定沒錯後存入團行程中
