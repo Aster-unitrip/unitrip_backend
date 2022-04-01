@@ -836,14 +836,14 @@ class ItineraryGroupController extends Controller
                     $find_name = $find_type.".".$find_day.".components.".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_day.".components.".$find_sort;
                     if(!array_key_exists($find_sort, $itinerary_group_past_data[$find_type][$find_day]['components'])){
-                        return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，找不到該筆元件資訊"], 400);
+                        return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]." ，找不到該筆元件資訊。"], 400);
                     }
                 }elseif($validated["type"] === "transportations" || $validated["type"] === "guides"){
                     $find_type =$validated["type"];
                     $find_name = $find_type.".".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_sort;
                     if(!array_key_exists($find_sort, $itinerary_group_past_data[$find_type])){
-                        return response()->json(['error' => "位於[交通工具]或[導遊]元件中，找不到該筆元件資訊"], 400);
+                        return response()->json(['error' => "位於[交通工具]或[導遊]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_sort]." ，找不到該筆元件資訊。"], 400);
                     }
                 }
             }else{
