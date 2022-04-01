@@ -471,7 +471,6 @@ class ItineraryGroupController extends Controller
                             return response()->json(['error' => '交通工具開始時間不可早於旅程期間'], 400);
                         }
                     }
-
                 }
                 for($i = 0; $i < count($validated['transportations']); $i++){
                     $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['transportations'][$i]['type'], $validated['transportations'][$i]);
@@ -490,7 +489,7 @@ class ItineraryGroupController extends Controller
                 }
             }
             if($amount_validated['total'] !== $validated['itinerary_group_cost']){
-                return response()->json(['error' => "所有元件加總不等於總直成本(itinerary_group_cost)"], 400);
+                return response()->json(['error' => "驗算總值成本: ".$amount_validated['total']."，前端傳來總值成本: ".$validated['itinerary_group_cost']."；所有元件加總不等於總直成本(itinerary_group_cost)"], 400);
             }
 
             $this->requestService->update('itinerary_group', $validated);
