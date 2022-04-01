@@ -828,6 +828,7 @@ class ItineraryGroupController extends Controller
                 return response()->json(['error' => "sort 必須大於0。"]);
             }
             $find_day = (int)(floor((strtotime($validated["date"]) - strtotime($validated['travel_start'])) / (60*60*24))); //將 date 做轉換成第幾天
+
             $find_sort = $validated["sort"]-1; // sort比原來少1
             if(array_key_exists("type", $validated)){
                 if($validated["type"] === "attractions" || $validated["type"] === "accomendations" || $validated["type"] === "activities" || $validated["type"] === "restaurants"){
@@ -892,6 +893,7 @@ class ItineraryGroupController extends Controller
         // 先確定該欄位是否有值 確認付款狀態及預訂狀態
         if($find_type === "itinerary_content"){
             $result_booking = $this->requestStatesService->booking_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
+            return $result_booking;
             if($result_booking !== 1) return $result_booking;
             $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
             if($result_payment !== 1) return $result_payment;

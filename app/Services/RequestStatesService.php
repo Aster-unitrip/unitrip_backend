@@ -59,6 +59,9 @@ class RequestStatesService
     }
 
     public function booking_status($validated, $itinerary_group_past_data){
+        if($itinerary_group_past_data === null){
+            return response()->json(['error' => "這筆資料可能已經被刪除嘞!"]);
+        }
         if(array_key_exists("booking_status", $validated)){
             if($validated['booking_status'] !== $itinerary_group_past_data['booking_status']){
                 if($itinerary_group_past_data["booking_status"] === "未預訂"){
