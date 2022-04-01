@@ -460,7 +460,6 @@ class ItineraryGroupController extends Controller
                         $validated['transportations'][$i]['actual_payment'] = 0;
                         $validated['transportations'][$i]['date_start'] = $validated['transportations'][$i]['date_start']."T00:00:00.000+08:00";
                         $validated['transportations'][$i]['date_end'] = $validated['transportations'][$i]['date_end']."T23:59:59.000+08:00";
-                        $amount_validated["total"] += $validated['transportations'][$i]['sum'];
                         if(strtotime($validated['transportations'][$i]['date_end']) - strtotime($validated['transportations'][$i]['date_start']) <= 0){
                             return response()->json(['error' => '(交通工具)結束時間不可早於開始時間'], 400);
                         }
