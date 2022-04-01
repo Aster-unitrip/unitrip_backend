@@ -827,7 +827,7 @@ class ItineraryGroupController extends Controller
             if($validated["sort"]<=0){
                 return response()->json(['error' => "sort 必須大於0。"]);
             }
-            $find_day = floor((strtotime($validated["date"]) - strtotime($validated['travel_start'])) / (60*60*24)); //將 date 做轉換成第幾天
+            $find_day = (int)(floor((strtotime($validated["date"]) - strtotime($validated['travel_start'])) / (60*60*24))); //將 date 做轉換成第幾天
             $find_sort = $validated["sort"]-1; // sort比原來少1
             if(array_key_exists("type", $validated)){
                 if($validated["type"] === "attractions" || $validated["type"] === "accomendations" || $validated["type"] === "activities" || $validated["type"] === "restaurants"){
