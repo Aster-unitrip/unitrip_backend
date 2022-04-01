@@ -893,16 +893,15 @@ class ItineraryGroupController extends Controller
         // 先確定該欄位是否有值 確認付款狀態及預訂狀態
         if($find_type === "itinerary_content"){
             $result_booking = $this->requestStatesService->booking_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
-            return $result_booking;
-            if($result_booking !== 1) return $result_booking;
+            if($result_booking !== true) return $result_booking;
             $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
-            if($result_payment !== 1) return $result_payment;
+            if($result_payment !== true) return $result_payment;
 
         }else if($find_type === "transportations" || $find_type === "guides"){
             $result_booking = $this->requestStatesService->booking_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
-            if($result_booking !== 1) return $result_booking;
+            if($result_booking !== true) return $result_booking;
             $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
-            if($result_payment !== 1) return $result_payment;
+            if($result_payment !== true) return $result_payment;
         }
 
         // 確定沒錯後存入團行程中
