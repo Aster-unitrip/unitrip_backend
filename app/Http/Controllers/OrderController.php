@@ -309,18 +309,15 @@ class OrderController extends Controller
                 if($validated['payment_status'] !== "未付款" && $validated['payment_status'] !== "已付訂金" && $validated['payment_status'] !== "已付全額"){
                     return response()->json(['error' => "[訂單狀態]為[已成團]時，[付款狀態]只可為[未付款]或[已付訂金]或[已付全額]。"]);
                 }
-                if($validated['out_status'] !== "出團中" && $validated['out_status'] !== "已出團，未結團" && $validated['out_status'] !== "已結團"){
-                    return response()->json(['error' => "[訂單狀態]為[已成團]時，[出團狀態]只可為[出團中]或[已出團，未結團]或[已結團]。"]);
-                }
                 if($validated['payment_status'] !== "已付全額" && $validated['out_status'] === "已結團"){
                     return response()->json(['error' => "[訂單狀態]為[已成團]且[出團狀態]為[已結團]，[付款狀態]必須為[已付全額]。"]);
                 }
-            }elseif($validated['order_status'] === "已棄單"){
-                if($validated['payment_status'] !== "已棄單，待退款" || $validated['payment_status'] !== "已棄單，已退款" || $validated['payment_status'] !== "已棄單，免退款"){
-                    return response()->json(['error' => "[訂單狀態]為[已棄單]時，[付款狀態]只可為[已棄單，待退款]或[已棄單，已退款]或[已棄單，免退款]。"]);
+            }elseif($validated['order_status'] === "棄單"){
+                if($validated['payment_status'] !== "已棄單，待退款" && $validated['payment_status'] !== "已棄單，已退款" && $validated['payment_status'] !== "已棄單，免退款"){
+                    return response()->json(['error' => "[訂單狀態]為[棄單]時，[付款狀態]只可為[已棄單，待退款]或[已棄單，已退款]或[已棄單，免退款]。"]);
                 }
                 if($validated['out_status'] !== "未出團"){
-                    return response()->json(['error' => "[訂單狀態]為[已棄單]時，[出團狀態]只可為[未出團]。"]);
+                    return response()->json(['error' => "[訂單狀態]為[棄單]時，[出團狀態]只可為[未出團]。"]);
                 }
             }
 
