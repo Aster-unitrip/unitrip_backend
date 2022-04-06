@@ -621,9 +621,9 @@ class ItineraryGroupController extends Controller
             $itinerary_group_data_new['name'] = "";
             $itinerary_group_data_new['summary'] = "";
             $itinerary_group_data_new['code'] = "";
-            $itinerary_group_data_new['travel_start'] = "";
-            $itinerary_group_data_new['travel_end'] = "";
-            $itinerary_group_data_new['total_day'] = 1;
+            $itinerary_group_data_new['travel_start'] = $cus_order_data['travel_start'];
+            $itinerary_group_data_new['travel_end'] = $cus_order_data['travel_end'];
+            $itinerary_group_data_new['total_day'] = $cus_order_data['total_day'];
             $itinerary_group_data_new['areas'] = array();
             $itinerary_group_data_new['sub_categories'] = array();
             $itinerary_content_new['type'] = "";
