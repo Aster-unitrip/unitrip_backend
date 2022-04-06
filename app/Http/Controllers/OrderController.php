@@ -42,6 +42,7 @@ class OrderController extends Controller
             'company_note' => 'nullable|string',
             'travel_start' => 'required|date',
             'travel_end' => 'required|date',
+            'total_day' =>'required|integer|min:1',
         ];
         $this->edit_rule = [
             '_id'=>'required|string|max:24',
@@ -123,6 +124,8 @@ class OrderController extends Controller
             "modified_by" => $user_name
         );
         array_push($validated['order_record'], $order_record_add_order_status);
+
+        //TODO 討論 total_day 處理
 
         $validated['pay_deposit'] = 'false';
         $validated['deposit'] = 0;
