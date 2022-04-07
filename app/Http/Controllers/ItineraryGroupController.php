@@ -110,9 +110,6 @@ class ItineraryGroupController extends Controller
         $validated['owned_by'] = $company_id;
 
 
-        // TODO(US-407) 需要將所有傳入時間(string)改成時間(date)傳入
-
-
         // TODO(US-390) 檢查行程內容
 /*         try{
             $is = new ItineraryGroupService($validated);

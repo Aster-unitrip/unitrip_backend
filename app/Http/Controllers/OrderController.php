@@ -127,6 +127,7 @@ class OrderController extends Controller
 
         //TODO 討論 total_day 處理
 
+
         $validated['pay_deposit'] = 'false';
         $validated['deposit'] = 0;
         $validated['balance'] = 0;
@@ -386,7 +387,6 @@ class OrderController extends Controller
         $company_id = auth()->payload()->get('company_id');
         $filter['user_company_id'] = auth()->user()->company_id;
 
-
         // 找該 company 的 types
         $company_data = Company::find($company_id);
         $company_type = $company_data['company_type'];
@@ -411,14 +411,23 @@ class OrderController extends Controller
         unset($filter['order_start']);
         unset($filter['order_end']);
 
-
         if(array_key_exists("estimated_travel_start", $filter) && array_key_exists('estimated_travel_end', $filter)){
-            if(strtotime($filter['estimated_travel_end']) - strtotime($filter['estimated_travel_start']) > 0){
+            if(strtotime($filter['estimated_travel_end']) - strtotime($filter['estimated_travel_start']) >= 0){
                 $filter['estimated_travel_start'] = array('$gte' => $filter['estimated_travel_start']."T00:00:00.000+08:00"
                 , '$lte' => $filter['estimated_travel_start']."T23:59:59.000+08:00");
                 $filter['estimated_travel_end'] = array('$gte' => $filter['estimated_travel_end']."T00:00:00.000+08:00"
                 , '$lte' => $filter['estimated_travel_end']."T23:59:59.000+08:00");
-            }else return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
+            }else{
+                return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
+            }
+        }
+
+        //[訂單編號]、[代表人]使用模糊搜尋
+        if(array_key_exists('representative', $filter)){
+            $filter['representative'] = array('$regex' => $filter['representative']);
+        }
+        if(array_key_exists('order_number', $filter)){
+            $filter['order_number'] = array('$regex' => $filter['order_number']);
         }
 
         $result = $this->requestService->aggregate_search('cus_orders', null, $filter, $page);
