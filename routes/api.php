@@ -18,6 +18,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ItineraryGroupController;
 use App\Http\Controllers\ComponentCarTypeController;
 use App\Http\Controllers\PassengerController;
+use App\Http\Controllers\DMController;
+
 
 
 
@@ -123,6 +125,10 @@ Route::group(['middleware'=>'api', 'prefix'=>'group-itinerary'], function($route
 Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
     Route::get('/{id}', [PassengerController::class, 'get_by_id']); // 取得訂單ID的旅客資料
     Route::post('/', [PassengerController::class, 'edit']);
+});
+
+Route::group(['middleware'=>'api', 'prefix'=>'dm'], function($router){ //DM系統
+    Route::get('/{id}', [DMController::class, 'get_by_id']); //取得相關資訊
 });
 
 // 行程
