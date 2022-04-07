@@ -49,6 +49,8 @@ class DMController extends Controller
 
         if($dm_before===false){ //new
             $dm_data_new['is_display'] = "false"; // 是否上架
+            $dm_data_new['dm_layout'] = "layout_1"; // 目前預設為 "layout_1"
+            $dm_data_new['price_per_person'] = null;
             $insert_one_to_dm = $this->requestService->insert_one('dm', $dm_data_new);
         }else{ //old
             $dm_data_new['_id'] = $dm_before['document']['_id'];
