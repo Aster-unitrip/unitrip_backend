@@ -40,8 +40,8 @@ class OrderController extends Controller
             'source' => 'required|string',
             'needs' => 'nullable|string',
             'company_note' => 'nullable|string',
-            'travel_start' => 'required|date',
-            'travel_end' => 'required|date',
+            'estimated_travel_start' => 'required|date',
+            'estimated_travel_end' => 'required|date',
             'total_day' =>'required|integer|min:1',
         ];
         $this->edit_rule = [
@@ -59,8 +59,8 @@ class OrderController extends Controller
             'languages' => 'required|array',
             'budget_min' => 'required|numeric',
             'budget_max' => 'required|numeric',
-            'travel_start' => 'required|date',
-            'travel_end' => 'required|date',
+            /* 'estimated_travel_start' => 'required|date',
+            'estimated_travel_end' => 'required|date', */
             'adult_number' => 'required|integer',
             'child_number' => 'required|integer',
             'baby_number' => 'required|integer',
@@ -97,7 +97,7 @@ class OrderController extends Controller
         $now_time = date("His" , mktime(date('H')+8, date('i'), date('s')));
 
         $validated = $validator->validated();
-        //$travel_days = round((strtotime($validated['travel_end']) - strtotime($validated['travel_start']))/3600/24)+1 ;
+        //$travel_days = round((strtotime($validated['estimated_travel_end']) - strtotime($validated['estimated_travel_start']))/3600/24)+1 ;
 
         // budget_max > 0
         if(array_key_exists("budget_max", $validated) && $validated['budget_max'] <= 0){
@@ -148,8 +148,8 @@ class OrderController extends Controller
 
 
         $validated['itinerary_group_id'] = null; //團行程一開始沒有(versions)
-        $validated['travel_start'] = $validated['travel_start']."T00:00:00.000+08:00";
-        $validated['travel_end'] = $validated['travel_end']."T23:59:59.000+08:00";
+        $validated['estimated_travel_start'] = $validated['estimated_travel_start']."T00:00:00.000+08:00";
+        $validated['estimated_travel_end'] = $validated['estimated_travel_end']."T23:59:59.000+08:00";
 
         $cus_orders = $this->requestService->insert_one('cus_orders', $validated);
 
@@ -187,6 +187,7 @@ class OrderController extends Controller
     public function edit(Request $request)
     {
         // 2. 先驗證前端傳回資料
+        // TODO: 目前將預計旅遊開始、預計旅遊結束、天數 綁死，直接不傳入
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->edit_rule);
         $user_name = auth()->user()->contact_name;
@@ -359,7 +360,7 @@ class OrderController extends Controller
 
     // filter: 訂單編號, 參團編號, 旅客代表人姓名, 來源, 訂購期間(ordertime_start、ordertime_end), 行程期間, 負責人, 出團狀態, 付款狀態, 頁數
 
-    // order_number, code, representative, source, order_status, travel_start, travel_end, user_name, payment_status, out_status, page
+    // order_number, code, representative, source, order_status, estimated_travel_start, estimated_travel_end, user_name, payment_status, out_status, page
     // code, out_status
 
     public function list(Request $request)
@@ -411,12 +412,12 @@ class OrderController extends Controller
         unset($filter['order_end']);
 
 
-        if(array_key_exists("travel_start", $filter) && array_key_exists('travel_end', $filter)){
-            if(strtotime($filter['travel_end']) - strtotime($filter['travel_start']) > 0){
-                $filter['travel_start'] = array('$gte' => $filter['travel_start']."T00:00:00.000+08:00"
-                , '$lte' => $filter['travel_start']."T23:59:59.000+08:00");
-                $filter['travel_end'] = array('$gte' => $filter['travel_end']."T00:00:00.000+08:00"
-                , '$lte' => $filter['travel_end']."T23:59:59.000+08:00");
+        if(array_key_exists("estimated_travel_start", $filter) && array_key_exists('estimated_travel_end', $filter)){
+            if(strtotime($filter['estimated_travel_end']) - strtotime($filter['estimated_travel_start']) > 0){
+                $filter['estimated_travel_start'] = array('$gte' => $filter['estimated_travel_start']."T00:00:00.000+08:00"
+                , '$lte' => $filter['estimated_travel_start']."T23:59:59.000+08:00");
+                $filter['estimated_travel_end'] = array('$gte' => $filter['estimated_travel_end']."T00:00:00.000+08:00"
+                , '$lte' => $filter['estimated_travel_end']."T23:59:59.000+08:00");
             }else return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
         }
 
