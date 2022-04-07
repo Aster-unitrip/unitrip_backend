@@ -19,6 +19,12 @@ class DMController extends Controller
     {
         $this->middleware('auth');
         $this->requestService = $requestPService;
+        $this->edit_rule = [
+            '_id'=>'required|string|max:24', //required
+            'price_per_person'=>'nullable|integer',
+            'dm_layout'=>'required|string',
+            'is_display'=>'required|string',
+        ];
     }
 
     public function get_by_id($id)
@@ -60,4 +66,30 @@ class DMController extends Controller
         return $after_dm_data_new['document'];
     }
 
+    public function edit(Request $request)
+    {
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->edit_rule);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validated = $validator->validated();
+
+        // 非旅行社及該旅行社人員不可修改訂單
+        $user_company_id = auth()->user()->company_id;
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+        $cus_dm_edit = $this->requestService->get_one('dm', $validated['_id']);
+        $cus_dm_edit_data =  json_decode($cus_dm_edit->content(), true);
+        if($user_company_id !== $cus_dm_edit_data['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+
+        $update_one_to_dm = $this->requestService->update_one('dm', $validated);
+        return $update_one_to_dm;
+    }
 }

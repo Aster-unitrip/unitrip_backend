@@ -129,6 +129,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
 
 Route::group(['middleware'=>'api', 'prefix'=>'dm'], function($router){ //DM系統
     Route::get('/{id}', [DMController::class, 'get_by_id']); //取得相關資訊
+    Route::post('/', [DMController::class, 'edit']); // 更改DM [是否上架]
 });
 
 // 行程
