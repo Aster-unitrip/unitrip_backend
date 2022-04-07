@@ -429,7 +429,9 @@ class OrderController extends Controller
         if(array_key_exists('order_number', $filter)){
             $filter['order_number'] = array('$regex' => $filter['order_number']);
         }
-
+        if(array_key_exists('cus_group_code', $filter)){
+            $filter['cus_group_code'] = array('$regex' => $filter['cus_group_code']);
+        }
         $result = $this->requestService->aggregate_search('cus_orders', null, $filter, $page);
         return $result;
 
