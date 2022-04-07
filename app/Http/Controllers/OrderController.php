@@ -422,7 +422,7 @@ class OrderController extends Controller
             }
         }
 
-        //[訂單編號]、[代表人]使用模糊搜尋
+        //[訂單編號]、[代表人]、[參團編號]使用模糊搜尋
         if(array_key_exists('representative', $filter)){
             $filter['representative'] = array('$regex' => $filter['representative']);
         }
