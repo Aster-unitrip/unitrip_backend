@@ -54,7 +54,7 @@ class DMController extends Controller
         $dm_data_new['itinerary_group_price'] = $cus_itinerary_group_data['itinerary_group_price'];
 
         if($dm_before===false){ //new
-            $dm_data_new['is_display'] = "false"; // 是否上架
+            $dm_data_new['is_display'] = "false";
             $dm_data_new['dm_layout'] = "layout_1"; // 目前預設為 "layout_1"
             $dm_data_new['price_per_person'] = 0;
             $insert_one_to_dm = $this->requestService->insert_one('dm', $dm_data_new);
@@ -63,6 +63,12 @@ class DMController extends Controller
             $update_one_to_dm = $this->requestService->update_one('dm', $dm_data_new);
         }
         $after_dm_data_new = $this->requestService->find_one('dm', null, 'itinerary_group_id', $id);
+
+        if($dm_before===false){//是否第一次使用DM->更新團行程資料庫
+            $edit_dm_activated["_id"] = $after_dm_data_new['document']['itinerary_group_id'];
+            $edit_dm_activated["dm_activated"] = "true";
+            $this->requestService->update_one('itinerary_group', $edit_dm_activated);
+        }
         return $after_dm_data_new['document'];
     }
 

@@ -328,6 +328,10 @@ class ItineraryGroupController extends Controller
                 return response()->json(['error' => "所有元件加總不等於總直成本(itinerary_group_cost)"], 400);
             }
 
+            //是否為第一次使用 DM
+            $validated['dm_activated']= "false";
+
+
             $itinerary_group_new = $this->requestService->insert_one('itinerary_group', $validated);
             $result_data = json_decode($itinerary_group_new->getContent(), true);
 
