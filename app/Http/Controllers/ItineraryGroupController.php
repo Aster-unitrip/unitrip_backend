@@ -802,7 +802,7 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
-        // TODO Validation 基本驗證 所有和金額有關必須不小於0
+        // 基本驗證 所有和金額有關必須不小於0
         if($validated['deposit'] < 0 && $validated['amount'] < 0){
             return response()->json(['error' => '金額相關不會小於0']);
         }

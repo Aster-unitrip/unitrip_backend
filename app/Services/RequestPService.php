@@ -450,7 +450,6 @@ class RequestPService
         $postdata = json_encode($data);
         //return $postdata;
         // 顯示 MongoDB 的查詢語法
-        //dump($postdata);
         $options = array(
             'http' => array(
                 'method' => 'POST',
