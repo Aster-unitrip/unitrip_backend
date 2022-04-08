@@ -397,8 +397,8 @@ class OrderController extends Controller
         //訂購期間為 order_start<= created_at <=order_end
         if(array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
             if(strtotime($filter['order_end']) - strtotime($filter['order_start']) >= 0){
-                $filter['created_at'] = array('$gte' => $filter['order_start']."T00:00:00.000+08:00"
-                , '$lte' => $filter['order_end']."T23:59:59.000+08:00");
+                $filter['created_at'] = array('$gte' => $filter['order_start']."T00:00:00.000+00:00"
+                , '$lte' => $filter['order_end']."T23:59:59.000+00:00");
             }
             else return response()->json(['error' => '訂購結束時間不可早於訂購開始時間'], 400);
         }
