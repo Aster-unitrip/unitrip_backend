@@ -21,7 +21,7 @@ class DMController extends Controller
         $this->requestService = $requestPService;
         $this->edit_rule = [
             '_id'=>'required|string|max:24', //required
-            'price_per_person'=>'nullable|integer',
+            'price_per_person'=>'integer',
             'dm_layout'=>'required|string',
             'is_display'=>'required|string',
         ];
