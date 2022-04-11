@@ -16,7 +16,7 @@ class DMController extends Controller
 
     public function __construct(RequestPService $requestPService)
     {
-        //$this->middleware('auth');
+        $this->middleware('auth');
         $this->requestService = $requestPService;
         $this->edit_rule = [
             '_id'=>'required|string|max:24', //required
