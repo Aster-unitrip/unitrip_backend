@@ -13,7 +13,6 @@ class DMController extends Controller
 {
     // 備註 : 目前沒有擋get_DM_setting的登入系統 直接在api.php擋下來
     private $requestService;
-    private $requestdataService;
 
     public function __construct(RequestPService $requestPService)
     {
