@@ -318,9 +318,9 @@ class ItineraryGroupController extends Controller
                     $amount_validated['total'] += $amount['total'];
                 }
             }
-            $validated['operator_note']= null;
+            $validated['operator_note']= "";
             if(!array_key_exists('itinerary_group_note', $validated)){
-                $validated['itinerary_group_note'] = null;
+                $validated['itinerary_group_note'] = "";
             }
 
             if($amount_validated['total'] !== $validated['itinerary_group_cost']){
@@ -833,9 +833,6 @@ class ItineraryGroupController extends Controller
                     $find_type = 'itinerary_content';
                     $find_name = $find_type.".".$find_day.".components.".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_day.".components.".$find_sort;
-                    /* if($itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
-                        return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]." ，找不到該筆元件資訊。"], 400);
-                    } */
                     if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type][$find_day]['components']) &&$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
                         return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]." ，找不到該筆元件資訊。"], 400);
                     }
@@ -950,6 +947,7 @@ class ItineraryGroupController extends Controller
             // 刪除團行程該元件
             $to_deleted_itinerary['_id'] = $validated['_id'];
             $to_deleted_itinerary[$find_name_no_dot] = null;
+            dd($to_deleted_itinerary);
             $this->requestService->delete_field('itinerary_group', $to_deleted_itinerary);
             return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
 
