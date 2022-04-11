@@ -227,7 +227,8 @@ class ItineraryGroupController extends Controller
             $validated['travel_start'] = $validated['travel_start']."T00:00:00.000+08:00";
             $validated['travel_end'] = $validated['travel_end']."T23:59:59.000+08:00";
             // travel_end 不可小於 travel_end
-            if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
+            if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) < 0){
+
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
             }
             // 處理分割項目，順便處理價錢
@@ -372,7 +373,7 @@ class ItineraryGroupController extends Controller
             $validated['travel_start'] = $validated['travel_start']."T00:00:00.000+08:00";
             $validated['travel_end'] = $validated['travel_end']."T23:59:59.000+08:00";
 
-            if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) <= 0){
+            if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) < 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
             }
 
