@@ -618,8 +618,15 @@ class ItineraryGroupController extends Controller
                 return response()->json(['error' => '訂單中團行程id可能已過期(團行程刪除)。'], 400);
             }
 
-            //如果預估旅行時間不符合旅行時間，傳回空值
-
+            //如果預估旅行時間不符合旅行時間(旅行時間沒有在預估旅行時間內)，傳回空值
+            $ac["estimated_travel_start"] = strtotime($itinerary_group_data['estimated_travel_start']);
+            $ac["estimated_travel_end"] = strtotime($itinerary_group_data['estimated_travel_end']);
+            $ac["travel_start"] = strtotime($itinerary_group_data['travel_start']);
+            $ac["travel_end"] = strtotime($itinerary_group_data['travel_end']);
+            if(($ac["estimated_travel_start"] > $ac["travel_start"]) || ($ac["estimated_travel_end"] < $ac["travel_end"])){
+                $itinerary_group_data["travel_start"] = "";
+                $itinerary_group_data["travel_end"] = "";
+            }
             return $itinerary_group_data;
 
         }elseif(!$cus_order_data['itinerary_group_id']){ //new
