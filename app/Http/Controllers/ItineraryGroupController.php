@@ -604,12 +604,6 @@ class ItineraryGroupController extends Controller
 
         if($cus_order_data['itinerary_group_id']){ //old
             //更新訂單相關資訊
-            $update_order_data['estimated_travel_start'] = $cus_order_data['estimated_travel_start'].".000+08:00";
-            $update_order_data['estimated_travel_end'] = $cus_order_data['estimated_travel_end'].".000+08:00";
-            $update_order_data['total_day'] = $cus_order_data['total_day'];
-            $update_order_data['_id'] = $cus_order_data['itinerary_group_id'];
-            $this->requestService->update_one('itinerary_group', $update_order_data);
-
 
             $itinerary_group = $this->requestService->get_one('itinerary_group', $cus_order_data['itinerary_group_id']);
             $itinerary_group_data =  json_decode($itinerary_group->content(), true);
@@ -617,6 +611,18 @@ class ItineraryGroupController extends Controller
             if(array_key_exists('count', $itinerary_group_data) && $itinerary_group_data['count'] === 0){
                 return response()->json(['error' => '訂單中團行程id可能已過期(團行程刪除)。'], 400);
             }
+
+            $update_order_data['estimated_travel_start'] = $cus_order_data['estimated_travel_start'].".000+08:00";
+            $update_order_data['estimated_travel_end'] = $cus_order_data['estimated_travel_end'].".000+08:00";
+            $update_order_data['total_day'] = $cus_order_data['total_day'];
+            $update_order_data['_id'] = $cus_order_data['itinerary_group_id'];
+
+            return $itinerary_group_data['itinerary_content'];
+            // TODO 判斷團行程object數量是否等於天數
+
+
+            $this->requestService->update_one('itinerary_group', $update_order_data);
+
 
             //如果預估旅行時間不符合旅行時間(旅行時間沒有在預估旅行時間內)，傳回空值
             $ac["estimated_travel_start"] = strtotime($itinerary_group_data['estimated_travel_start']);
