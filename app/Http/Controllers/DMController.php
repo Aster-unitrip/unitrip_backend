@@ -9,12 +9,10 @@ use App\Services\RequestPService;
 use Validator;
 
 
-
-
 class DMController extends Controller
 {
+    // 目前沒有擋
     private $requestService;
-
     public function __construct(RequestPService $requestPService)
     {
         $this->middleware('auth');
@@ -29,19 +27,8 @@ class DMController extends Controller
 
     public function get_by_id($id)
     { //id 團行程id
-
-        // 非旅行社及該旅行社人員不可修改訂單
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
-        $company_type = $company_data['company_type'];
-        if ($company_type !== 2){
-            return response()->json(['error' => 'company_type must be 2'], 400);
-        }
         $cus_itinerary_group = $this->requestService->get_one('itinerary_group', $id);
         $cus_itinerary_group_data =  json_decode($cus_itinerary_group->content(), true);
-        if($user_company_id !== $cus_itinerary_group_data['owned_by']){
-            return response()->json(['error' => 'you are not an employee of this company.'], 400);
-        }
 
         // 先確定是否有DM中是否有資料
         $dm_before = $this->requestService->find_one('dm', null, 'itinerary_group_id', $id);
@@ -80,14 +67,6 @@ class DMController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
         $validated = $validator->validated();
-
-        // 非旅行社及該旅行社人員不可修改訂單
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
-        $company_type = $company_data['company_type'];
-        if ($company_type !== 2){
-            return response()->json(['error' => 'company_type must be 2'], 400);
-        }
 
         $cus_dm_edit = $this->requestService->get_one('dm', $validated['_id']);
         $cus_dm_edit_data =  json_decode($cus_dm_edit->content(), true);
