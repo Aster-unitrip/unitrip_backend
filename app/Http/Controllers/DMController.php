@@ -11,11 +11,11 @@ use Validator;
 
 class DMController extends Controller
 {
-    // 目前沒有擋
+    // 備註 : 目前沒有擋get_DM_setting的登入系統 直接在api.php擋下來
     private $requestService;
     public function __construct(RequestPService $requestPService)
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
         $this->requestService = $requestPService;
         $this->edit_rule = [
             '_id'=>'required|string|max:24', //required
@@ -25,7 +25,7 @@ class DMController extends Controller
         ];
     }
 
-    public function get_by_id($id)
+    public function get_dm_setting($id)
     { //id 團行程id
         $cus_itinerary_group = $this->requestService->get_one('itinerary_group', $id);
         $cus_itinerary_group_data =  json_decode($cus_itinerary_group->content(), true);
@@ -59,8 +59,16 @@ class DMController extends Controller
         return $after_dm_data_new['document'];
     }
 
-    public function edit(Request $request)
+    public function edit_dm_setting(Request $request)
     {
+        // 1-1 使用者公司必須是旅行社
+        $user_company_id = auth()->user()->company_id;
+        $company_data = Company::find($user_company_id);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->edit_rule);
         if ($validator->fails()) {
@@ -68,6 +76,8 @@ class DMController extends Controller
         }
         $validated = $validator->validated();
 
+
+        // 1-2 限制只能同公司員工作修正 -> 關聯 get_id
         $cus_dm_edit = $this->requestService->get_one('dm', $validated['_id']);
         $cus_dm_edit_data =  json_decode($cus_dm_edit->content(), true);
         if($user_company_id !== $cus_dm_edit_data['owned_by']){
