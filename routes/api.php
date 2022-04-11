@@ -128,10 +128,10 @@ Route::group(['middleware'=>'api', 'prefix'=>'dm'], function($router){ //DM系�
     Route::middleware('auth')->post('/setting', [DMController::class, 'edit_dm_setting']); // 更改DM設定 [是否上架]
 });
 
-/* Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
+Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
     Route::get('/{id}', [PassengerController::class, 'get_by_id']); // 取得訂單ID的旅客資料
     Route::post('/', [PassengerController::class, 'edit']);
-}); */
+});
 
 // 行程
 Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
