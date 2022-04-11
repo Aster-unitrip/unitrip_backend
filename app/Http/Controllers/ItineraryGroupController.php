@@ -373,8 +373,9 @@ class ItineraryGroupController extends Controller
             $validated['travel_start'] = $validated['travel_start']."T00:00:00.000+08:00";
             $validated['travel_end'] = $validated['travel_end']."T23:59:59.000+08:00";
 
+
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) < 0){
-                return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
+                return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'. strtotime($validated['travel_end']) - strtotime($validated['travel_start'])], 400);
             }
 
             $amount_validated["total"] = 0;
