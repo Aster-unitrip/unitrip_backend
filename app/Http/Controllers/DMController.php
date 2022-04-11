@@ -11,15 +11,15 @@ use Validator;
 
 class DMController extends Controller
 {
-    // 備註 : 目前沒有擋get_DM_setting的登入系統 直接在api.php擋下來
     private $requestService;
 
     public function __construct(RequestPService $requestPService)
     {
         //$this->middleware('auth');
         $this->requestService = $requestPService;
+        
         $this->edit_rule = [
-            '_id'=>'required|string|max:24', //required
+            '_id'=>'required|string|max:24',
             'price_per_person'=>'integer',
             'dm_layout'=>'required|string',
             'is_display'=>'required|string',
