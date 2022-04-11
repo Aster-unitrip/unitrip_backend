@@ -61,23 +61,29 @@ class DMController extends Controller
         return $after_dm_data_new['document'];
     }
 
-    public function get_dm_itinerary_group($id)
+    public function get_dm_group_itinerary($id)
     {   //id 團行程id
         $cus_itinerary_group = $this->requestService->get_one('itinerary_group', $id);
         $cus_itinerary_group_data =  json_decode($cus_itinerary_group->content(), true);
 
-        $dm_itinerary_group_data['name'] = $cus_itinerary_group_data['name'];
-        $dm_itinerary_group_data['summary'] = $cus_itinerary_group_data['summary'];
-        $dm_itinerary_group_data['code'] = $cus_itinerary_group_data['code'];
-        $dm_itinerary_group_data['travel_start'] = $cus_itinerary_group_data['travel_start'];
-        $dm_itinerary_group_data['travel_end'] = $cus_itinerary_group_data['travel_end'];
-        $dm_itinerary_group_data['total_day'] = $cus_itinerary_group_data['total_day'];
-        $dm_itinerary_group_data['itinerary_content'] = $cus_itinerary_group_data['itinerary_content'];
-        $dm_itinerary_group_data['include_description'] = $cus_itinerary_group_data['include_description'];
-        $dm_itinerary_group_data['exclude_description'] = $cus_itinerary_group_data['exclude_description'];
-        $dm_itinerary_group_data['itinerary_group_note'] = $cus_itinerary_group_data['itinerary_group_note'];
+        if($cus_itinerary_group_data){
+            $dm_itinerary_group_data['name'] = $cus_itinerary_group_data['name'];
+            $dm_itinerary_group_data['summary'] = $cus_itinerary_group_data['summary'];
+            $dm_itinerary_group_data['code'] = $cus_itinerary_group_data['code'];
+            $dm_itinerary_group_data['travel_start'] = $cus_itinerary_group_data['travel_start'];
+            $dm_itinerary_group_data['travel_end'] = $cus_itinerary_group_data['travel_end'];
+            $dm_itinerary_group_data['total_day'] = $cus_itinerary_group_data['total_day'];
+            $dm_itinerary_group_data['itinerary_content'] = $cus_itinerary_group_data['itinerary_content'];
+            $dm_itinerary_group_data['include_description'] = $cus_itinerary_group_data['include_description'];
+            $dm_itinerary_group_data['exclude_description'] = $cus_itinerary_group_data['exclude_description'];
+            $dm_itinerary_group_data['itinerary_group_note'] = $cus_itinerary_group_data['itinerary_group_note'];
 
-        return $dm_itinerary_group_data;
+            return $dm_itinerary_group_data;
+        }else{
+            return response()->json(['error' => '沒有團行程資料。'], 400);
+        }
+
+
 
     }
 

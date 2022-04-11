@@ -59,8 +59,9 @@ class OrderController extends Controller
             'languages' => 'required|array',
             'budget_min' => 'required|numeric',
             'budget_max' => 'required|numeric',
-            /* 'estimated_travel_start' => 'required|date',
-            'estimated_travel_end' => 'required|date', */
+            'estimated_travel_start' => 'required|date',
+            'estimated_travel_end' => 'required|date',
+            'total_day' =>'required|integer|min:1',
             'adult_number' => 'required|integer',
             'child_number' => 'required|integer',
             'baby_number' => 'required|integer',
@@ -125,8 +126,6 @@ class OrderController extends Controller
         );
         array_push($validated['order_record'], $order_record_add_order_status);
 
-        //TODO 討論 total_day 處理
-
 
         $validated['pay_deposit'] = 'false';
         $validated['deposit'] = 0;
@@ -188,7 +187,6 @@ class OrderController extends Controller
     public function edit(Request $request)
     {
         // 2. 先驗證前端傳回資料
-        // TODO: 目前將預計旅遊開始、預計旅遊結束、天數 綁死，直接不傳入
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->edit_rule);
         $user_name = auth()->user()->contact_name;
