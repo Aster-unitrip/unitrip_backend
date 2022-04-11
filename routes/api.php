@@ -122,7 +122,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'group-itinerary'], function($route
     Route::post('/operator', [ItineraryGroupController::class, 'operator']); // 修改旅行社供應商控團預警
 });
 
-Route::group(['middleware'=>'api', 'prefix'=>'dm'], function($router){ //DM系統
+Route::group(['middleware'=>'api', 'prefix'=>'dmsystem'], function($router){ //DM系統
     Route::get('/setting/{id}', [DMController::class, 'get_dm_setting']); //取得dm設定資訊
     Route::get('/group-itinerary/{id}', [DMController::class, 'get_dm_group_itinerary']); //取得團行程放入dm
     Route::middleware('auth')->post('/setting', [DMController::class, 'edit_dm_setting']); // 更改DM設定 [是否上架]
