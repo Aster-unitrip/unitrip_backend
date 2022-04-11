@@ -59,6 +59,13 @@ class DMController extends Controller
         return $after_dm_data_new['document'];
     }
 
+    public function get_dm_itinerary_group($id)
+    {   //id 團行程id
+        $cus_itinerary_group = $this->requestService->get_one('itinerary_group', $id);
+        $cus_itinerary_group_data =  json_decode($cus_itinerary_group->content(), true);
+        return $cus_itinerary_group_data;
+    }
+
     public function edit_dm_setting(Request $request)
     {
         // 1-1 使用者公司必須是旅行社
