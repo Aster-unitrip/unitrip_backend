@@ -80,11 +80,7 @@ class DMController extends Controller
         $dm_itinerary_group_data['include_description'] = $cus_itinerary_group_data['include_description'];
         $dm_itinerary_group_data['exclude_description'] = $cus_itinerary_group_data['exclude_description'];
         $dm_itinerary_group_data['itinerary_group_note'] = $cus_itinerary_group_data['itinerary_group_note'];
-
         return $dm_itinerary_group_data;
-
-
-
 
     }
 

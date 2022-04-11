@@ -128,8 +128,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'dm'], function($router){ //DM系統
-    Route::get('/group-itinerary/{id}', [DMController::class, 'get_dm_group_itinerary']); //取得團行程放入dm
     Route::get('/setting/{id}', [DMController::class, 'get_dm_setting']); //取得dm設定資訊
+    Route::get('/group-itinerary/{id}', [DMController::class, 'get_dm_group_itinerary']); //取得團行程放入dm
     Route::middleware('auth')->post('/setting', [DMController::class, 'edit_dm_setting']); // 更改DM設定 [是否上架]
 });
 
