@@ -17,7 +17,7 @@ class DMController extends Controller
     {
         //$this->middleware('auth');
         $this->requestService = $requestPService;
-        
+
         $this->edit_rule = [
             '_id'=>'required|string|max:24',
             'price_per_person'=>'integer',
@@ -30,6 +30,9 @@ class DMController extends Controller
     { //id 團行程id
         $cus_itinerary_group = $this->requestService->get_one('itinerary_group', $id);
         $cus_itinerary_group_data =  json_decode($cus_itinerary_group->content(), true);
+        if(array_key_exists('count', $cus_itinerary_group_data) && $cus_itinerary_group_data['count'] === 0){
+            return response()->json(['error' => '沒有此筆團行程資料。'], 400);
+        }
 
         // 先確定是否有DM中是否有資料
         $dm_before = $this->requestService->find_one('dm', null, 'itinerary_group_id', $id);
