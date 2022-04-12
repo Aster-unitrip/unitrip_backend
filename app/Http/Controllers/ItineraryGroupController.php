@@ -640,7 +640,7 @@ class ItineraryGroupController extends Controller
                     unset($itinerary_group_data['itinerary_content'][$i]);
                     break;
                 }
-                if($update_order_data["travel_start"] === ""){
+                if(array_key_exists("travel_start", $update_order_data) && $update_order_data["travel_start"] === ""){
                     // 時間需要被覆蓋
                     $itinerary_group_data['itinerary_content'][$i]['date'] = "";
                     for($j = 0; $j < count($itinerary_group_data['itinerary_content'][$i]['components']); $j++){
