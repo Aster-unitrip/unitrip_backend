@@ -25,7 +25,7 @@ class PassengerController extends Controller
             'nationality' => 'required|string',
             'company' => 'string|max:50',
             'gender' => 'required|string|max:50',
-            'id_number' => 'required|string|max:50',
+            'id_number' => 'string|max:50',
             'passport_number' => 'string|max:50',
             'birthday' => 'required|string|date',
             'is_vegetarian' => 'boolean',
