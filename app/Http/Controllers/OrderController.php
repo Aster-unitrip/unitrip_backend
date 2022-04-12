@@ -349,6 +349,9 @@ class OrderController extends Controller
             }
         }
 
+        $validated['estimated_travel_start'] = $validated['estimated_travel_start']."T00:00:00.000+08:00";
+        $validated['estimated_travel_end'] = $validated['estimated_travel_end']."T23:59:59.000+08:00";
+
         //總人數 = 各項人數相加
         $validated['total_people'] = $validated['adult_number'] + $validated['child_number'] + $validated['baby_number'];
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
