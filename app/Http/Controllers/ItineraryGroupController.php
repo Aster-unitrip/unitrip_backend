@@ -633,9 +633,6 @@ class ItineraryGroupController extends Controller
                 $update_order_data["travel_start"] = "";
                 $update_order_data["travel_end"] = "";
             }
-            if($update_order_data["travel_start"] === ""){
-
-            }
 
             // TODO 判斷團行程object數量是否等於天數
             for($i = 0; $i < count($itinerary_group_data['itinerary_content']); $i++){
