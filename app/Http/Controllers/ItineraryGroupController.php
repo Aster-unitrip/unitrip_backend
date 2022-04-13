@@ -522,62 +522,98 @@ class ItineraryGroupController extends Controller
             $page = 0;
         }
 
-        // Handle itinerary sub_categories
-        if (array_key_exists('sub_categories', $filter)) {
-            $category = $filter['sub_categories'];
-            $filter['sub_categories'] = array('$elemMatch' => array('$in' => $category));
+        // Handle itinerary order_number
+        if (array_key_exists('order_number', $filter)) {
+            $filter['order_number'] = array('$regex' => $filter['order_number']);
         }
 
-        // Handle itinerary areas
-        // if (array_key_exists('areas', $filter)) {
-        //     $areas = $filter['areas'];
-        //     $filter['areas'] = array('$elemMatch' =>array('$in' => $areas));
-        // }
-
-        // Handle itinerary totoal_day range query
-        if (array_key_exists('total_day_range', $filter)){
-            if (array_key_exists('total_day_min', $filter['total_day_range']) && array_key_exists('total_day_max', $filter['total_day_range'])){
-                $filter['total_day'] = array('$gte' => $filter['total_day_range']['total_day_min'], '$lte' => $filter['total_day_range']['total_day_max']);
-            }
-            elseif (array_key_exists('total_day_min', $filter['total_day_range']) && !array_key_exists('total_day_max', $filter['total_day_range'])){
-                $filter['total_day'] = array('$gte' => $filter['total_day_range']['total_day_min']);
-            }
-            elseif (!array_key_exists('total_day_min', $filter['total_day_range']) && array_key_exists('total_day_max', $filter['total_day_range'])){
-                $filter['total_day'] = array('$lte' => $filter['total_day_range']['total_day_max']);
-            }
-        }
-        unset($filter['total_day_range']);
-
-        // Handle itinerary area query
-        if (array_key_exists('areas', $filter)) {
-            $areas = $filter['areas'];
-            $filter['areas'] = array('$in' => $areas);
+        // Handle itinerary representative
+        if (array_key_exists('representative', $filter)) {
+            $filter['representative'] = array('$regex' => $filter['representative']);
         }
 
+        // Handle itinerary cus_group_code
+        if (array_key_exists('cus_group_code', $filter)) {
+            $filter['cus_group_code'] = array('$regex' => $filter['cus_group_code']);
+        }
+
+        // Handle order created_at range query
+        if(array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
+            if(strtotime($filter['order_end']) - strtotime($filter['order_start']) >= 0){
+                $filter['created_at'] = array('$gte' => $filter['order_start']."T00:00:00.000+08:00"
+                , '$lte' => $filter['order_end']."T23:59:59.000+08:00");
+            }
+            else return response()->json(['error' => '訂購結束時間不可早於訂購開始時間'], 400);
+        }
+        elseif(array_key_exists('order_start', $filter) && !array_key_exists('order_end', $filter)){
+            return response()->json(['error' => '沒有訂購結束時間'], 400);
+        }
+        elseif(!array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
+            return response()->json(['error' => '沒有訂購開始時間'], 400);
+        }
+        unset($filter['order_start']);
+        unset($filter['order_end']);
 
         $company_type = auth()->payload()->get('company_type');
-        $company_id = auth()->payload()->get('company_id');
         if ($company_type == 1){
         }elseif ($company_type == 2){
-            $query_private = false;
-            $filter['owned_by'] = auth()->user()->company_id;
-            // $filter['is_display'] = true;
+            $filter['user_company_id'] = auth()->user()->company_id;
         }else{
             return response()->json(['error' => 'company_type must be 1 or 2'], 400);
         }
 
+        // Handle itinerary_group travel_start、travel_end
+        // lookkup database
+        $lookup = array(
+            "from" => 'itinerary_group',
+            "localField" => 'itinerary_group_id',
+            "foreignField" => '_id',
+            "as" => 'itinerary_group_date'
+        );
+
+        $unwind = array(
+            "path" => '$itinerary_group_date'
+        );
+
+        $filter_join_table = array();
+
+        // Handle itinerary travel_start、travel_end range query
+        if(array_key_exists('travel_start', $filter) && array_key_exists('travel_end', $filter)){
+            if(strtotime($filter['travel_end']) - strtotime($filter['travel_start']) >= 0){
+                $filter_join_table['itinerary_group_date.travel_start'] = $filter['travel_start']."T00:00:00.000+08:00";
+                $filter_join_table['itinerary_group_date.travel_end'] = $filter['travel_end']."T23:59:59.000+08:00";
+            }
+            else return response()->json(['error' => '行程結束時間不可早於行程開始時間'], 400);
+        }
+        elseif(array_key_exists('travel_start', $filter) && !array_key_exists('travel_end', $filter)){
+            return response()->json(['error' => '沒有訂購結束時間'], 400);
+        }
+        elseif(!array_key_exists('travel_start', $filter) && array_key_exists('travel_end', $filter)){
+            return response()->json(['error' => '沒有訂購開始時間'], 400);
+        }
+        unset($filter['travel_start']);
+        unset($filter['travel_end']);
+
+        // 欲產生內容
         $projection = array(
-                // "_id" => 1,
-                // "name" => 1,
-                // "sub_categories" => 1,
-                // "total_day" => 1,
-                // "people_threshold" => 1,
-                // "accounting" => 1,
-                // "imgs" => 1,
-                // "areas" => 1,
-                // "created_at" => 1
-            );
-        $result = $this->requestService->aggregate_facet('itineraries', $projection, $company_id, $filter, $page, $query_private);
+            "_id" => 1,
+            "order_number" => 1,
+            "cus_group_code" => 1,
+            "representative" => 1,
+            "created_at" => 1,
+            "group_status" => 1,
+            "order_status" => 1,
+            "out_status" => 1,
+            "amount" => 1,
+            "user_name" => 1,
+            "total_people" => 1,
+            "itinerary_group_id" => 1,
+            'itinerary_group_date.travel_start'=> 1,
+            'itinerary_group_date.travel_end'=> 1
+        );
+
+        $result = $this->requestService->aggregate_search_two_table('cus_order', $projection, $filter, $lookup, $unwind, $filter_join_table, $page);
+
         return $result;
     }
 
