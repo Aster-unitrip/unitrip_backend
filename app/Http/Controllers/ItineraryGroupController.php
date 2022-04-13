@@ -605,6 +605,7 @@ class ItineraryGroupController extends Controller
             "created_at" => 1,
             "group_status" => 1,
             "order_status" => 1,
+            "payment_status" => 1,
             "out_status" => 1,
             "amount" => 1,
             "user_name" => 1,
