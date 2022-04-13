@@ -28,6 +28,7 @@ class CompanyController extends Controller
             'title' => 'required|string|max:20',
             'tax_id' => 'required|string|max:12',
             'tel' => 'required|string|max:15|',
+            'fax' => 'nullable|string|max:15|',
             'email' => 'required|email|string|max:100',
             'address_city' => 'required|string|max:5',
             'address_town' => 'required|string|max:5',
@@ -62,6 +63,7 @@ class CompanyController extends Controller
             'title' => 'required|string|max:20',
             'tax_id' => 'required|string|max:12',
             'tel' => 'required|string|max:15|',
+            'fax' => 'nullable|string|max:15|',
             'email' => 'required|email|string|max:100',
             'address_city' => 'required|string|max:5',
             'address_town' => 'required|string|max:5',
@@ -77,5 +79,5 @@ class CompanyController extends Controller
         ]);
     }
 
-    
+
 }
