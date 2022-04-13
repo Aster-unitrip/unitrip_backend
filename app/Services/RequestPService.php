@@ -513,7 +513,7 @@ class RequestPService
         array_push($data['pipeline'], array('$set' => array('count' => '$count.totalCount')));
 
         $postdata = json_encode($data);
-        dd($postdata);
+        //dd($postdata);
         // 顯示 MongoDB 的查詢語法
         $options = array(
             'http' => array(

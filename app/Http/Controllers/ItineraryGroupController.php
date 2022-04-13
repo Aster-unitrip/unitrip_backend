@@ -614,7 +614,7 @@ class ItineraryGroupController extends Controller
             'itinerary_group_date.travel_end'=> 1
         );
 
-        $result = $this->requestService->aggregate_search_two_table('cus_order', $projection, $filter, $lookup, $unwind, $filter_join_table, $page);
+        $result = $this->requestService->aggregate_search_two_table('cus_orders', $projection, $filter, $lookup, $unwind, $filter_join_table, $page);
 
         return $result;
     }
