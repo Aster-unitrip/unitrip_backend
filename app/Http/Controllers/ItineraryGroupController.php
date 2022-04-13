@@ -491,7 +491,7 @@ class ItineraryGroupController extends Controller
             }
 
             $itinerary_group_update_data = $this->requestService->update('itinerary_group', $validated);
-            return $validated;
+
             $fixed["_id"] = $validated["order_id"];
             $fixed["itinerary_group_id"] = $validated['_id'];
             $fixed["amount"] = $validated['itinerary_group_price'];
