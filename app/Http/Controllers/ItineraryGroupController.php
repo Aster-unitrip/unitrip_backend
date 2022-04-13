@@ -385,7 +385,7 @@ class ItineraryGroupController extends Controller
 
             if(array_key_exists('itinerary_content', $validated)){
                 for($i = 0; $i < count($validated['itinerary_content']); $i++){
-                    if(array_key_exists('sort', $validated['itinerary_content'][$i])){
+                    if(!array_key_exists('sort', $validated['itinerary_content'][$i])){
                         $validated['itinerary_content'][$i]['sort'] = $i+1;
                         $validated['itinerary_content'][$i]['date'] = date("Y-m-d H:i:s", strtotime($validated['travel_start'].$i."day"));
                     }
