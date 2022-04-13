@@ -174,7 +174,7 @@ class ItineraryGroupController extends Controller
         }
         $validated = $validator->validated();
 
-        // 1-1 使用者公司必須是旅行社
+/*         // 1-1 使用者公司必須是旅行社
         $user_company_id = auth()->user()->company_id;
         $company_data = Company::find($user_company_id);
         $company_type = $company_data['company_type'];
@@ -186,7 +186,7 @@ class ItineraryGroupController extends Controller
         if($user_company_id !== $validated['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
-
+ */
         // 判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
         if(array_key_exists('code', $validated)){
             $filter_code["code"] = $validated['code'];
@@ -356,6 +356,7 @@ class ItineraryGroupController extends Controller
             $fixed["itinerary_group_id"] = $result_data['inserted_id'];
             $fixed["amount"] = $itinerary_group_data['itinerary_group_price'];
 
+
             $result = $this->requestService->update_one('cus_orders', $fixed);
             return $result;
 
@@ -384,7 +385,7 @@ class ItineraryGroupController extends Controller
 
             if(array_key_exists('itinerary_content', $validated)){
                 for($i = 0; $i < count($validated['itinerary_content']); $i++){
-                    if(!array_key_exists('sort', $validated['itinerary_content'][$i])){
+                    if(array_key_exists('sort', $validated['itinerary_content'][$i])){
                         $validated['itinerary_content'][$i]['sort'] = $i+1;
                         $validated['itinerary_content'][$i]['date'] = date("Y-m-d H:i:s", strtotime($validated['travel_start'].$i."day"));
                     }
