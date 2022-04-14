@@ -73,7 +73,7 @@ class ItineraryGroupController extends Controller
             'exclude_description' => 'required|string',
             'itinerary_group_cost' => 'required|numeric',
             'itinerary_group_price' => 'required|numeric',
-            'itinerary_group_note' => 'string|max:800'
+            'itinerary_group_note' => 'nullable|string'
         ];
         $this->operator_rule = [
             '_id' => 'required|string|max:24',
