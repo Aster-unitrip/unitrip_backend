@@ -556,13 +556,13 @@ class ItineraryGroupController extends Controller
         unset($filter['order_start']);
         unset($filter['order_end']);
 
-/*         $company_type = auth()->payload()->get('company_type');
+        $company_type = auth()->payload()->get('company_type');
         if ($company_type == 1){
         }elseif ($company_type == 2){
             $filter['user_company_id'] = auth()->user()->company_id;
         }else{
             return response()->json(['error' => 'company_type must be 1 or 2'], 400);
-        } */
+        }
 
         // lookup database
         $lookup = array(
