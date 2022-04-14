@@ -540,10 +540,6 @@ class RequestPService
         );
         $query_filter = [];
 
-        // 用正規表達式查詢名稱
-        if ($filter != []) {
-            array_push($query_filter, array('$match' => $filter));
-        }
         if ($unwind[0] != []) {
             array_push($query_filter, array('$unwind' => $unwind[0]));
         }
@@ -556,6 +552,10 @@ class RequestPService
         // 留下需要的欄位
         if ($projection != []) {
             array_push($query_filter, array('$project' => $projection));
+        }
+        // 用正規表達式查詢名稱
+        if ($filter != []) {
+            array_push($query_filter, array('$match' => $filter));
         }
 
         $second_query_filter = $query_filter;
