@@ -485,13 +485,13 @@ class RequestPService
         if ($unwind != []) {
             array_push($query_filter, array('$unwind' => $unwind));
         }
-        if ($filter_join_table != []) {
-            array_push($query_filter, array('$match' => $filter_join_table));
-        }
-
         // 留下需要的欄位
         if ($projection != []) {
             array_push($query_filter, array('$project' => $projection));
+        }
+
+        if ($filter_join_table != []) {
+            array_push($query_filter, array('$match' => $filter_join_table));
         }
         $second_query_filter = $query_filter;
 
