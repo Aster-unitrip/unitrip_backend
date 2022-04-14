@@ -45,9 +45,9 @@ class ItineraryGroupController extends Controller
             'accounting' => 'required|array',
             'itinerary_group_cost' => 'required|numeric',
             'itinerary_group_price' => 'required|numeric',
-            'include_description' => 'nullable|string|max:800',
-            'exclude_description' => 'nullable|string|max:800',
-            'itinerary_group_note' => 'string|max:800'
+            'include_description' => 'required|string',
+            'exclude_description' => 'required|string',
+            'itinerary_group_note' => 'nullable|string'
 
         ];
         $this->edit_rule = [
@@ -69,8 +69,8 @@ class ItineraryGroupController extends Controller
             'transportations' => 'present|array',
             'misc' => 'present|array',
             'accounting' => 'required|array',
-            'include_description' => 'nullable|string|max:800',
-            'exclude_description' => 'nullable|string|max:800',
+            'include_description' => 'required|string',
+            'exclude_description' => 'required|string',
             'itinerary_group_cost' => 'required|numeric',
             'itinerary_group_price' => 'required|numeric',
             'itinerary_group_note' => 'string|max:800'
