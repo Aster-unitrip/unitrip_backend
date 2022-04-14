@@ -85,7 +85,7 @@ class ComponentCarTypeController extends Controller
             "address_city" => 1,
             "address" => 1
         );
-        $result = $this->requestService->aggregate_search_car_table('car_rental_company', $projection, $filter, $lookup, $unwind, $page=0);
+        $result = $this->requestService->aggregate_search_car_table('car_rental_company', $projection, $filter, $lookup, $unwind, $page);
         return $result;
     }
 
