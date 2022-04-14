@@ -599,7 +599,8 @@ class ItineraryGroupController extends Controller
                 "total_people" => 1,
                 "itinerary_group_id" => 1,
                 'itinerary_group_date.travel_start'=> 1,
-                'itinerary_group_date.travel_end'=> 1
+                'itinerary_group_date.travel_end'=> 1,
+                "source" =>1
             );
             $result = $this->requestService->aggregate_search_two_table('cus_orders', $projection, $filter, $lookup, $unwind, $filter_join_table, $page);
         }elseif(array_key_exists('travel_start', $filter) && !array_key_exists('travel_end', $filter)){
@@ -621,9 +622,14 @@ class ItineraryGroupController extends Controller
                 "amount" => 1,
                 "user_name" => 1,
                 "total_people" => 1,
-                "itinerary_group_id" => 1
+                "itinerary_group_id" => 1,
+                "source" =>1
             );
             $result = $this->requestService->aggregate_search('cus_orders', $projection, $filter, $page);
+            for($i = 0; $i < $result['count']; $i++){
+                $result['docs'][$i]['itinerary_group_date']['travel_start'] = "";
+                $result['docs'][$i]['itinerary_group_date']['travel_end'] = "";
+            }
         }
 
         return $result;
