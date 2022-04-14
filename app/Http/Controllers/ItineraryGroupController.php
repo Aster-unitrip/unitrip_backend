@@ -603,6 +603,7 @@ class ItineraryGroupController extends Controller
                 "source" =>1
             );
             $result = $this->requestService->aggregate_search_two_table('cus_orders', $projection, $filter, $lookup, $unwind, $filter_join_table, $page);
+            $result_data =  json_decode($result->content(), true);
         }elseif(array_key_exists('travel_start', $filter) && !array_key_exists('travel_end', $filter)){
             return response()->json(['error' => '沒有訂購結束時間'], 400);
         }elseif(!array_key_exists('travel_start', $filter) && array_key_exists('travel_end', $filter)){
@@ -626,13 +627,13 @@ class ItineraryGroupController extends Controller
                 "source" =>1
             );
             $result = $this->requestService->aggregate_search('cus_orders', $projection, $filter, $page);
-            for($i = 0; $i < $result['count']; $i++){
-                $result['docs'][$i]['itinerary_group_date']['travel_start'] = "";
-                $result['docs'][$i]['itinerary_group_date']['travel_end'] = "";
+            $result_data =  json_decode($result->content(), true);
+            for($i = 0; $i < $result_data['count']; $i++){
+                $result_data['docs'][$i]['itinerary_group_date']['travel_start'] = "";
+                $result_data['docs'][$i]['itinerary_group_date']['travel_end'] = "";
             }
         }
-
-        return $result;
+        return $result_data;
     }
 
     public function get_by_id($id)
