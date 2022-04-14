@@ -34,6 +34,9 @@ class ComponentCarTypeController extends Controller
         else{
             $page = 0;
         }
+        $filter['address_city'] = $filter['base'];
+        unset($filter['base']);
+
 
 
         // unset($filter['fee']);
@@ -47,7 +50,7 @@ class ComponentCarTypeController extends Controller
         }
         else if ($company_type == 2){
             $query_private = true;
-            $filter['is_display'] = true;
+            //$filter['is_display'] = true;
         }
         else{
             return response()->json(['error' => 'company_type must be 1 or 2'], 400);
