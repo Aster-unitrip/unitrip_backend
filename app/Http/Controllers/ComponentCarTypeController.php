@@ -34,8 +34,11 @@ class ComponentCarTypeController extends Controller
         else{
             $page = 0;
         }
-        $filter['address_city'] = $filter['base'];
-        unset($filter['base']);
+        if(array_key_exists("base", $filter)){
+            $filter['address_city'] = $filter['base'];
+            unset($filter['base']);
+        }
+
 
 
 
