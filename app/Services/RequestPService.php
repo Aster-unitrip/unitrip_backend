@@ -390,7 +390,7 @@ class RequestPService
 
         $postdata = json_encode($data);
         // 顯示 MongoDB 的查詢語法
-        //dump($postdata);
+        dump($postdata);
         $options = array(
             'http' => array(
                 'method' => 'POST',
@@ -493,6 +493,71 @@ class RequestPService
         if ($filter_join_table != []) {
             array_push($query_filter, array('$match' => $filter_join_table));
         }
+        $second_query_filter = $query_filter;
+
+        // 分頁
+        if ($page>0) {
+            array_push($query_filter, array('$skip' => $page*$limit));
+        }
+        array_push($query_filter, array('$limit' => $limit));
+
+        $second_query_filter[] = array('$count' => 'totalCount');
+        $data['pipeline'] =array( array(
+            '$facet' => array(
+                'docs' => $query_filter,
+                'count' => $second_query_filter
+            ))
+            );
+        // 格式轉換
+        array_push($data['pipeline'], array('$unwind' => array('path' => '$count')));
+        array_push($data['pipeline'], array('$set' => array('count' => '$count.totalCount')));
+
+        $postdata = json_encode($data);
+        dd($postdata);
+        // 顯示 MongoDB 的查詢語法
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                    'api-key:'.config('app.mongo_key'),
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        return $this->send_req($options, $url);
+    }
+    public function aggregate_search_car_table($collection, $projection, $filter=[], $lookup, $unwind, $page=0){
+        $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/aggregate";
+        $limit = 10;
+        $data = array(
+            "collection" => $collection,
+            "database" => "unitrip",
+            "dataSource" => "RealmCluster",
+            "pipeline" => null,
+        );
+        $query_filter = [];
+
+        // 用正規表達式查詢名稱
+        if ($filter != []) {
+            array_push($query_filter, array('$match' => $filter));
+        }
+        if ($unwind[0] != []) {
+            array_push($query_filter, array('$unwind' => $unwind[0]));
+        }
+        if ($lookup != []) {
+            array_push($query_filter, array('$lookup' => $lookup));
+        }
+        if ($unwind[1] != []) {
+            array_push($query_filter, array('$unwind' => $unwind[1]));
+        }
+        // 留下需要的欄位
+        if ($projection != []) {
+            array_push($query_filter, array('$project' => $projection));
+        }
+
         $second_query_filter = $query_filter;
 
         // 分頁
