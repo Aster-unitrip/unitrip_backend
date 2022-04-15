@@ -65,7 +65,7 @@ class ComponentAccomendationController extends Controller
             if ($filter['fee'] == array()) {
                 unset($filter['fee']);
             }
-            
+
             $price_range = array();
             if (array_key_exists('price_max', $filter['fee'])){
                 $price_range['$lte'] = $filter['fee']['price_max'];
@@ -112,6 +112,8 @@ class ComponentAccomendationController extends Controller
             "private" => 1,
             'updated_at' => 1,
             'created_at' => 1,
+            "intro_summary" => 1,
+            "description" => 1,
         );
         $result = $this->requestService->aggregate_facet('accomendations', $projection, $company_id, $filter, $page, $query_private);
         return $result;

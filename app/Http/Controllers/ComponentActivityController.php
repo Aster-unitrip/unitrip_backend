@@ -53,7 +53,7 @@ class ComponentActivityController extends Controller
         return $activity;
     }
 
-    // 
+    //
     public function list(Request $request)
     {
         // Handle filter content
@@ -153,7 +153,9 @@ class ComponentActivityController extends Controller
             'refund' => 'string|max:300',
             'note' => 'string|max:300',
             'is_display' => 'required|boolean',
-            'created_at' => 'required|string'
+            'created_at' => 'required|string',
+            "intro_summary" => 1,
+            "description" => 1,
         ];
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $rule);

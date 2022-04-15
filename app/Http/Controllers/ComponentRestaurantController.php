@@ -46,7 +46,7 @@ class ComponentRestaurantController extends Controller
 
         // Handle cost_per_person range
         if (array_key_exists('cost_per_person', $filter)) {
-            
+
             $price_range = array();
             if (array_key_exists('price_max', $filter['cost_per_person'])){
                 $price_range['$lte'] = $filter['cost_per_person']['price_max'];
@@ -89,6 +89,8 @@ class ComponentRestaurantController extends Controller
             "meals" => 1,
             "imgs" => 1,
             "private" => 1,
+            "intro_summary" => 1,
+            "description" => 1,
         );
         $result = $this->requestService->aggregate_facet('restaurants', $projection, $company_id, $filter, $page, $query_private);
         return $result;

@@ -127,6 +127,8 @@ class ComponentAttractionController extends Controller
                 "ticket" => 1,
                 "imgs" => 1,
                 "private" => 1,
+                "intro_summary" => 1,
+            "description" => 1,
             );
         $result = $this->requestService->aggregate_facet('attractions', $projection, $company_id, $filter, $page, $query_private);
         // $result = $this->requestService->aggregate_join_private('attractions', $projection, $filter, $page);
