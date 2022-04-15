@@ -502,7 +502,7 @@ class ItineraryGroupController extends Controller
     }
 
     // filter: 區域, 行程名稱, 子類別, 天數起訖, 成團人數, 滿團人數, 頁數
-    // name, areas, sub_categories, total_day, people_threshold, people_full, page
+    // _id, name, areas, sub_categories, total_day, people_threshold, people_full, page
 
     // project: ID, 名稱, 子類別, 行程天數, 成團人數, 建立日期
 
