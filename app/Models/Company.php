@@ -17,6 +17,7 @@ class Company extends Model
         'title',
         'tax_id',
         'tel',
+        'fax',
         'address_city',
         'address_town',
         'address',

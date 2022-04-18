@@ -9,6 +9,7 @@ use App\Services\UserService;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+
 use Validator;
 
 
@@ -21,7 +22,7 @@ class AuthController extends Controller
      *
      * @return void
      */
-    public function __construct(CompanyService $companyService, UserService $userService) 
+    public function __construct(CompanyService $companyService, UserService $userService)
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
         $this->companyService = $companyService;
@@ -54,7 +55,7 @@ class AuthController extends Controller
             'ta_register_num' => 'nullable|string|max:6',
             'ta_category' => 'nullable|string|max:20',
         ];
-        
+
         $this->agencyRegisterRule = array_push($this->supplierRegisterRule, array(
             'ta_register_num' => 'required|string|max:6',
             'ta_category' => 'required|string|max:20',
@@ -66,7 +67,7 @@ class AuthController extends Controller
             'contact_tel' => 'required|string|min:8,12',
             'role_id' => 'required|string|min:1',
             'email' => 'required|string|email|max:100',
-            // 'password' => 'required|string|confirmed|min:6',
+            //'password' => 'required|string|confirmed|min:6',
             'address_city' => 'string|max:5',
             'address_town' => 'string|max:5',
             'address' => 'string|max:30',
@@ -119,7 +120,7 @@ class AuthController extends Controller
      */
     public function register(Request $request) {
         $company_type = $request->all()['company_type'];
-        
+
         if ($company_type == 2)
         {
             $rule = $this->agencyRegisterRule;
@@ -171,7 +172,7 @@ class AuthController extends Controller
             // }
             return response()->json(['error' => $e->getMessage()], 400);
         }
-        
+
         return response()->json([
             'message' => 'User successfully registered',
         ], 201);
@@ -236,22 +237,26 @@ class AuthController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        $company_type = $request->all()['company']['company_type'];
-        $rule = $this->updateRule;
-        if ($company_type == 2)
+        $user_company_id = auth()->user()->company_id;
+        $company_data = Company::find($user_company_id);
+
+        $validator = Validator::make(json_decode($request->getContent(), true),$this->updateRule);
+        if($validator->fails()){
+            return response()->json($validator->errors(), 400);
+        }
+        $validated = $validator->validated();
+
+        return $company_data;
+        $company_type = $company_data['company_type'];
+        if ($company_type === 2)
         {
             $rule['company.ta_register_num'] = 'required|string|max:6';
             $rule['company.ta_category'] = 'required|string|max:2';
         }
 
-        $validator = Validator::make(json_decode($request->getContent(), true), $rule);
-        if($validator->fails()){
-            return response()->json($validator->errors(), 400);
-        }
-        $validated = $validator->validated();
         $validated['password'] = bcrypt($request->password);
         // unset($validated['password']);
-        
+
         // Make sure the user is the owner of the company
         $currectCompanyId = $validated['company_id'];
         if ($currectCompanyId != $validated['company']['id']) {
@@ -281,10 +286,12 @@ class AuthController extends Controller
 
             return response()->json(['error' => $e->getMessage()], 400);
         }
-        
         return response()->json([
             'message' => 'User successfully updated',
         ], 201);
     }
 
+    public function test(){
+        return bcrypt("123456");
+    }
 }

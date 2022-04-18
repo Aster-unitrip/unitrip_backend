@@ -115,6 +115,8 @@ class ComponentActivityController extends Controller
             "stay_time" => 1,
             "imgs" => 1,
             "private" => 1,
+            "description" => 1,
+            "intro_summary" => 1,
             "updated_at" => 1
         );
         $result = $this->requestService->aggregate_facet('activities', $projection, $company_id, $filter, $page, $query_private);
