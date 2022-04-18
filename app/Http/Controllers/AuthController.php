@@ -272,14 +272,13 @@ class AuthController extends Controller
             );
         }
         catch(\Exception $e){
-            if ($user) {
+/*             if ($user) {
                 $user->delete();
             }
             if ($company) {
                 $company->delete();
             }
-
-            return response()->json(['error' => $e->getMessage()], 400);
+            return response()->json(['error' => $e->getMessage()], 400); */
         }
 
         return response()->json([
