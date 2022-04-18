@@ -246,7 +246,6 @@ class AuthController extends Controller
         }
         $validated = $validator->validated();
 
-        return $company_data;
         $company_type = $company_data['company_type'];
         if ($company_type === 2)
         {
@@ -254,7 +253,7 @@ class AuthController extends Controller
             $rule['company.ta_category'] = 'required|string|max:2';
         }
 
-        $validated['password'] = bcrypt($request->password);
+        //$validated['password'] = bcrypt($request->password);
         // unset($validated['password']);
 
         // Make sure the user is the owner of the company
