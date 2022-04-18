@@ -237,23 +237,19 @@ class AuthController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
-
-        $validator = Validator::make(json_decode($request->getContent(), true),$this->updateRule);
-        if($validator->fails()){
-            return response()->json($validator->errors(), 400);
-        }
-        $validated = $validator->validated();
-
-        $company_type = $company_data['company_type'];
-        if ($company_type === 2)
+        $company_type = $request->all()['company']['company_type'];
+        if ($company_type == 2)
         {
             $rule['company.ta_register_num'] = 'required|string|max:6';
             $rule['company.ta_category'] = 'required|string|max:2';
         }
 
-        //$validated['password'] = bcrypt($request->password);
+        $validator = Validator::make(json_decode($request->getContent(), true), $this->updateRule);
+        if($validator->fails()){
+            return response()->json($validator->errors(), 400);
+        }
+        $validated = $validator->validated();
+        // $validated['password'] = bcrypt($request->password);
         // unset($validated['password']);
 
         // Make sure the user is the owner of the company
@@ -285,6 +281,7 @@ class AuthController extends Controller
 
             return response()->json(['error' => $e->getMessage()], 400);
         }
+
         return response()->json([
             'message' => 'User successfully updated',
         ], 201);
