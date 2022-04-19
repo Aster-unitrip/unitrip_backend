@@ -285,8 +285,4 @@ class AuthController extends Controller
             'message' => 'User successfully updated',
         ], 201);
     }
-
-    public function test(){
-        return bcrypt("123456");
-    }
 }
