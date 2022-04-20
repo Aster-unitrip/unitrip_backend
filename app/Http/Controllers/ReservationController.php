@@ -64,10 +64,6 @@ class ReservationController extends Controller
         $reservation_data['guides'] = $itinerary_group_component_type_data['guides'];
 
         $reservation_data_after = $this->requestReservationNameService->get_reservation_data($reservation_data);
-
-
-
-
         return $reservation_data_after;
     }
 
