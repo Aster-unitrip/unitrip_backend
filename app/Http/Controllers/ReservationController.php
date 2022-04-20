@@ -56,12 +56,12 @@ class ReservationController extends Controller
         // 分別組合需要資料 - 檔案命名方式 + 資料obj
         $reservation_data['cus_group_code'] = $order_data["cus_group_code"];
         $reservation_data['itinerary_group_id'] = $order_data["itinerary_group_id"];
-        $reservation_data['attractions'] = $itinerary_group_component_type_data['attractions'];
-        $reservation_data['restaurants'] = $itinerary_group_component_type_data['restaurants'];
-        $reservation_data['accomendations'] = $itinerary_group_component_type_data['accomendations'];
-        $reservation_data['activities'] = $itinerary_group_component_type_data['activities'];
-        $reservation_data['transportations'] = $itinerary_group_component_type_data['transportations'];
-        $reservation_data['guides'] = $itinerary_group_component_type_data['guides'];
+        $reservation_data['attractions'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "attractions");
+        $reservation_data['restaurants'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "restaurants");
+        $reservation_data['accomendations'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "accomendations");
+        $reservation_data['activities'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "activities");
+        $reservation_data['transportations'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "transportations");
+        $reservation_data['guides'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "guides");
 
         $reservation_data_after = $this->requestReservationNameService->get_reservation_data($reservation_data);
         return $reservation_data_after;

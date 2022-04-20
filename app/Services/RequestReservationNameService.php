@@ -23,7 +23,7 @@ class RequestReservationNameService
                 $reservation_data['attractions'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
             }
         }else{
-            return array();
+            $reservation_data['attractions'] = array();
         }
 
         // 2. 體驗 參團編號_體驗名稱
@@ -36,7 +36,8 @@ class RequestReservationNameService
                 $reservation_data['activities'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
             }
         }else{
-            return array();
+            $reservation_data['activities'] = array();
+
         }
 
         // 3. 交通工具 參團編號_車行名稱_車型名稱
@@ -51,7 +52,8 @@ class RequestReservationNameService
 
             }
         }else{
-            return array();
+            $reservation_data['transportations'] = array();
+
         }
 
         // 4. 導遊 參團編號_導遊_導遊姓名
@@ -65,7 +67,7 @@ class RequestReservationNameService
                 $reservation_data['guides'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
             }
         }else{
-            return array();
+            $reservation_data['guides'] = array();
         }
 
         // 5. 飯店(需要討論case) 參團編號_飯店名稱_日期
@@ -99,7 +101,7 @@ class RequestReservationNameService
                 }
             }
         }else{
-            return array();
+            $reservation_data['accomendations'] = array();
         }
 
         // 6. 餐廳(需要討論case) 參團編號_餐廳名稱_日期
@@ -132,17 +134,14 @@ class RequestReservationNameService
                 }
             }
         }else{
-            return array();
+            $reservation_data['restaurants'] = array();
         }
         return $reservation_data;
     }
 
-    public function is_array_empty($component_object_each){
-        if(count($component_object_each) !== 0){
-            for($i = 0; $i < count($component_object); $i++){
-                $component_object[$i]['reservation_name'] = $cus_group_code."_".$component_object[$i]['name'];
-            }
-            return $component_object;
+    public function is_array_empty($component_object, $component_name){
+        if(array_key_exists($component_name, $component_object) && count($component_object) > 0){
+            return $component_object[$component_name];
         }else{
             return array();
         }
