@@ -32,8 +32,6 @@ class OrderController extends Controller
             'nationality' => 'required|string',
             'currency' => 'required|string|max:10',
             'languages' => 'required|array',
-            'budget_min' => 'required|numeric',
-            'budget_max' => 'required|numeric',
             'adult_number' => 'required|integer',
             'child_number' => 'required|integer',
             'baby_number' => 'required|integer',
@@ -44,7 +42,7 @@ class OrderController extends Controller
             'estimated_travel_end' => 'required|date',
             'total_day' =>'required|integer|min:1',
             'representative_company_tax_id' => 'nullable|string',
-            'budget_per_person' => 'nullable|numeric',
+            'budget' => 'required|object',
         ];
         $this->edit_rule = [
             '_id'=>'required|string|max:24',
@@ -59,8 +57,6 @@ class OrderController extends Controller
             'nationality' => 'required|string',
             'currency' => 'required|string|max:10',
             'languages' => 'required|array',
-            'budget_min' => 'required|numeric',
-            'budget_max' => 'required|numeric',
             'estimated_travel_start' => 'required|date',
             'estimated_travel_end' => 'required|date',
             'total_day' =>'required|integer|min:1',
@@ -70,8 +66,9 @@ class OrderController extends Controller
             'source' => 'required|string',
             'needs' => 'nullable|string',
             'company_note' => 'nullable|string',
+            'budget' => 'required|object',
             'representative_company_tax_id' => 'nullable|string',
-            'budget_per_person' => 'nullable|numeric',
+
         ];
         $this->operator_rule = [
             '_id'=>'required|string|max:24',
@@ -102,11 +99,21 @@ class OrderController extends Controller
         $now_time = date("His" , mktime(date('H')+8, date('i'), date('s')));
 
         $validated = $validator->validated();
-        //$travel_days = round((strtotime($validated['estimated_travel_end']) - strtotime($validated['estimated_travel_start']))/3600/24)+1 ;
+        return $validated;
 
-        // budget_max > 0
-        if(array_key_exists("budget_max", $validated) && $validated['budget_max'] <= 0){
-            return response()->json(['error' => "預算最大值必須大於0。"], 400);
+        if(array_key_exists("budget", $validated)){
+            if(!array_key_exists("budgetMin", $validated['budget'])){
+                return response()->json(['error' => "請輸入[訂單 - 行程每人預算最小值。]"]);
+            }
+            if(!array_key_exists("budgetMax", $validated['budget'])){
+                return response()->json(['error' => "請輸入[訂單 - 行程每人預算最大值。]"]);
+            }
+            if(!array_key_exists("budgetMinPerDay", $validated['budget'])){
+                return response()->json(['error' => "請輸入[訂單 - 行程每人每日預算最小值。]"]);
+            }
+            if(!array_key_exists("budgetMaxPerDay", $validated['budget'])){
+                return response()->json(['error' => "請輸入[訂單 - 行程每人每日預算最大值。]"]);
+            }
         }
 
         $validated['user_company_id'] = auth()->user()->company_id;
@@ -220,9 +227,21 @@ class OrderController extends Controller
         if($user_company_id !== $data_before['user_company_id']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
-        // budget_max > 0
-        if(array_key_exists("budget_max", $validated) && $validated['budget_max'] <= 0){
-            return response()->json(['error' => "預算最大值必須大於0。"], 400);
+        
+        // budget
+        if(array_key_exists("budget", $validated)){
+            if(!array_key_exists("budgetMin", $validated['budget'])){
+                return response()->json(['error' => "請輸入[訂單 - 行程每人預算最小值。]"]);
+            }
+            if(!array_key_exists("budgetMax", $validated['budget'])){
+                return response()->json(['error' => "請輸入[訂單 - 行程每人預算最大值。]"]);
+            }
+            if(!array_key_exists("budgetMinPerDay", $validated['budget'])){
+                return response()->json(['error' => "請輸入[訂單 - 行程每人每日預算最小值。]"]);
+            }
+            if(!array_key_exists("budgetMaxPerDay", $validated['budget'])){
+                return response()->json(['error' => "請輸入[訂單 - 行程每人每日預算最大值。]"]);
+            }
         }
 
         // TODO381 6. 出團狀態 需寫判斷
