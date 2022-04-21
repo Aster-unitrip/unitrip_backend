@@ -43,6 +43,8 @@ class OrderController extends Controller
             'estimated_travel_start' => 'required|date',
             'estimated_travel_end' => 'required|date',
             'total_day' =>'required|integer|min:1',
+            'representative_company_tax_id' => 'nullable|string',
+            'budget_per_person' => 'nullable|numeric',
         ];
         $this->edit_rule = [
             '_id'=>'required|string|max:24',
@@ -67,7 +69,9 @@ class OrderController extends Controller
             'baby_number' => 'required|integer',
             'source' => 'required|string',
             'needs' => 'nullable|string',
-            'company_note' => 'nullable|string'
+            'company_note' => 'nullable|string',
+            'representative_company_tax_id' => 'nullable|string',
+            'budget_per_person' => 'nullable|numeric',
         ];
         $this->operator_rule = [
             '_id'=>'required|string|max:24',
