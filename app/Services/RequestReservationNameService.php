@@ -21,6 +21,8 @@ class RequestReservationNameService
                 $reservation_data['attractions'][$i]["detail"]['date'] = $data['attractions'][$i]['date'];
                 $reservation_data['attractions'][$i]["detail"]['sort'] = $data['attractions'][$i]['sort'];
                 $reservation_data['attractions'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
+                $reservation_data['attractions'][$i]["detail"]['order_id'] = $data['order_id'];
+
             }
         }else{
             $reservation_data['attractions'] = array();
@@ -34,6 +36,8 @@ class RequestReservationNameService
                 $reservation_data['activities'][$i]["detail"]['date'] = $data['activities'][$i]['date'];
                 $reservation_data['activities'][$i]["detail"]['sort'] = $data['activities'][$i]['sort'];
                 $reservation_data['activities'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
+                $reservation_data['activities'][$i]["detail"]['order_id'] = $data['order_id'];
+
             }
         }else{
             $reservation_data['activities'] = array();
@@ -49,6 +53,8 @@ class RequestReservationNameService
                 $reservation_data['transportations'][$i]["detail"]['date_start'] = $data['transportations'][$i]['date_start'];
                 $reservation_data['transportations'][$i]["detail"]['date_end'] = $data['transportations'][$i]['date_end'];
                 $reservation_data['transportations'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
+                $reservation_data['transportations'][$i]["detail"]['order_id'] = $data['order_id'];
+
 
             }
         }else{
@@ -65,6 +71,8 @@ class RequestReservationNameService
                 $reservation_data['guides'][$i]["detail"]['date_start'] = $data['guides'][$i]['date_start'];
                 $reservation_data['guides'][$i]["detail"]['date_end'] = $data['guides'][$i]['date_end'];
                 $reservation_data['guides'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
+                $reservation_data['guides'][$i]["detail"]['order_id'] = $data['order_id'];
+
             }
         }else{
             $reservation_data['guides'] = array();
@@ -87,6 +95,7 @@ class RequestReservationNameService
                         $s['sort'] = $data['accomendations'][$i]['sort'];
                         $s['date'] = $data['accomendations'][$i]['date'];
                         $s['itinerary_group_id'] = $data['itinerary_group_id'];
+                        $s['order_id'] = $data['order_id'];
                         $reservation_data['accomendations'][$j]['detail'][] = $s;
                         //$reservation_data['accomendations'][$j]['component_id'] = $data['accomendations'][$i]['_id'];
                         break;
@@ -95,6 +104,7 @@ class RequestReservationNameService
                         $s['sort'] = $data['accomendations'][$i]['sort'];
                         $s['date'] = $data['accomendations'][$i]['date'];
                         $s['itinerary_group_id'] = $data['itinerary_group_id'];
+                        $s['order_id'] = $data['order_id'];
                         $reservation_data['accomendations'][$j]['detail'][] = $s;
                         break;
                     }
@@ -121,6 +131,7 @@ class RequestReservationNameService
                         $s['sort'] = $data['restaurants'][$i]['sort'];
                         $s['date'] = $data['restaurants'][$i]['date'];
                         $s['itinerary_group_id'] = $data['itinerary_group_id'];
+                        $s['order_id'] = $data['order_id'];
                         $reservation_data['restaurants'][$j]['detail'][] = $s;
                         break;
                     }
@@ -128,6 +139,7 @@ class RequestReservationNameService
                         $s['sort'] = $data['restaurants'][$i]['sort'];
                         $s['date'] = $data['restaurants'][$i]['date'];
                         $s['itinerary_group_id'] = $data['itinerary_group_id'];
+                        $s['order_id'] = $data['order_id'];
                         $reservation_data['restaurants'][$j]['detail'][] = $s;
                         break;
                     }

@@ -55,6 +55,7 @@ class ReservationController extends Controller
 
         // 分別組合需要資料 - 檔案命名方式 + 資料obj
         $reservation_data['cus_group_code'] = $order_data["cus_group_code"];
+        $reservation_data['order_id'] = $order_data["_id"];
         $reservation_data['itinerary_group_id'] = $order_data["itinerary_group_id"];
         $reservation_data['attractions'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "attractions");
         $reservation_data['restaurants'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "restaurants");
