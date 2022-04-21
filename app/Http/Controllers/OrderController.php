@@ -42,7 +42,7 @@ class OrderController extends Controller
             'estimated_travel_end' => 'required|date',
             'total_day' =>'required|integer|min:1',
             'representative_company_tax_id' => 'nullable|string',
-            'budget' => 'required|object',
+            'budget' => 'required|array',
         ];
         $this->edit_rule = [
             '_id'=>'required|string|max:24',
@@ -66,7 +66,7 @@ class OrderController extends Controller
             'source' => 'required|string',
             'needs' => 'nullable|string',
             'company_note' => 'nullable|string',
-            'budget' => 'required|object',
+            'budget' => 'required|array',
             'representative_company_tax_id' => 'nullable|string',
 
         ];
@@ -227,7 +227,7 @@ class OrderController extends Controller
         if($user_company_id !== $data_before['user_company_id']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
-        
+
         // budget
         if(array_key_exists("budget", $validated)){
             if(!array_key_exists("budgetMin", $validated['budget'])){
