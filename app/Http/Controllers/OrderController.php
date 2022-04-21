@@ -271,7 +271,7 @@ class OrderController extends Controller
             }
         }
 
-        // TODO381 4. 訂單狀態->參團號碼 需寫判斷
+        // 4. 訂單狀態->參團號碼 需寫判斷
         // 寫入資料 $validated / 比較資料(在資料庫) $data_before
         if(array_key_exists('order_status',$validated) && $data_before['order_status'] !== $validated['order_status']){
             //客製化訂單狀態: 0.收到需求單 -> 1 4 / 1.已規劃行程&詢價 ->2 4 / 2.已回覆，待旅客確認 ->1 3 4 / 3.已成團 -> 4 / 4.棄單 -> X
@@ -297,9 +297,6 @@ class OrderController extends Controller
                     }
                     break;
             }
-            //TODO381 處理成團狀態
-            if($validated['order_status'] === "已成團") $validated['group_status'] = "成團";
-            if($validated['order_status'] === "棄單") $validated['group_status'] = "未成團";
 
             // 預定狀態關聯付款狀態
             if($validated['order_status'] === "收到需求單" || $validated['order_status'] === "已規劃行程&詢價" || $validated['order_status'] === "已回覆，待旅客確認"){
@@ -337,6 +334,9 @@ class OrderController extends Controller
             array_push($validated['order_record'], $order_record_add_order_status);
         }
 
+        //成團狀態
+        if($validated['order_status'] === "已成團") $validated['group_status'] = "成團";
+        if($validated['order_status'] === "棄單") $validated['group_status'] = "未成團";
         $validated['last_updated_on'] = $user_name;
 
         // 參團編號需擋重複
@@ -357,6 +357,7 @@ class OrderController extends Controller
 
         //總人數 = 各項人數相加
         $validated['total_people'] = $validated['adult_number'] + $validated['child_number'] + $validated['baby_number'];
+        return $validated;
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
 
