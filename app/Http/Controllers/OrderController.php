@@ -299,6 +299,7 @@ class OrderController extends Controller
             }
             //TODO381 處理成團狀態
             if($validated['order_status'] === "已成團") $validated['group_status'] = "成團";
+            if($validated['order_status'] === "棄單") $validated['group_status'] = "未成團";
 
             // 預定狀態關聯付款狀態
             if($validated['order_status'] === "收到需求單" || $validated['order_status'] === "已規劃行程&詢價" || $validated['order_status'] === "已回覆，待旅客確認"){
@@ -344,7 +345,7 @@ class OrderController extends Controller
             $cus_orders_past = $this->requestService->aggregate_search('cus_orders', null, $find_one, $page=0);
             $cus_orders_past_data = json_decode($cus_orders_past->getContent(), true);
             //如果只有一筆，判斷是否為重複
-            if($cus_orders_past_data['count'] === 1 && $cus_orders_past_data['docs'][0]['_id'] !== $validated['_id']){
+            if($cus_orders_past_data['count'] > 1){
                 return response()->json(['error' => "已存在此參團編號"], 400);
             }
         }
