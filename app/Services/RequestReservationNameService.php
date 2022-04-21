@@ -82,7 +82,7 @@ class RequestReservationNameService
             for($i = 0; $i < count($data['accomendations']); $i++){
                 for($j = 0; $j < count($compare_before); $j++){
                     if($i === array_keys($compare_before)[$j]){// 第一次
-                        $reservation_data['accomendations'][$j]['reservation_sort'] = $i+1;
+                        $reservation_data['accomendations'][$j]['reservation_sort'] = $j+1;
                         $reservation_data['accomendations'][$j]['reservation_name'] = $cus_group_code."_".$data['accomendations'][$j]['name']."_".$this->date_format($data['accomendations'][$i]['date']);
                         $s['sort'] = $data['accomendations'][$i]['sort'];
                         $s['date'] = $data['accomendations'][$i]['date'];
@@ -116,7 +116,7 @@ class RequestReservationNameService
             for($i = 0; $i < count($data['restaurants']); $i++){
                 for($j = 0; $j < count($compare_before); $j++){
                     if($i === array_keys($compare_before)[$j]){// 第一次
-                        $reservation_data['restaurants'][$j]['reservation_sort'] = $i+1;
+                        $reservation_data['restaurants'][$j]['reservation_sort'] = $j+1;
                         $reservation_data['restaurants'][$j]['reservation_name'] = $cus_group_code."_".$data['restaurants'][$j]['name']."_".$this->date_format($data['restaurants'][$i]['date']);
                         $s['sort'] = $data['restaurants'][$i]['sort'];
                         $s['date'] = $data['restaurants'][$i]['date'];

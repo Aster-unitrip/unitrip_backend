@@ -67,7 +67,7 @@ class ReservationController extends Controller
         return $reservation_data_after;
     }
 
-    public function edit(Request $request)
+    public function pass_to_python(Request $request)
     {
 
 
