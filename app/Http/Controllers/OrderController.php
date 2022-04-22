@@ -90,15 +90,14 @@ class OrderController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
+        $validated = $validator->validated();
 
         //預設
         $user_name = auth()->user()->contact_name;
-
-
+        $validated['user_company_id'] = auth()->user()->company_id;
+        $validated['own_by_id'] = auth()->user()->id;
         $now_date = date('Ymd');
         $now_time = date("His" , mktime(date('H')+8, date('i'), date('s')));
-
-        $validated = $validator->validated();
 
         if(array_key_exists("budget", $validated)){
             if(!array_key_exists("budgetMin", $validated['budget'])){
@@ -115,9 +114,6 @@ class OrderController extends Controller
             }
         }
 
-        $validated['user_company_id'] = auth()->user()->company_id;
-        $validated['own_by_id'] = auth()->user()->id;
-
         //找user公司名稱
         $company_data = Company::find($validated['user_company_id']);
         $validated['user_company_name'] = $company_data['title'];
@@ -127,7 +123,6 @@ class OrderController extends Controller
         $validated['order_number'] = "CUS_".$now_date."_".$now_time;
         $validated['last_updated_on'] = $user_name;
         $validated['user_name'] = $user_name;
-
         $validated['order_record'] = array();
         $order_record_add_order_status = array(
             "event" =>  $validated['order_status'],
@@ -135,7 +130,6 @@ class OrderController extends Controller
             "modified_by" => $user_name
         );
         array_push($validated['order_record'], $order_record_add_order_status);
-
 
         $validated['pay_deposit'] = 'false';
         $validated['deposit'] = 0;
@@ -154,7 +148,6 @@ class OrderController extends Controller
         $validated['total_people'] = $validated['adult_number'] + $validated['child_number'] + $validated['baby_number'];
 
         if(!array_key_exists('company', $validated)) $validated['company'] = null;
-
 
 
         $validated['itinerary_group_id'] = null; //團行程一開始沒有(versions)
