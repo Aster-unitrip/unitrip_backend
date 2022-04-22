@@ -417,6 +417,11 @@ class RequestPService
             "pipeline" => null,
         );
         $query_filter = [];
+        $searchSort = [];
+        if(array_key_exists('searchSort', $filter)){
+            $searchSort = $filter['searchSort'];
+            unset($filter['searchSort']);
+        }
 
         // 用正規表達式查詢名稱
         if ($filter != []) {
@@ -428,6 +433,10 @@ class RequestPService
             array_push($query_filter, array('$project' => $projection));
         }
         $second_query_filter = $query_filter;
+
+        if($searchSort != []){
+            array_push($query_filter, array('$sort' => $searchSort));
+        }
 
         // 分頁
         if ($page>0) {

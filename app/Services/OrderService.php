@@ -40,4 +40,22 @@ class OrderService
             return response()->json(['error' =>'沒有付款狀態欄位', 400]);
         }
     }
+    public function change_search_sort($filter_sort){
+
+        if($filter_sort == "travelStart_1"){ //預計行程時間由舊到新
+            $filter['sort']["estimated_travel_start"] = 1;
+            $filter['sort']["created_at"] = -1;
+        }
+        else if($filter_sort === "travelStart_-1"){ //預計行程時間由新到舊
+            $filter['sort']["estimated_travel_start"] = -1;
+            $filter['sort']["created_at"] = -1;
+        }
+        else if($filter_sort === "createdAt_1"){ //建單日期由舊到新
+            $filter['sort']["created_at"] = 1;
+        }
+        else if($filter_sort === "createdAt_-1"){ //建單日期由新到舊
+            $filter['sort']["created_at"] = -1;
+        }
+        return $filter['sort'];
+    }
 }

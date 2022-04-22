@@ -375,7 +375,6 @@ class OrderController extends Controller
         return $validated;
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
-
     }
 
 
@@ -386,7 +385,6 @@ class OrderController extends Controller
 
     public function list(Request $request)
     {
-
         $filter = json_decode($request->getContent(), true);
 
         if (array_key_exists('page', $filter)) {
@@ -422,10 +420,10 @@ class OrderController extends Controller
             }
             else return response()->json(['error' => '訂購結束時間不可早於訂購開始時間'], 400);
         }
-        elseif(array_key_exists('order_start', $filter) && !array_key_exists('order_end', $filter)){
+        else if(array_key_exists('order_start', $filter) && !array_key_exists('order_end', $filter)){
             return response()->json(['error' => '沒有訂購結束時間'], 400);
         }
-        elseif(!array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
+        else if(!array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
             return response()->json(['error' => '沒有訂購開始時間'], 400);
         }
         unset($filter['order_start']);
@@ -442,6 +440,15 @@ class OrderController extends Controller
             }
         }
 
+        //sort by [created_at]、[travel_start]
+        if(array_key_exists('sort', $filter)){
+            // 轉換sort
+            $filter["searchSort"] = $this->orderService->change_search_sort($filter['sort']);
+            unset($filter['sort']);
+        }else{
+            $filter["searchSort"]["created_at"] = -1;
+        }
+
         //[訂單編號]、[代表人]、[參團編號]使用模糊搜尋
         if(array_key_exists('representative', $filter)){
             $filter['representative'] = array('$regex' => $filter['representative']);
@@ -452,6 +459,7 @@ class OrderController extends Controller
         if(array_key_exists('cus_group_code', $filter)){
             $filter['cus_group_code'] = array('$regex' => $filter['cus_group_code']);
         }
+
         $result = $this->requestService->aggregate_search('cus_orders', null, $filter, $page);
         return $result;
 
