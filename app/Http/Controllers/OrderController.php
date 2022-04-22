@@ -99,7 +99,6 @@ class OrderController extends Controller
         $now_time = date("His" , mktime(date('H')+8, date('i'), date('s')));
 
         $validated = $validator->validated();
-        return $validated;
 
         if(array_key_exists("budget", $validated)){
             if(!array_key_exists("budgetMin", $validated['budget'])){
