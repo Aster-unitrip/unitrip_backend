@@ -16,8 +16,7 @@ use Exception;
 class ItineraryGroupService
 {
 
-    public function __construct($raw_data)
-    {
+    public function __construct($raw_data){
         $this->raw_data = $raw_data;
         $this->total_day = $raw_data['total_day'];
         $this->areas = $raw_data['areas'];
@@ -120,5 +119,24 @@ class ItineraryGroupService
                 }
             }
         }
+    }
+
+    public function change_search_sort($filter_sort){
+
+        if($filter_sort == "travelStart_1"){ //預計行程時間由舊到新
+            $filter['sort']["travel_start"] = 1;
+            $filter['sort']["created_at"] = -1;
+        }
+        else if($filter_sort === "travelStart_-1"){ //預計行程時間由新到舊
+            $filter['sort']["travel_start"] = -1;
+            $filter['sort']["created_at"] = -1;
+        }
+        else if($filter_sort === "createdAt_1"){ //建單日期由舊到新
+            $filter['sort']["created_at"] = 1;
+        }
+        else if($filter_sort === "createdAt_-1"){ //建單日期由新到舊
+            $filter['sort']["created_at"] = -1;
+        }
+        return $filter['sort'];
     }
 }

@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use App\Services\RequestStatesService;
 use App\Services\RequestCostService;
-
-
 use App\Services\ItineraryGroupService;
+
+
 use Validator;
 
 class ItineraryGroupController extends Controller
@@ -17,13 +17,17 @@ class ItineraryGroupController extends Controller
     private $requestService;
     private $requestStatesService;
     private $requestCostService;
+    private $itineraryGroupService;
 
-    public function __construct(RequestPService $requestService, RequestStatesService $requestStatesService, RequestCostService $requestCostService)
+
+    public function __construct(RequestPService $requestService, RequestStatesService $requestStatesService, RequestCostService $requestCostService, ItineraryGroupService $itineraryGroupService)
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
         $this->requestStatesService = $requestStatesService;
         $this->requestCostService = $requestCostService;
+        $this->itineraryGroupService = $itineraryGroupService;
+
 
         // TODO新增欄位已很久無更新
         $this->rule = [
@@ -547,10 +551,10 @@ class ItineraryGroupController extends Controller
             }
             else return response()->json(['error' => '訂購結束時間不可早於訂購開始時間'], 400);
         }
-        elseif(array_key_exists('order_start', $filter) && !array_key_exists('order_end', $filter)){
+        else if(array_key_exists('order_start', $filter) && !array_key_exists('order_end', $filter)){
             return response()->json(['error' => '沒有訂購結束時間'], 400);
         }
-        elseif(!array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
+        else if(!array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
             return response()->json(['error' => '沒有訂購開始時間'], 400);
         }
         unset($filter['order_start']);
@@ -559,57 +563,34 @@ class ItineraryGroupController extends Controller
         $company_type = auth()->payload()->get('company_type');
         if ($company_type == 1){
         }elseif ($company_type == 2){
-            $filter['user_company_id'] = auth()->user()->company_id;
+            //$filter['user_company_id'] = auth()->user()->company_id;
         }else{
             return response()->json(['error' => 'company_type must be 1 or 2'], 400);
         }
 
-        // lookup database
-        $lookup = array(
-            "from" => 'itinerary_group',
-            "localField" => 'itinerary_group_id',
-            "foreignField" => '_id',
-            "as" => 'itinerary_group_date'
-        );
-        $unwind = array(
-            "path" => '$itinerary_group_date',
-            "preserveNullAndEmptyArrays" => true
-        );
-        $filter_join_table = array();
-
         // Handle itinerary travel_start、travel_end range query
         if(array_key_exists('travel_start', $filter) && array_key_exists('travel_end', $filter)){
             if(strtotime($filter['travel_end']) - strtotime($filter['travel_start']) >= 0){
-                $filter_join_table['travel_start'] = $filter['travel_start']."T00:00:00.000+08:00";
-                $filter_join_table['travel_end'] = $filter['travel_end']."T23:59:59.000+08:00";
+                $filter['travel_start'] = $filter['travel_start']."T00:00:00.000+08:00";
+                $filter['travel_end'] = $filter['travel_end']."T23:59:59.000+08:00";
             }else return response()->json(['error' => '行程結束時間不可早於行程開始時間'], 400);
-            unset($filter['travel_start']);
-            unset($filter['travel_end']);
+
         }elseif(array_key_exists('travel_start', $filter) && !array_key_exists('travel_end', $filter)){
             return response()->json(['error' => '沒有訂購結束時間'], 400);
         }elseif(!array_key_exists('travel_start', $filter) && array_key_exists('travel_end', $filter)){
             return response()->json(['error' => '沒有訂購開始時間'], 400);
         }
-        // 欲產生內容
-        $projection = array(
-            "_id" => 1,
-            "order_number" => 1,
-            "cus_group_code" => 1,
-            "representative" => 1,
-            "created_at" => 1,
-            "group_status" => 1,
-            "order_status" => 1,
-            "payment_status" => 1,
-            "out_status" => 1,
-            "amount" => 1,
-            "user_name" => 1,
-            "total_people" => 1,
-            "itinerary_group_id" => 1,
-            "travel_start" => "\$itinerary_group_date.travel_start",
-            "travel_end" => "\$itinerary_group_date.travel_end",
-            "source" =>1
-        );
-        $result = $this->requestService->aggregate_search_two_table('cus_orders', $projection, $filter, $lookup, $unwind, $filter_join_table, $page);
+
+        //sort by [created_at]、[travel_start]
+        if(array_key_exists('sort', $filter)){
+            // 轉換sort
+            $filter["searchSort"] = $this->itineraryGroupService->change_search_sort($filter['sort']);
+            unset($filter['sort']);
+        }else{
+            $filter["searchSort"]["created_at"] = -1;
+        }
+
+        $result = $this->requestService->aggregate_search('cus_orders_join_itinerary_group', null, $filter, $page);
         $result_data =  json_decode($result->content(), true);
 
         for($i = 0; $i < count($result_data['docs']); $i++){
