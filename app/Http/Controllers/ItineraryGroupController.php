@@ -7,26 +7,22 @@ use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use App\Services\RequestStatesService;
 use App\Services\RequestCostService;
-use App\Services\ItineraryGroupService;
-
+use App\Services\OrderService;
 
 use Validator;
 
 class ItineraryGroupController extends Controller
 {
     private $requestService;
-    private $requestStatesService;
-    private $requestCostService;
-    private $itineraryGroupService;
 
-
-    public function __construct(RequestPService $requestService, RequestStatesService $requestStatesService, RequestCostService $requestCostService, ItineraryGroupService $itineraryGroupService)
+    public function __construct(RequestPService $requestPService, RequestStatesService $requestStatesService, RequestCostService $requestCostService)
     {
         $this->middleware('auth');
-        $this->requestService = $requestService;
+        $this->requestService = $requestPService;
         $this->requestStatesService = $requestStatesService;
         $this->requestCostService = $requestCostService;
-        $this->itineraryGroupService = $itineraryGroupService;
+
+
 
 
         // TODO新增欄位已很久無更新
@@ -584,7 +580,7 @@ class ItineraryGroupController extends Controller
         //sort by [created_at]、[travel_start]
         if(array_key_exists('sort', $filter)){
             // 轉換sort
-            $filter["searchSort"] = $this->itineraryGroupService->change_search_sort($filter['sort']);
+            $filter["searchSort"] = $this->requestStatesService->change_search_sort($filter['sort']);
             unset($filter['sort']);
         }else{
             $filter["searchSort"]["created_at"] = -1;

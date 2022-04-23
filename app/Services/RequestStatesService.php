@@ -86,5 +86,22 @@ class RequestStatesService
         }
 
     }
+
+    public function change_search_sort($filter_sort){
+        if($filter_sort == "travelStart_1"){ //預計行程時間由舊到新
+            $filter['sort']["travel_start"] = 1;
+        }
+        else if($filter_sort === "travelStart_-1"){ //預計行程時間由新到舊
+            $filter['sort']["travel_start"] = -1;
+        }
+        else if($filter_sort === "totalPeople_1"){ //參團人數由少到多
+            $filter['sort']["total_people"] = 1;
+        }
+        else if($filter_sort === "totalPeople_-1"){ //參團人數由多到少
+            $filter['sort']["total_people"] = -1;
+        }
+        $filter['sort']["created_at"] = -1;
+        return $filter['sort'];
+    }
 }
 ?>
