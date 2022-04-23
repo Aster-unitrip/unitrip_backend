@@ -88,10 +88,10 @@ class RequestStatesService
     }
 
     public function change_search_sort($filter_sort){
-        if($filter_sort == "travelStart_1"){ //預計行程時間由舊到新
+        if($filter_sort == "travelStart_1"){ //實際行程時間由舊到新
             $filter['sort']["travel_start"] = 1;
         }
-        else if($filter_sort === "travelStart_-1"){ //預計行程時間由新到舊
+        else if($filter_sort === "travelStart_-1"){ //實際行程時間由新到舊
             $filter['sort']["travel_start"] = -1;
         }
         else if($filter_sort === "totalPeople_1"){ //參團人數由少到多
