@@ -363,7 +363,7 @@ class OrderController extends Controller
             $cus_orders_past_data = json_decode($cus_orders_past->getContent(), true);
             //如果只有一筆，判斷是否為重複
             if($cus_orders_past_data['count'] > 1){
-                return response()->json(['error' => "已存在此參團編號"], 400);
+                return response()->json(['error' => "同公司不可重複相同參團編號"], 400);
             }
         }
 
