@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
+use App\Services\CompanyService;
 
 use Validator;
 
@@ -12,11 +13,13 @@ use Validator;
 class DMController extends Controller
 {
     private $requestService;
+    private $companyService;
 
-    public function __construct(RequestPService $requestPService)
+    public function __construct(RequestPService $requestPService, CompanyService $companyService)
     {
         //$this->middleware('auth');
         $this->requestService = $requestPService;
+        $this->companyService = $companyService;
 
         $this->edit_rule = [
             '_id'=>'required|string|max:24',
@@ -48,6 +51,7 @@ class DMController extends Controller
             $dm_data_new['is_display'] = "false";
             $dm_data_new['dm_layout'] = "BlueDM"; // 目前預設為 "BlueDM"
             $dm_data_new['price_per_person'] = 0;
+            $dm_data_new['if_show_logo'] = "true";
             $insert_one_to_dm = $this->requestService->insert_one('dm', $dm_data_new);
         }else{ //old
             $dm_data_new['_id'] = $dm_before['document']['_id'];
@@ -75,6 +79,7 @@ class DMController extends Controller
         $dm_itinerary_group_data['name'] = $cus_itinerary_group_data['name'];
         $dm_itinerary_group_data['summary'] = $cus_itinerary_group_data['summary'];
         $dm_itinerary_group_data['code'] = $cus_itinerary_group_data['code'];
+        $dm_itinerary_group_data['owned_by'] = $cus_itinerary_group_data['owned_by'];
         $dm_itinerary_group_data['travel_start'] = $cus_itinerary_group_data['travel_start'];
         $dm_itinerary_group_data['travel_end'] = $cus_itinerary_group_data['travel_end'];
         $dm_itinerary_group_data['total_day'] = $cus_itinerary_group_data['total_day'];
@@ -82,6 +87,11 @@ class DMController extends Controller
         $dm_itinerary_group_data['include_description'] = $cus_itinerary_group_data['include_description'];
         $dm_itinerary_group_data['exclude_description'] = $cus_itinerary_group_data['exclude_description'];
         $dm_itinerary_group_data['itinerary_group_note'] = $cus_itinerary_group_data['itinerary_group_note'];
+        $ta_profile = $this->companyService->getPublicDataById($cus_itinerary_group_data['owned_by']);
+        $ta_profile['address'] = $ta_profile['address_city'].$ta_profile['address_town'].$ta_profile['address'];
+        unset($ta_profile['address_city']);
+        unset($ta_profile['address_town']);
+        $dm_itinerary_group_data['company_data'] = $ta_profile;
         return $dm_itinerary_group_data;
 
     }

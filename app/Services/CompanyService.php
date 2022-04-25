@@ -21,6 +21,11 @@ class CompanyService
         return $this->model->find($id);
     }
 
+    public function getPublicDataById($id)
+    {
+        return $this->model->select('title', 'tel', 'logo_path', 'address_city', 'address_town', 'address', 'ta_register_num')->find($id);
+    }
+
     public function getCompanyByTaxId($taxId)
     {
         return $this->model->where('tax_id', $taxId)->first();
