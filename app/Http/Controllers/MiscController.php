@@ -68,12 +68,12 @@ class MiscController extends Controller
     {
         //傳入要查詢的欄位、數值、id
         $filter = json_decode($request->getContent(), true);
-/*         $filter['owned_by'] = auth()->user()->company_id;
+        $filter['owned_by'] = auth()->user()->company_id;
         $company_data = Company::find($filter['owned_by']);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
-        } */
+        }
         $fieldId = null;
         if(array_key_exists('fieldName', $filter) && array_key_exists('value', $filter)){
             $array_field = array(0 => 'cus_group_code', 1 => 'code', 2 => 'name');

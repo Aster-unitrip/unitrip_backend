@@ -559,7 +559,7 @@ class ItineraryGroupController extends Controller
         $company_type = auth()->payload()->get('company_type');
         if ($company_type == 1){
         }elseif ($company_type == 2){
-            //$filter['owned_by'] = auth()->user()->company_id;
+            $filter['owned_by'] = auth()->user()->company_id;
         }else{
             return response()->json(['error' => 'company_type must be 1 or 2'], 400);
         }
