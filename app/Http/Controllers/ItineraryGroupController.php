@@ -506,7 +506,6 @@ class ItineraryGroupController extends Controller
 
     // project: ID, 名稱, 子類別, 行程天數, 成團人數, 建立日期
 
-    // TODO 尚未修改
     public function list(Request $request)
     {
         $filter = json_decode($request->getContent(), true);
