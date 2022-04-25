@@ -95,8 +95,7 @@ class OrderController extends Controller
         //預設
         $user_name = auth()->user()->contact_name;
         $validated['owned_by'] = auth()->user()->company_id;
-        $validated['own_by'] = auth()->user()->company_id;
-        $validated['own_by_id'] = auth()->user()->id;
+        $validated['owned_by_id'] = auth()->user()->id;
         $now_date = date('Ymd');
         $now_time = date("His" , mktime(date('H')+8, date('i'), date('s')));
 
@@ -138,7 +137,6 @@ class OrderController extends Controller
         $validated['amount'] = 0;
         $validated['actual_payment'] = 0; //旅客實際支付金額
         $validated['cancel_at'] = null;
-        $validated['deleted_at'] = null;
         $validated['cus_group_code'] = null;
         $validated['operator_note'] = null;
         $validated['group_status'] = "未成團";
@@ -352,7 +350,10 @@ class OrderController extends Controller
 
         //成團狀態
         if($validated['order_status'] === "已成團") $validated['group_status'] = "成團";
-        if($validated['order_status'] === "棄單") $validated['group_status'] = "未成團";
+        if($validated['order_status'] === "棄單"){
+            $validated['group_status'] = "未成團";
+            $validated['cancel_at'] = date('Y-m-d H:i:s');
+        }
         $validated['last_updated_on'] = $user_name;
 
         // 參團編號需擋重複

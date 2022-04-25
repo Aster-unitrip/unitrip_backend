@@ -100,7 +100,7 @@ class RequestReservationNameService
                         //$reservation_data['accomendations'][$j]['component_id'] = $data['accomendations'][$i]['_id'];
                         break;
                     }
-                    elseif($compare_before[$j] === $data['accomendations'][$i]['_id']){
+                    else if($compare_before[$j] === $data['accomendations'][$i]['_id']){
                         $s['sort'] = $data['accomendations'][$i]['sort'];
                         $s['date'] = $data['accomendations'][$i]['date'];
                         $s['itinerary_group_id'] = $data['itinerary_group_id'];

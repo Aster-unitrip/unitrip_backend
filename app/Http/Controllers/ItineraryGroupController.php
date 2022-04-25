@@ -154,9 +154,9 @@ class ItineraryGroupController extends Controller
 
         //CUS_"行程代碼"_"旅行社員工id"_"客製團訂單日期"_"客製團訂單時間"_"行程天數"_"第幾團"
         if(array_key_exists('code', $itinerary_group_data)){
-            $fixed["cus_group_code"] = "CUS_".$itinerary_group_data['code']."_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
+            $fixed["cus_group_code"] = "CUS_".$itinerary_group_data['code']."_".$order_data["owned_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
         }else if(!array_key_exists('code', $itinerary_group_data) && $validated['code'] !== null){
-            $fixed["cus_group_code"] = "CUS_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
+            $fixed["cus_group_code"] = "CUS_".$order_data["owned_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
         }
 
         $fixed["_id"] = $order_data["_id"];
@@ -347,9 +347,9 @@ class ItineraryGroupController extends Controller
 
             //CUS_"行程代碼"_"旅行社員工id"_"客製團訂單日期"_"客製團訂單時間"_"行程天數"_"第幾團"
             if(array_key_exists('code', $itinerary_group_data)){
-                $fixed["cus_group_code"] = "CUS_".$itinerary_group_data['code']."_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
+                $fixed["cus_group_code"] = "CUS_".$itinerary_group_data['code']."_".$order_data["owned_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
             }else if(!array_key_exists('code', $itinerary_group_data) && $validated['code'] !== null){
-                $fixed["cus_group_code"] = "CUS_".$order_data["own_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
+                $fixed["cus_group_code"] = "CUS_".$order_data["owned_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
             }
 
             $fixed["_id"] = $order_data["_id"];

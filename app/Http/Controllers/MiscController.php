@@ -69,32 +69,33 @@ class MiscController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-
-        if(array_key_exists('fieldName', $filter)){
+        $fieldName = $filter['fieldName'];
+        if(array_key_exists('fieldName', $filter) && array_key_exists('value', $filter)){
             $array_field = array(0 => 'cus_group_code', 1 => 'code', 2 => 'name');
             $key = array_search($filter['fieldName'], $array_field);
             if($key === 0){
                 $filter['db_name'] = 'cus_orders';
+                $filter['cus_group_code'] = $filter['value'];
             }
-            else if($key === 1 || $key === 2){
+            else if($key === 1){
                 $filter['db_name'] = 'itinerary_group';
+                $filter['code'] = $filter['value'];
+            }
+            else if($key === 2){
+                $filter['db_name'] = 'itinerary_group';
+                $filter['name'] = $filter['value'];
             }
             else{
                 return response()->json(['error' => '請傳入有效查詢的欄位。']);
             }
         }
         else{
-            return response()->json(['error' => '請傳入查詢的欄位。']);
+            return response()->json(['error' => '請傳入查詢的欄位或數值。']);
         }
+        unset($filter['value']);
+        unset($filter['fieldName']);
 
-        if(array_key_exists('value', $filter)){
-            return $filter;
 
-        }
-        else{
-            return response()->json(['error' => '請傳入查詢的數值。']);
-
-        }
-        //return $filter;
+        return $filter;
     }
 }
