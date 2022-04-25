@@ -125,10 +125,10 @@ class MiscController extends Controller
                 return true;
             }
             else{ // 如果沒建過此筆 則為重複
-                return "false";
+                return false;
             }
         }else{
-            return "false";
+            return false;
 
         }
     }
