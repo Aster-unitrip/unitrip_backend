@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\MiscService;
+use App\Services\RequestPService;
+
 use App\Models\User;
 use App\Models\Company;
 
@@ -10,11 +12,14 @@ use App\Models\Company;
 class MiscController extends Controller
 {
     private $miscService;
+    private $requestService;
 
-    public function __construct(MiscService $miscService)
+
+    public function __construct(MiscService $miscService, RequestPService $requestPService)
     {
         // $this->middleware('auth');
         $this->miscService = $miscService;
+        $this->requestService = $requestPService;
 
     }
 
@@ -61,28 +66,37 @@ class MiscController extends Controller
 
     public function check_duplicate(Request $request)
     {
-        //傳入要查詢的欄位、數值
+        //傳入要查詢的欄位、數值、id
         $filter = json_decode($request->getContent(), true);
-        $filter['owned_by'] = auth()->user()->company_id;
+/*         $filter['owned_by'] = auth()->user()->company_id;
         $company_data = Company::find($filter['owned_by']);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
-        }
-        $fieldName = $filter['fieldName'];
+        } */
+        $fieldId = null;
         if(array_key_exists('fieldName', $filter) && array_key_exists('value', $filter)){
             $array_field = array(0 => 'cus_group_code', 1 => 'code', 2 => 'name');
             $key = array_search($filter['fieldName'], $array_field);
             if($key === 0){
-                $filter['db_name'] = 'cus_orders';
+                if($filter['value'] === ""){
+                    return false; //不可以空
+                }
+                $fieldDB = "cus_orders";
                 $filter['cus_group_code'] = $filter['value'];
             }
             else if($key === 1){
-                $filter['db_name'] = 'itinerary_group';
+                if($filter['value'] === ""){
+                    return true; //空
+                }
+                $fieldDB = "itinerary_group";
                 $filter['code'] = $filter['value'];
             }
             else if($key === 2){
-                $filter['db_name'] = 'itinerary_group';
+                if($filter['value'] === ""){
+                    return false; //不可以空
+                }
+                $fieldDB = "itinerary_group";
                 $filter['name'] = $filter['value'];
             }
             else{
@@ -94,8 +108,28 @@ class MiscController extends Controller
         }
         unset($filter['value']);
         unset($filter['fieldName']);
+        if(array_key_exists('fieldId', $filter)){
+            $fieldId = $filter['fieldId'];
+            unset($filter['fieldId']);
+        }
 
+        $result = $this->requestService->aggregate_search( $fieldDB, null, $filter, $page=0);
+        $result_data = json_decode($result->getContent(), true);
 
-        return $filter;
+        if($result_data['count'] === 0){
+            return true;
+        }
+        else if($result_data['count'] === 1){
+            // 如果已建過此筆 可能為同一筆資料
+            if($fieldId !== null && $result_data['docs'][0]['_id'] === $fieldId){
+                return true;
+            }
+            else{ // 如果沒建過此筆 則為重複
+                return "false";
+            }
+        }else{
+            return "false";
+
+        }
     }
 }
