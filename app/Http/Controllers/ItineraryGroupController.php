@@ -175,15 +175,15 @@ class ItineraryGroupController extends Controller
         $validated = $validator->validated();
 
         // 1-1 使用者公司必須是旅行社
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
 
         // 1-2 限制只能同公司員工作修正 -> 關聯 get_id
-        if($user_company_id !== $validated['owned_by']){
+        if($owned_by !== $validated['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -559,7 +559,7 @@ class ItineraryGroupController extends Controller
         $company_type = auth()->payload()->get('company_type');
         if ($company_type == 1){
         }elseif ($company_type == 2){
-            //$filter['user_company_id'] = auth()->user()->company_id;
+            //$filter['owned_by'] = auth()->user()->company_id;
         }else{
             return response()->json(['error' => 'company_type must be 1 or 2'], 400);
         }
@@ -602,9 +602,9 @@ class ItineraryGroupController extends Controller
     public function get_by_id($id)
     { //傳入訂單id
         // 1-1 使用者公司必須是旅行社
-        $user_company_id = auth()->user()->company_id;
+        $owned_by = auth()->user()->company_id;
         $contact_name = auth()->user()->contact_name;
-        $company_data = Company::find($user_company_id);
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
@@ -618,7 +618,7 @@ class ItineraryGroupController extends Controller
         }
 
         // 1-2 限制只能同公司員工作修正
-        if($user_company_id !== $cus_order_data['user_company_id']){
+        if($owned_by !== $cus_order_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -711,7 +711,7 @@ class ItineraryGroupController extends Controller
             $itinerary_group_data_new['exclude_description'] = "";
             $itinerary_group_data_new['last_updated_on'] = $contact_name;
             $itinerary_group_data_new['itinerary_group_note'] = "";
-            $itinerary_group_data_new['owned_by'] = $user_company_id;
+            $itinerary_group_data_new['owned_by'] = $owned_by;
             return $itinerary_group_data_new;
         }else{
             return response()->json(['error' => '發生一些問題，可能是資料沒給正確!']);
@@ -728,13 +728,13 @@ class ItineraryGroupController extends Controller
         }
 
         $data_before = $data_before['document'];
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-        if($user_company_id !== $data_before['owned_by']){
+        if($owned_by !== $data_before['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -755,8 +755,8 @@ class ItineraryGroupController extends Controller
         $validated = $validator->validated();
 
         // 1-1 使用者公司必須是旅行社
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
@@ -764,12 +764,12 @@ class ItineraryGroupController extends Controller
 
         // 1-2 限制只能同公司員工作修正
         // 找團行程的company_id和使用者company_id
-        if($user_company_id !== $validated['owned_by']){
+        if($owned_by !== $validated['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
         // TODO 團行程[名稱]、[代碼]必須和行程不同
-        //$filter['company_id'] = $user_company_id;
+        //$filter['company_id'] = $owned_by;
         $filter['code'] = $validated['code'];
         $filter['name'] = $validated['name'];
         $result_code = $this->requestService->aggregate_search('itineraries', null, $filter, $page=0);
@@ -854,13 +854,13 @@ class ItineraryGroupController extends Controller
         $validated = $validator->validated();
 
         // 1.使用者公司必須是旅行社、限制只能同公司員工作修正
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-        if($user_company_id !== $validated['owned_by']){
+        if($owned_by !== $validated['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -1021,8 +1021,8 @@ class ItineraryGroupController extends Controller
     { // 過濾出該[團行程]全部刪除內容
 
         // 1-1 使用者公司必須是旅行社
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
@@ -1031,7 +1031,7 @@ class ItineraryGroupController extends Controller
         if(!$data){
             return response()->json(['error' => '沒有這筆團行程資料。'], 400);
         }
-        if($user_company_id !== $data['document']['owned_by']){
+        if($owned_by !== $data['document']['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -1054,15 +1054,15 @@ class ItineraryGroupController extends Controller
         $validated = $validator->validated();
 
         // 1.使用者公司必須是旅行社
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
         $data_before = $this->requestService->find_one('cus_delete_components', $validated['_id'], null, null);
         $data_of_itinerary_group_before = $this->requestService->find_one('itinerary_group', $data_before['document']['itinerary_group_id'], null, null);
-        if($user_company_id !== $data_of_itinerary_group_before['document']['owned_by']){
+        if($owned_by !== $data_of_itinerary_group_before['document']['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 

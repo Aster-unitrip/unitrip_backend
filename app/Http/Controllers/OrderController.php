@@ -94,7 +94,8 @@ class OrderController extends Controller
 
         //預設
         $user_name = auth()->user()->contact_name;
-        $validated['user_company_id'] = auth()->user()->company_id;
+        $validated['owned_by'] = auth()->user()->company_id;
+        $validated['own_by'] = auth()->user()->company_id;
         $validated['own_by_id'] = auth()->user()->id;
         $now_date = date('Ymd');
         $now_time = date("His" , mktime(date('H')+8, date('i'), date('s')));
@@ -115,7 +116,7 @@ class OrderController extends Controller
         }
 
         //找user公司名稱
-        $company_data = Company::find($validated['user_company_id']);
+        $company_data = Company::find($validated['owned_by']);
         $validated['user_company_name'] = $company_data['title'];
         $validated['order_status'] = "收到需求單";
         $validated['payment_status'] = "未付款";
@@ -178,7 +179,7 @@ class OrderController extends Controller
         $address["address"] = "";
         $address["detail"] = "";
         $passenger_data['address'] = $address;
-        $passenger_data['owned_by'] = $validated['user_company_id'];
+        $passenger_data['owned_by'] = $validated['owned_by'];
 
 
         $this->requestService->insert_one('passengers', $passenger_data);
@@ -210,13 +211,13 @@ class OrderController extends Controller
 
 
         // 非旅行社及該旅行社人員不可修改訂單
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-        if($user_company_id !== $data_before['user_company_id']){
+        if($owned_by !== $data_before['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -357,7 +358,7 @@ class OrderController extends Controller
         // 參團編號需擋重複
         if(array_key_exists('cus_group_code', $validated)){
             // 需檔自己公司
-            $find_one['user_company_id'] = $user_company_id;
+            $find_one['owned_by'] = $owned_by;
             $find_one['cus_group_code'] = $validated['cus_group_code'];
             $cus_orders_past = $this->requestService->aggregate_search('cus_orders', null, $find_one, $page=0);
             $cus_orders_past_data = json_decode($cus_orders_past->getContent(), true);
@@ -402,7 +403,7 @@ class OrderController extends Controller
 
         //擋下供應商/其他公司的id
         $company_id = auth()->payload()->get('company_id');
-        $filter['user_company_id'] = auth()->user()->company_id;
+        $filter['owned_by'] = auth()->user()->company_id;
 
         // 找該 company 的 types
         $company_data = Company::find($company_id);
@@ -467,8 +468,8 @@ class OrderController extends Controller
     public function get_by_id($id)
     {
         // 非旅行社及該旅行社人員不可修改訂單
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
@@ -480,7 +481,7 @@ class OrderController extends Controller
 
         $data_before = $data_before['document'];
 
-        if($user_company_id !== $data_before['user_company_id']){
+        if($owned_by !== $data_before['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -497,8 +498,8 @@ class OrderController extends Controller
 
 
         // 非旅行社及該旅行社人員不可修改訂單
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
@@ -511,7 +512,7 @@ class OrderController extends Controller
         $cus_orders_past = $cus_orders_past['document'];
 
         //判斷是否為該公司
-        if($user_company_id !== $cus_orders_past['user_company_id']){
+        if($owned_by !== $cus_orders_past['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
