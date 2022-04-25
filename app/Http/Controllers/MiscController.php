@@ -57,4 +57,11 @@ class MiscController extends Controller
         $same_company_users_data = User::where('company_id', $user_company_id)->get();
         return $same_company_users_data;
     }
+
+    public function check_duplicate(Request $request)
+    {
+        //傳入要查詢的資料庫、欄位
+        $filter = json_decode($request->getContent(), true);
+        return $filter;
+    }
 }
