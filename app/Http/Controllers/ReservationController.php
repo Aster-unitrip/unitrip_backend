@@ -36,9 +36,9 @@ class ReservationController extends Controller
         // 1-2 限制只能同公司員工作修正
         $order = $this->requestService->get_one('cus_orders', $id);
         $order_data = json_decode($order->getContent(), true);
-        if($owned_by !== $order_data['owned_by']){
+        /* if($owned_by !== $order_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
-        }
+        } */
 
         // 取得訂單相關資訊
         $order = $this->requestService->get_one('cus_orders', $id);
@@ -70,8 +70,8 @@ class ReservationController extends Controller
 
     public function pass_to_python(Request $request)
     {
-
-
+        $filter = json_decode($request->getContent(), true);
+        return $filter;
     }
 
 }

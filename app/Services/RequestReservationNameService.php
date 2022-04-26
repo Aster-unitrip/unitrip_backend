@@ -72,7 +72,6 @@ class RequestReservationNameService
                 $reservation_data['guides'][$i]["detail"]['date_end'] = $data['guides'][$i]['date_end'];
                 $reservation_data['guides'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
                 $reservation_data['guides'][$i]["detail"]['order_id'] = $data['order_id'];
-
             }
         }else{
             $reservation_data['guides'] = array();
@@ -83,8 +82,9 @@ class RequestReservationNameService
         if(count($data['accomendations']) !== 0){
             $compare_before = array();
             for($i = 0; $i < count($data['accomendations']); $i++){
-                $compare_before[$i] = $data['accomendations'][$i]['_id'];
+                $compare_before[$i] = $data['accomendations'][$i]['name'];
             }
+
             $compare_before = array_unique($compare_before);
 
             for($i = 0; $i < count($data['accomendations']); $i++){
@@ -100,7 +100,7 @@ class RequestReservationNameService
                         //$reservation_data['accomendations'][$j]['component_id'] = $data['accomendations'][$i]['_id'];
                         break;
                     }
-                    else if($compare_before[$j] === $data['accomendations'][$i]['_id']){
+                    else if($compare_before[$j] === $data['accomendations'][$i]['name']){
                         $s['sort'] = $data['accomendations'][$i]['sort'];
                         $s['date'] = $data['accomendations'][$i]['date'];
                         $s['itinerary_group_id'] = $data['itinerary_group_id'];
@@ -119,7 +119,7 @@ class RequestReservationNameService
         if(count($data['restaurants']) !== 0){
             $compare_before = array();
             for($i = 0; $i < count($data['restaurants']); $i++){
-                $compare_before[$i] = $data['restaurants'][$i]['_id'];
+                $compare_before[$i] = $data['restaurants'][$i]['name'];
             }
             $compare_before = array_unique($compare_before);
 
@@ -135,7 +135,7 @@ class RequestReservationNameService
                         $reservation_data['restaurants'][$j]['detail'][] = $s;
                         break;
                     }
-                    elseif($compare_before[$j] === $data['restaurants'][$i]['_id']){
+                    elseif($compare_before[$j] === $data['restaurants'][$i]['name']){
                         $s['sort'] = $data['restaurants'][$i]['sort'];
                         $s['date'] = $data['restaurants'][$i]['date'];
                         $s['itinerary_group_id'] = $data['itinerary_group_id'];
