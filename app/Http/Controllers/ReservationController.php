@@ -72,8 +72,6 @@ class ReservationController extends Controller
     {
         $filter = json_decode($request->getContent(), true);
         /* 包裝公司資料
-        旅行社名稱 旅行社地址 旅行社聯絡人 訂單聯絡人分機 旅行社統編 旅行社電話 旅行社傳真 導遊 導遊聯繫方式
-        團號 訂房代表人 各人數 旅客國籍
         飯店名稱 飯店聯絡人 飯店電話 飯店匯款資訊 住房總天數 飯店傳真 住房日期 房型 床數 間數 報價（每房） 費用總計
         */
 
@@ -92,6 +90,7 @@ class ReservationController extends Controller
         $travel_agency['guides'] = $this->requestReservationNameService->get_itinerary_group_guides($itinerary_group_data);
         $travel_agency['order'] = $this->requestReservationNameService->get_order_data($order_data);
         $travel_agency['data'] = $filter;
+
 
         return $travel_agency;
     }

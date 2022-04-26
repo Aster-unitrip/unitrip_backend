@@ -159,6 +159,7 @@ class RequestReservationNameService
     }
 
     public function get_travel_agency($company_data){
+       // 旅行社名稱 旅行社地址 旅行社聯絡人 訂單聯絡人分機 旅行社統編 旅行社電話 旅行社傳真
 
         $travel_agency['name'] = $company_data['title']; //旅行社名稱
         $travel_agency['address'] = $company_data['address_city'].$company_data['address_town'].$company_data['address']; //旅行社地址
@@ -172,6 +173,7 @@ class RequestReservationNameService
     }
 
     public function get_itinerary_group_guides($data){
+        // 導遊 導遊聯繫方式
         for($i = 0; $i < count($data['guides']); $i++){
             $guide_data[$i]['name'] = $data['guides'][$i]['name'];
             $guide_data[$i]['cell_phone'] = $data['guides'][$i]['cell_phone'];
