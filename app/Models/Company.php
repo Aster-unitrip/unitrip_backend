@@ -31,7 +31,8 @@ class Company extends Model
         'account_number',
         'company_type',
         'ta_register_num',
-        'ta_category'
+        'ta_category',
+        'tqaa_num'
     ];
 
 }
