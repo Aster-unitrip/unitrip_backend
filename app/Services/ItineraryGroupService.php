@@ -15,9 +15,7 @@ use Exception;
 
 class ItineraryGroupService
 {
-
-    public function __construct($raw_data)
-    {
+    public function __construct($raw_data){
         $this->raw_data = $raw_data;
         $this->total_day = $raw_data['total_day'];
         $this->areas = $raw_data['areas'];

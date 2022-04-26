@@ -99,8 +99,8 @@ class DMController extends Controller
     public function edit_dm_setting(Request $request)
     {
         // 1-1 使用者公司必須是旅行社
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
@@ -117,7 +117,7 @@ class DMController extends Controller
         // 1-2 限制只能同公司員工作修正 -> 關聯 get_id
         $cus_dm_edit = $this->requestService->get_one('dm', $validated['_id']);
         $cus_dm_edit_data =  json_decode($cus_dm_edit->content(), true);
-        if($user_company_id !== $cus_dm_edit_data['owned_by']){
+        if($owned_by !== $cus_dm_edit_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 

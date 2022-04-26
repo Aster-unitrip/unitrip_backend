@@ -94,8 +94,8 @@ class OrderController extends Controller
 
         //預設
         $user_name = auth()->user()->contact_name;
-        $validated['user_company_id'] = auth()->user()->company_id;
-        $validated['own_by_id'] = auth()->user()->id;
+        $validated['owned_by'] = auth()->user()->company_id;
+        $validated['owned_by_id'] = auth()->user()->id;
         $now_date = date('Ymd');
         $now_time = date("His" , mktime(date('H')+8, date('i'), date('s')));
 
@@ -115,7 +115,7 @@ class OrderController extends Controller
         }
 
         //找user公司名稱
-        $company_data = Company::find($validated['user_company_id']);
+        $company_data = Company::find($validated['owned_by']);
         $validated['user_company_name'] = $company_data['title'];
         $validated['order_status'] = "收到需求單";
         $validated['payment_status'] = "未付款";
@@ -137,7 +137,6 @@ class OrderController extends Controller
         $validated['amount'] = 0;
         $validated['actual_payment'] = 0; //旅客實際支付金額
         $validated['cancel_at'] = null;
-        $validated['deleted_at'] = null;
         $validated['cus_group_code'] = null;
         $validated['operator_note'] = null;
         $validated['group_status'] = "未成團";
@@ -178,7 +177,7 @@ class OrderController extends Controller
         $address["address"] = "";
         $address["detail"] = "";
         $passenger_data['address'] = $address;
-        $passenger_data['owned_by'] = $validated['user_company_id'];
+        $passenger_data['owned_by'] = $validated['owned_by'];
 
 
         $this->requestService->insert_one('passengers', $passenger_data);
@@ -210,13 +209,13 @@ class OrderController extends Controller
 
 
         // 非旅行社及該旅行社人員不可修改訂單
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-        if($user_company_id !== $data_before['user_company_id']){
+        if($owned_by !== $data_before['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -351,19 +350,22 @@ class OrderController extends Controller
 
         //成團狀態
         if($validated['order_status'] === "已成團") $validated['group_status'] = "成團";
-        if($validated['order_status'] === "棄單") $validated['group_status'] = "未成團";
+        if($validated['order_status'] === "棄單"){
+            $validated['group_status'] = "未成團";
+            $validated['cancel_at'] = date('Y-m-d H:i:s');
+        }
         $validated['last_updated_on'] = $user_name;
 
         // 參團編號需擋重複
         if(array_key_exists('cus_group_code', $validated)){
             // 需檔自己公司
-            $find_one['user_company_id'] = $user_company_id;
+            $find_one['owned_by'] = $owned_by;
             $find_one['cus_group_code'] = $validated['cus_group_code'];
             $cus_orders_past = $this->requestService->aggregate_search('cus_orders', null, $find_one, $page=0);
             $cus_orders_past_data = json_decode($cus_orders_past->getContent(), true);
             //如果只有一筆，判斷是否為重複
             if($cus_orders_past_data['count'] > 1){
-                return response()->json(['error' => "已存在此參團編號"], 400);
+                return response()->json(['error' => "同公司不可重複相同參團編號"], 400);
             }
         }
 
@@ -372,10 +374,8 @@ class OrderController extends Controller
 
         //總人數 = 各項人數相加
         $validated['total_people'] = $validated['adult_number'] + $validated['child_number'] + $validated['baby_number'];
-        return $validated;
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
-
     }
 
 
@@ -386,7 +386,6 @@ class OrderController extends Controller
 
     public function list(Request $request)
     {
-
         $filter = json_decode($request->getContent(), true);
 
         if (array_key_exists('page', $filter)) {
@@ -405,7 +404,7 @@ class OrderController extends Controller
 
         //擋下供應商/其他公司的id
         $company_id = auth()->payload()->get('company_id');
-        $filter['user_company_id'] = auth()->user()->company_id;
+        $filter['owned_by'] = auth()->user()->company_id;
 
         // 找該 company 的 types
         $company_data = Company::find($company_id);
@@ -422,10 +421,10 @@ class OrderController extends Controller
             }
             else return response()->json(['error' => '訂購結束時間不可早於訂購開始時間'], 400);
         }
-        elseif(array_key_exists('order_start', $filter) && !array_key_exists('order_end', $filter)){
+        else if(array_key_exists('order_start', $filter) && !array_key_exists('order_end', $filter)){
             return response()->json(['error' => '沒有訂購結束時間'], 400);
         }
-        elseif(!array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
+        else if(!array_key_exists('order_start', $filter) && array_key_exists('order_end', $filter)){
             return response()->json(['error' => '沒有訂購開始時間'], 400);
         }
         unset($filter['order_start']);
@@ -442,6 +441,15 @@ class OrderController extends Controller
             }
         }
 
+        //sort by [created_at]、[travel_start]
+        if(array_key_exists('sort', $filter)){
+            // 轉換sort
+            $filter["searchSort"] = $this->orderService->change_search_sort($filter['sort']);
+            unset($filter['sort']);
+        }else{
+            $filter["searchSort"]["created_at"] = -1;
+        }
+
         //[訂單編號]、[代表人]、[參團編號]使用模糊搜尋
         if(array_key_exists('representative', $filter)){
             $filter['representative'] = array('$regex' => $filter['representative']);
@@ -452,6 +460,7 @@ class OrderController extends Controller
         if(array_key_exists('cus_group_code', $filter)){
             $filter['cus_group_code'] = array('$regex' => $filter['cus_group_code']);
         }
+
         $result = $this->requestService->aggregate_search('cus_orders', null, $filter, $page);
         return $result;
 
@@ -460,8 +469,8 @@ class OrderController extends Controller
     public function get_by_id($id)
     {
         // 非旅行社及該旅行社人員不可修改訂單
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
@@ -473,7 +482,7 @@ class OrderController extends Controller
 
         $data_before = $data_before['document'];
 
-        if($user_company_id !== $data_before['user_company_id']){
+        if($owned_by !== $data_before['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -490,8 +499,8 @@ class OrderController extends Controller
 
 
         // 非旅行社及該旅行社人員不可修改訂單
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
@@ -504,7 +513,7 @@ class OrderController extends Controller
         $cus_orders_past = $cus_orders_past['document'];
 
         //判斷是否為該公司
-        if($user_company_id !== $cus_orders_past['user_company_id']){
+        if($owned_by !== $cus_orders_past['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 

@@ -26,17 +26,17 @@ class ReservationController extends Controller
     {   //$id => 訂單id
 
         // 1-1 使用者公司必須是旅行社
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
 
         // 1-2 限制只能同公司員工作修正
-        /* $order = $this->requestService->get_one('cus_orders', $id);
+        $order = $this->requestService->get_one('cus_orders', $id);
         $order_data = json_decode($order->getContent(), true);
-        if($user_company_id !== $order_data['user_company_id']){
+        /* if($owned_by !== $order_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         } */
 
@@ -70,8 +70,30 @@ class ReservationController extends Controller
 
     public function pass_to_python(Request $request)
     {
+        $filter = json_decode($request->getContent(), true);
+        /* 包裝公司資料
+        旅行社名稱 旅行社地址 旅行社聯絡人 訂單聯絡人分機 旅行社統編 旅行社電話 旅行社傳真 導遊 導遊聯繫方式
+        團號 訂房代表人 各人數 旅客國籍
+        飯店名稱 飯店聯絡人 飯店電話 飯店匯款資訊 住房總天數 飯店傳真 住房日期 房型 床數 間數 報價（每房） 費用總計
+        */
 
+        //取得所有公司資料
+        $company_id = auth()->user()->company_id;
+        $company_data = Company::find($company_id);
+        //取得團行程所有資料
+        $itinerary_group = $this->requestService->get_one('itinerary_group', $filter['itinerary_group_id']);
+        $itinerary_group_data = json_decode($itinerary_group->content(), true);
+        //取得訂單所有資料
+        $order = $this->requestService->get_one('cus_orders', $filter['order_id']);
+        $order_data = json_decode($order->content(), true);
 
+        // 包裝公司資料
+        $travel_agency['agency'] = $this->requestReservationNameService->get_travel_agency($company_data);
+        $travel_agency['guides'] = $this->requestReservationNameService->get_itinerary_group_guides($itinerary_group_data);
+        $travel_agency['order'] = $this->requestReservationNameService->get_order_data($order_data);
+        $travel_agency['data'] = $filter;
+
+        return $travel_agency;
     }
 
 }

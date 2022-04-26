@@ -41,8 +41,8 @@ class PassengerController extends Controller
     {   //$id => 訂單id
         // 1-1 使用者公司必須是旅行社
 
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
@@ -52,7 +52,7 @@ class PassengerController extends Controller
         // 找團行程的company_id和使用者company_id
         $order = $this->requestService->get_one('cus_orders', $id);
         $order_data = json_decode($order->getContent(), true);
-        if($user_company_id !== $order_data['user_company_id']){
+        if($owned_by !== $order_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -80,8 +80,8 @@ class PassengerController extends Controller
 
         //array 中每一筆單的 order_id 都要是一樣的
 
-        $user_company_id = auth()->user()->company_id;
-        $company_data = Company::find($user_company_id);
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
@@ -93,7 +93,7 @@ class PassengerController extends Controller
         if(array_key_exists('count', $order_data) && $order_data['count'] === 0){
             return response()->json(['error' => '沒有這筆訂單(no order_id)']);
         }
-        if($user_company_id !== $order_data['user_company_id']){
+        if($owned_by !== $order_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
@@ -104,7 +104,7 @@ class PassengerController extends Controller
         }
         if(!array_key_exists("_id", $validated)){ //新增
             $validated['is_representative'] = false;
-            $validated['owned_by'] = $user_company_id;
+            $validated['owned_by'] = $owned_by;
             $passengers_new = $this->requestService->insert_one('passengers', $validated);
             return $passengers_new;
         }

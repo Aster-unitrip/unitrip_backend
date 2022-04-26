@@ -18,10 +18,10 @@ class RequestReservationNameService
             for($i = 0; $i < count($data['attractions']); $i++){
                 $reservation_data['attractions'][$i]['reservation_sort'] = $i+1;
                 $reservation_data['attractions'][$i]['reservation_name'] = $cus_group_code."_".$data['attractions'][$i]['name'];
+                $reservation_data['attractions'][$i]['itinerary_group_id'] = $data['itinerary_group_id'];
+                $reservation_data['attractions'][$i]['order_id'] = $data['order_id'];
                 $reservation_data['attractions'][$i]["detail"]['date'] = $data['attractions'][$i]['date'];
                 $reservation_data['attractions'][$i]["detail"]['sort'] = $data['attractions'][$i]['sort'];
-                $reservation_data['attractions'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
-                $reservation_data['attractions'][$i]["detail"]['order_id'] = $data['order_id'];
 
             }
         }else{
@@ -33,11 +33,10 @@ class RequestReservationNameService
             for($i = 0; $i < count($data['activities']); $i++){
                 $reservation_data['activities'][$i]['reservation_sort'] = $i+1;
                 $reservation_data['activities'][$i]['reservation_name'] = $cus_group_code."_".$data['activities'][$i]['name'];
+                $reservation_data['activities'][$i]['itinerary_group_id'] = $data['itinerary_group_id'];
+                $reservation_data['activities'][$i]['order_id'] = $data['order_id'];
                 $reservation_data['activities'][$i]["detail"]['date'] = $data['activities'][$i]['date'];
                 $reservation_data['activities'][$i]["detail"]['sort'] = $data['activities'][$i]['sort'];
-                $reservation_data['activities'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
-                $reservation_data['activities'][$i]["detail"]['order_id'] = $data['order_id'];
-
             }
         }else{
             $reservation_data['activities'] = array();
@@ -49,13 +48,11 @@ class RequestReservationNameService
             for($i = 0; $i < count($data['transportations']); $i++){
                 $reservation_data['transportations'][$i]['reservation_sort'] = $i+1;
                 $reservation_data['transportations'][$i]['reservation_name'] = $cus_group_code."_".$data['transportations'][$i]['transportation_rental_agency']."_".$data['transportations'][$i]['model'];
+                $reservation_data['transportations'][$i]['itinerary_group_id'] = $data['itinerary_group_id'];
+                $reservation_data['transportations'][$i]['order_id'] = $data['order_id'];
                 $reservation_data['transportations'][$i]["detail"]['sort'] = $data['transportations'][$i]['sort'];
                 $reservation_data['transportations'][$i]["detail"]['date_start'] = $data['transportations'][$i]['date_start'];
                 $reservation_data['transportations'][$i]["detail"]['date_end'] = $data['transportations'][$i]['date_end'];
-                $reservation_data['transportations'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
-                $reservation_data['transportations'][$i]["detail"]['order_id'] = $data['order_id'];
-
-
             }
         }else{
             $reservation_data['transportations'] = array();
@@ -67,12 +64,11 @@ class RequestReservationNameService
             for($i = 0; $i < count($data['guides']); $i++){
                 $reservation_data['guides'][$i]['reservation_sort'] = $i+1;
                 $reservation_data['guides'][$i]['reservation_name'] = $cus_group_code."_".$data['guides'][$i]['name'];
+                $reservation_data['guides'][$i]['itinerary_group_id'] = $data['itinerary_group_id'];
+                $reservation_data['guides'][$i]['order_id'] = $data['order_id'];
                 $reservation_data['guides'][$i]["detail"]['sort'] = $data['guides'][$i]['sort'];
                 $reservation_data['guides'][$i]["detail"]['date_start'] = $data['guides'][$i]['date_start'];
                 $reservation_data['guides'][$i]["detail"]['date_end'] = $data['guides'][$i]['date_end'];
-                $reservation_data['guides'][$i]["detail"]['itinerary_group_id'] = $data['itinerary_group_id'];
-                $reservation_data['guides'][$i]["detail"]['order_id'] = $data['order_id'];
-
             }
         }else{
             $reservation_data['guides'] = array();
@@ -85,6 +81,7 @@ class RequestReservationNameService
             for($i = 0; $i < count($data['accomendations']); $i++){
                 $compare_before[$i] = $data['accomendations'][$i]['_id'];
             }
+
             $compare_before = array_unique($compare_before);
 
             for($i = 0; $i < count($data['accomendations']); $i++){
@@ -92,19 +89,17 @@ class RequestReservationNameService
                     if($i === array_keys($compare_before)[$j]){// 第一次
                         $reservation_data['accomendations'][$j]['reservation_sort'] = $j+1;
                         $reservation_data['accomendations'][$j]['reservation_name'] = $cus_group_code."_".$data['accomendations'][$j]['name']."_".$this->date_format($data['accomendations'][$i]['date']);
+                        $reservation_data['accomendations'][$j]['itinerary_group_id'] = $data['itinerary_group_id'];
+                        $reservation_data['accomendations'][$j]['order_id'] = $data['order_id'];
                         $s['sort'] = $data['accomendations'][$i]['sort'];
                         $s['date'] = $data['accomendations'][$i]['date'];
-                        $s['itinerary_group_id'] = $data['itinerary_group_id'];
-                        $s['order_id'] = $data['order_id'];
                         $reservation_data['accomendations'][$j]['detail'][] = $s;
                         //$reservation_data['accomendations'][$j]['component_id'] = $data['accomendations'][$i]['_id'];
                         break;
                     }
-                    elseif($compare_before[$j] === $data['accomendations'][$i]['_id']){
+                    else if($compare_before[$j] === $data['accomendations'][$i]['_id']){
                         $s['sort'] = $data['accomendations'][$i]['sort'];
                         $s['date'] = $data['accomendations'][$i]['date'];
-                        $s['itinerary_group_id'] = $data['itinerary_group_id'];
-                        $s['order_id'] = $data['order_id'];
                         $reservation_data['accomendations'][$j]['detail'][] = $s;
                         break;
                     }
@@ -128,18 +123,16 @@ class RequestReservationNameService
                     if($i === array_keys($compare_before)[$j]){// 第一次
                         $reservation_data['restaurants'][$j]['reservation_sort'] = $j+1;
                         $reservation_data['restaurants'][$j]['reservation_name'] = $cus_group_code."_".$data['restaurants'][$j]['name']."_".$this->date_format($data['restaurants'][$i]['date']);
+                        $reservation_data['restaurants'][$j]['itinerary_group_id'] = $data['itinerary_group_id'];
+                        $reservation_data['restaurants'][$j]['order_id'] = $data['order_id'];
                         $s['sort'] = $data['restaurants'][$i]['sort'];
                         $s['date'] = $data['restaurants'][$i]['date'];
-                        $s['itinerary_group_id'] = $data['itinerary_group_id'];
-                        $s['order_id'] = $data['order_id'];
                         $reservation_data['restaurants'][$j]['detail'][] = $s;
                         break;
                     }
                     elseif($compare_before[$j] === $data['restaurants'][$i]['_id']){
                         $s['sort'] = $data['restaurants'][$i]['sort'];
                         $s['date'] = $data['restaurants'][$i]['date'];
-                        $s['itinerary_group_id'] = $data['itinerary_group_id'];
-                        $s['order_id'] = $data['order_id'];
                         $reservation_data['restaurants'][$j]['detail'][] = $s;
                         break;
                     }
@@ -159,14 +152,43 @@ class RequestReservationNameService
         }
     }
 
-
     public function date_format($date){
         $date_substr = substr($date, 0, 10);
         $date_after_format = preg_replace('/-/', "", $date_substr);
         return $date_after_format;
     }
 
+    public function get_travel_agency($company_data){
 
+        $travel_agency['name'] = $company_data['title']; //旅行社名稱
+        $travel_agency['address'] = $company_data['address_city'].$company_data['address_town'].$company_data['address']; //旅行社地址
+        $travel_agency['contact_name'] = auth()->user()->contact_name; //旅行社聯絡人
+        $travel_agency['contact_phone_extension'] = auth()->user()->contact_tel; //訂單聯絡人分機
+        $travel_agency['tax_id '] = $company_data['tax_id']; //旅行社統編
+        $travel_agency['phone'] = $company_data['tel']; //旅行社電話
+        $travel_agency['fax'] = $company_data['fax']; //旅行社傳真
+        return $travel_agency;
 
+    }
+
+    public function get_itinerary_group_guides($data){
+        for($i = 0; $i < count($data['guides']); $i++){
+            $guide_data[$i]['name'] = $data['guides'][$i]['name'];
+            $guide_data[$i]['cell_phone'] = $data['guides'][$i]['cell_phone'];
+        }
+        return $guide_data;
+    }
+
+    public function get_order_data($data){ //訂單相關資料 團號 訂房代表人 各人數 旅客國籍
+        $reservation_order_data['adult_number'] = $data['adult_number'];
+        $reservation_order_data['child_number'] = $data['child_number'];
+        $reservation_order_data['baby_number'] = $data['baby_number'];
+        $reservation_order_data['cus_group_code'] = $data['cus_group_code'];
+        $reservation_order_data['representative_name'] = $data['representative']; //訂房代表人
+        $reservation_order_data['representative_nationality'] = $data['nationality']; // 訂房代表人國籍
+        $reservation_order_data['representative_phone'] = $data['phone']; //訂房代表人電話
+        $reservation_order_data['representative_currency'] = $data['currency']; //訂房代表人使用錢幣
+        return $reservation_order_data;
+    }
 }
 ?>

@@ -79,6 +79,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/nationality', [MiscController::class, 'nationality']); //國籍
     Route::get('/order_source', [MiscController::class, 'order_source']); //訂單來源
     Route::get('/company_employee', [MiscController::class, 'company_employee']); //查詢與使用帳號同公司所有員工
+    Route::post('/check-duplicate', [MiscController::class, 'check_duplicate']); //檢查是否重複
+
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'restaurants'], function($router){
