@@ -26,6 +26,7 @@ class DMController extends Controller
             'price_per_person'=>'integer',
             'dm_layout'=>'required|string',
             'is_display'=>'required|string',
+            'if_show_logo'=>'required|string',
         ];
     }
 
