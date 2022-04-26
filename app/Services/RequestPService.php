@@ -474,6 +474,12 @@ class RequestPService
         return $this->send_req($options, $url);
     }
 
+    public function get_data($data){
+        $url = "http://127.0.0.1:8005/get_data";
+        return $data;
+        //return $this->send_req($data, $url);
+    }
+
     public static function send_req($options, $url)
     {
         try{

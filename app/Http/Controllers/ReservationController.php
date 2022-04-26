@@ -8,6 +8,7 @@ use App\Services\RequestPService;
 use App\Services\RequestReservationNameService;
 
 
+
 use Validator;
 
 class ReservationController extends Controller
@@ -78,8 +79,10 @@ class ReservationController extends Controller
         */
 
         //取得所有公司資料
+        $data['user'] = auth()->user();
         $company_id = auth()->user()->company_id;
-        $company_data = Company::find($company_id);
+        $data["company"] = Company::find($company_id);
+
         //取得團行程所有資料
         $itinerary_group = $this->requestService->get_one('itinerary_group', $filter['itinerary_group_id']);
         $itinerary_group_data = json_decode($itinerary_group->content(), true);
@@ -88,12 +91,14 @@ class ReservationController extends Controller
         $order_data = json_decode($order->content(), true);
 
         // 包裝公司資料
-        $travel_agency['agency'] = $this->requestReservationNameService->get_travel_agency($company_data);
-        $travel_agency['guides'] = $this->requestReservationNameService->get_itinerary_group_guides($itinerary_group_data);
-        $travel_agency['order'] = $this->requestReservationNameService->get_order_data($order_data);
+        $travel_agency['agency_data'] = $this->requestReservationNameService->get_travel_agency($data);
+        /* $travel_agency['guides'] = $this->requestReservationNameService->get_itinerary_group_guides($itinerary_group_data);
+        $travel_agency['order'] = $this->requestReservationNameService->get_order_data($order_data); */
         $travel_agency['data'] = $filter;
 
-        return $travel_agency;
+        $result_html = $this->requestService->get_data($travel_agency);
+
+        return $result_html;
     }
 
 }
