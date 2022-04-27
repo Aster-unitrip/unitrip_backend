@@ -72,6 +72,8 @@ class ReservationController extends Controller
     public function pass_to_python(Request $request)
     {
         $filter = json_decode($request->getContent(), true);
+        $travel_agency['reservation_data'] = $filter;
+
         /* 包裝公司資料
         飯店名稱 飯店聯絡人 飯店電話 飯店匯款資訊 住房總天數 飯店傳真 住房日期 房型 床數 間數 報價（每房） 費用總計
         */

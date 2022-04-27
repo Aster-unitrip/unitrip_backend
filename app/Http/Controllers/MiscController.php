@@ -70,6 +70,10 @@ class MiscController extends Controller
         $filter = json_decode($request->getContent(), true);
         $filter['owned_by'] = auth()->user()->company_id;
 
+        if($filter['owned_by'] === null){
+            return response()->json(['error' => "請確實登入系統(找不到使用者公司id)"]);
+        }
+
         $fieldId = null;
         if(array_key_exists('fieldName', $filter) && array_key_exists('value', $filter)){
             $array_field = array(0 => 'cus_group_code', 1 => 'code', 2 => 'name');
