@@ -89,10 +89,11 @@ class ReservationController extends Controller
         $order_data = json_decode($order->content(), true);
 
         // 包裝公司資料
+        $travel_agency['reservation_data'] = $filter;
         $travel_agency['agency_data'] = $this->requestReservationNameService->get_travel_agency($data);
         /* $travel_agency['guides'] = $this->requestReservationNameService->get_itinerary_group_guides($itinerary_group_data);
         $travel_agency['order'] = $this->requestReservationNameService->get_order_data($order_data); */
-        $travel_agency['data'] = $filter;
+
         $result_html = $this->requestService->get_data($travel_agency);
 
         return $result_html;
