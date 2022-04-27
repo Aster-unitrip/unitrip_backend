@@ -493,7 +493,11 @@ class RequestPService
                 'timeout' => 10 // 超時時間（單位:s）
             )
         );
-        return $this->send_req($options, $url);
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        $result = json_decode($result, true);
+        return $result;
+
     }
 
     public static function send_req($options, $url)
@@ -528,73 +532,5 @@ class RequestPService
         catch(\Exception $e) {
             return response()->json($e->getMessage(), 400);
         }
-    }
-
-    public function laravel_to_reservation($collection, $projection, $filter=[], $page=0){
-
-        $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/aggregate";
-        $limit = 10;
-        $data = array(
-            "collection" => $collection,
-            "database" => "unitrip",
-            "dataSource" => "RealmCluster",
-            "pipeline" => null,
-        );
-        $query_filter = [];
-        $searchSort = [];
-        if(array_key_exists('searchSort', $filter)){
-            $searchSort = $filter['searchSort'];
-            unset($filter['searchSort']);
-        }
-
-        // 用正規表達式查詢名稱
-        if ($filter != []) {
-            array_push($query_filter, array('$match' => $filter));
-        }
-
-        // 留下需要的欄位
-        if ($projection != []) {
-            array_push($query_filter, array('$project' => $projection));
-        }
-        $second_query_filter = $query_filter;
-
-        if($searchSort != []){
-            array_push($query_filter, array('$sort' => $searchSort));
-        }
-
-        // 分頁
-        if ($page>0) {
-            array_push($query_filter, array('$skip' => $page*$limit));
-        }
-        array_push($query_filter, array('$limit' => $limit));
-
-        $second_query_filter[] = array('$count' => 'totalCount');
-        $data['pipeline'] =array( array(
-            '$facet' => array(
-                'docs' => $query_filter,
-                'count' => $second_query_filter
-            ))
-            );
-        // 格式轉換
-        array_push($data['pipeline'], array('$unwind' => array('path' => '$count')));
-        array_push($data['pipeline'], array('$set' => array('count' => '$count.totalCount')));
-
-
-        $postdata = json_encode($data);
-        //dd($postdata);
-        // 顯示 MongoDB 的查詢語法
-        $options = array(
-            'http' => array(
-                'method' => 'POST',
-                'header' => array(
-                    'Content-type:application/json',
-                    'Access-Control-Request-Headers: *',
-                    'api-key:'.config('app.mongo_key'),
-                ),
-                'content' => $postdata,
-                'timeout' => 10 // 超時時間（單位:s）
-            )
-        );
-        return $this->send_req($options, $url);
     }
 }

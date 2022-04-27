@@ -158,15 +158,6 @@ class RequestReservationNameService
         return $date_after_format;
     }
 
-<<<<<<< HEAD
-    public function get_travel_agency($company_data){
-       // 旅行社名稱 旅行社地址 旅行社聯絡人 訂單聯絡人分機 旅行社統編 旅行社電話 旅行社傳真
-
-        $travel_agency['name'] = $company_data['title']; //旅行社名稱
-        $travel_agency['address'] = $company_data['address_city'].$company_data['address_town'].$company_data['address']; //旅行社地址
-        $travel_agency['contact_name'] = auth()->user()->contact_name; //旅行社聯絡人
-        $travel_agency['contact_phone_extension'] = auth()->user()->contact_tel; //訂單聯絡人分機
-=======
     public function get_travel_agency($data){
         $user_data = $data['user'];
         $company_data = $data['company'];
@@ -176,7 +167,6 @@ class RequestReservationNameService
         $travel_agency['contact_name'] = $user_data['contact_name']; //旅行社聯絡人
         $travel_agency['contact_phone_extension'] = $user_data['contact_tel']; //訂單聯絡人分機
         $travel_agency['email'] = $user_data['email']; //訂單聯絡人email
->>>>>>> daily
         $travel_agency['tax_id '] = $company_data['tax_id']; //旅行社統編
         $travel_agency['contact_tel'] = $company_data['tel']; //旅行社電話
         $travel_agency['fax'] = $company_data['fax']; //旅行社傳真
