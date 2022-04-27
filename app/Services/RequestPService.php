@@ -475,9 +475,22 @@ class RequestPService
     }
 
     public function get_data($data){
-        $url = "http://127.0.0.1:8005/get_data";
-        return $data;
-        //return $this->send_req($data, $url);
+
+        $url = "http://127.0.0.1:8005/get-data";
+        $postdata = json_encode($data);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                    'api-key:'.config('app.mongo_key'),
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        return $this->send_req($options, $url);
     }
 
     public static function send_req($options, $url)
