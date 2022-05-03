@@ -94,7 +94,7 @@ class RequestReservationNameService
                     if($i === array_keys($compare_before)[$j]){// 第一次
                         $reservation_data['accomendations'][$j]['reservation_sort'] = $j+1;
                         $reservation_data['accomendations'][$j]['reservation_name'] = $cus_group_code."_".$data['accomendations'][$j]['name']."_".$this->date_format($data['accomendations'][$i]['date']);
-                        $reservation_data['accomendations'][$i]['type'] = 'accomendations';
+                        $reservation_data['accomendations'][$j]['type'] = 'accomendations';
                         $reservation_data['accomendations'][$j]['itinerary_group_id'] = $data['itinerary_group_id'];
                         $reservation_data['accomendations'][$j]['order_id'] = $data['order_id'];
                         $s['sort'] = $data['accomendations'][$i]['sort'];
