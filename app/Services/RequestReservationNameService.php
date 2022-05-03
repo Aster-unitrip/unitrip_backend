@@ -52,6 +52,7 @@ class RequestReservationNameService
                 $reservation_data['transportations'][$i]['reservation_name'] = $cus_group_code."_".$data['transportations'][$i]['transportation_rental_agency']."_".$data['transportations'][$i]['model'];
                 $reservation_data['transportations'][$i]['type'] = 'transportations';
                 $reservation_data['transportations'][$i]['itinerary_group_id'] = $data['itinerary_group_id'];
+                $reservation_data['transportations'][$i]['type'] = 'transportations';
                 $reservation_data['transportations'][$i]['order_id'] = $data['order_id'];
                 $reservation_data['transportations'][$i]["detail"]['sort'] = $data['transportations'][$i]['sort'];
                 $reservation_data['transportations'][$i]["detail"]['date_start'] = $data['transportations'][$i]['date_start'];
