@@ -487,7 +487,6 @@ class RequestPService
                 'header' => array(
                     'Content-type:application/json',
                     'Access-Control-Request-Headers: *',
-                    'api-key:'.config('app.mongo_key'),
                 ),
                 'content' => $postdata,
                 'timeout' => 10 // 超時時間（單位:s）

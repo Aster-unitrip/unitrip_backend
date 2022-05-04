@@ -174,7 +174,7 @@ class RequestReservationNameService
         $travel_agency['contact_name'] = $user_data['contact_name']; //旅行社聯絡人
         $travel_agency['contact_phone_extension'] = $user_data['contact_tel']; //訂單聯絡人分機
         $travel_agency['email'] = $user_data['email']; //訂單聯絡人email
-        $travel_agency['tax_id '] = $company_data['tax_id']; //旅行社統編
+        $travel_agency['tax_id'] = $company_data['tax_id']; //旅行社統編
         $travel_agency['contact_tel'] = $company_data['tel']; //旅行社電話
         $travel_agency['fax'] = $company_data['fax']; //旅行社傳真
         return $travel_agency;

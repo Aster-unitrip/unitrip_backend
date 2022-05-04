@@ -95,7 +95,7 @@ class ReservationController extends Controller
         $travel_agency['agency_data'] = $this->requestReservationNameService->get_travel_agency($data);
         /* $travel_agency['guides'] = $this->requestReservationNameService->get_itinerary_group_guides($itinerary_group_data);
         $travel_agency['order'] = $this->requestReservationNameService->get_order_data($order_data); */
-
+        // return $travel_agency;
         $result_html = $this->requestService->get_data($travel_agency);
 
         return $result_html;
