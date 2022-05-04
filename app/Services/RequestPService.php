@@ -479,7 +479,7 @@ class RequestPService
 
     public function get_data($data){
 
-        $url = "http://127.0.0.1:8005/get-data";
+        $url = "https://reservation-generator-by4xskwu4q-de.a.run.app/get-data";
         $postdata = json_encode($data);
         $options = array(
             'http' => array(
@@ -494,7 +494,6 @@ class RequestPService
         );
         $context = stream_context_create($options);
         $result = file_get_contents($url, false, $context);
-        $result = json_decode($result, true);
         return $result;
 
     }
