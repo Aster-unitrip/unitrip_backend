@@ -15,15 +15,18 @@ class RequestReservationNameService
 
         // 1. 景點
         if(count($data['attractions']) !== 0){
+            $j=0;
             for($i = 0; $i < count($data['attractions']); $i++){
-                $reservation_data['attractions'][$i]['reservation_sort'] = $i+1;
-                $reservation_data['attractions'][$i]['reservation_name'] = $cus_group_code."_".$data['attractions'][$i]['name'];
-                $reservation_data['attractions'][$i]['type'] = 'attractions';
-                $reservation_data['attractions'][$i]['itinerary_group_id'] = $data['itinerary_group_id'];
-                $reservation_data['attractions'][$i]['order_id'] = $data['order_id'];
-                $reservation_data['attractions'][$i]["detail"]['date'] = $data['attractions'][$i]['date'];
-                $reservation_data['attractions'][$i]["detail"]['sort'] = $data['attractions'][$i]['sort'];
-
+                if($data['attractions'][$i]['sum'] !== 0){
+                    $reservation_data['attractions'][$j]['reservation_sort'] = $i+1;
+                    $reservation_data['attractions'][$j]['reservation_name'] = $cus_group_code."_".$data['attractions'][$i]['name'];
+                    $reservation_data['attractions'][$j]['type'] = 'attractions';
+                    $reservation_data['attractions'][$j]['itinerary_group_id'] = $data['itinerary_group_id'];
+                    $reservation_data['attractions'][$j]['order_id'] = $data['order_id'];
+                    $reservation_data['attractions'][$j]["detail"]['date'] = $data['attractions'][$i]['date'];
+                    $reservation_data['attractions'][$j]["detail"]['sort'] = $data['attractions'][$i]['sort'];
+                    $j++;
+                }
             }
         }else{
             $reservation_data['attractions'] = array();
