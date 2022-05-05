@@ -151,6 +151,23 @@ class RequestReservationNameService
         }else{
             $reservation_data['restaurants'] = array();
         }
+        # 非元件
+        // 導遊出團確認書
+        $reservation_data['other'][0]['reservation_sort'] = 1;
+        $reservation_data['other'][0]['reservation_name'] = $cus_group_code."_導遊出團確認書";
+        $reservation_data['other'][0]['order_id'] = $data['order_id'];
+        $reservation_data['other'][0]['itinerary_group_id'] = $data['itinerary_group_id'];
+        // 旅客資料總表
+        $reservation_data['other'][1]['reservation_sort'] = 2;
+        $reservation_data['other'][1]['reservation_name'] = $cus_group_code."_旅客資料總表";
+        $reservation_data['other'][1]['order_id'] = $data['order_id'];
+        $reservation_data['other'][1]['itinerary_group_id'] = $data['itinerary_group_id'];
+        // // 導遊預支單
+        $reservation_data['other'][2]['reservation_sort'] = 3;
+        $reservation_data['other'][2]['reservation_name'] = $cus_group_code."_導遊預支單";
+        $reservation_data['other'][2]['order_id'] = $data['order_id'];
+        $reservation_data['other'][2]['itinerary_group_id'] = $data['itinerary_group_id'];
+
         return $reservation_data;
     }
 
