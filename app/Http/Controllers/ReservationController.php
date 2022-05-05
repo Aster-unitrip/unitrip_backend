@@ -69,34 +69,51 @@ class ReservationController extends Controller
         return $reservation_data_after;
     }
 
-    public function pass_to_python(Request $request)
+    public function component_pass_to_python(Request $request)
     {
         $filter = json_decode($request->getContent(), true);
-        $travel_agency['reservation_data'] = $filter;
 
-        /* 包裝公司資料
-        飯店名稱 飯店聯絡人 飯店電話 飯店匯款資訊 住房總天數 飯店傳真 住房日期 房型 床數 間數 報價（每房） 費用總計
-        */
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+        // 1-2 限制只能同公司員工作修正
+        $order = $this->requestService->get_one('cus_orders', $filter['order_id']);
+        $order_data = json_decode($order->getContent(), true);
+        // if($owned_by !== $order_data['owned_by']){
+        //     return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        // }
 
         //取得所有公司資料
         $data['user'] = auth()->user();
         $company_id = auth()->user()->company_id;
         $data["company"] = Company::find($company_id);
 
-        //取得團行程所有資料
-        $itinerary_group = $this->requestService->get_one('itinerary_group', $filter['itinerary_group_id']);
-        $itinerary_group_data = json_decode($itinerary_group->content(), true);
-        //取得訂單所有資料
-        $order = $this->requestService->get_one('cus_orders', $filter['order_id']);
-        $order_data = json_decode($order->content(), true);
+        if(!array_key_exists("detail", $filter)){ // 其他表單
+            $travel_agency['order_id'] = $filter['order_id'];
+            if($filter['reservation_sort'] === 1){// 導遊出團預訂單
+                // 包裝公司資料
+                $travel_agency['agency_data'] = $this->requestReservationNameService->get_travel_agency($data);
+                $result_html = $this->requestService->guide_out($travel_agency);
+            }
+            if($filter['reservation_sort'] === 2){ //旅客資料總表
+                return $travel_agency;
+                $result_html = $this->requestService->passengers_sheet($travel_agency);
+            }
+            if($filter['reservation_sort'] === 3){ // TODO 導遊預支單
+                // 包裝公司資料
+                $travel_agency['agency_data'] = $this->requestReservationNameService->get_travel_agency($data);
+                // $result_html = $this->requestService->($travel_agency);
+            }
+        }else{
+            // 包裝公司資料
+            $travel_agency['agency_data'] = $this->requestReservationNameService->get_travel_agency($data);
+            $travel_agency['reservation_data'] = $filter;
+            $result_html = $this->requestService->get_data($travel_agency);
+        }
 
-        // 包裝公司資料
-        $travel_agency['reservation_data'] = $filter;
-        $travel_agency['agency_data'] = $this->requestReservationNameService->get_travel_agency($data);
-        /* $travel_agency['guides'] = $this->requestReservationNameService->get_itinerary_group_guides($itinerary_group_data);
-        $travel_agency['order'] = $this->requestReservationNameService->get_order_data($order_data); */
-        // return $travel_agency;
-        $result_html = $this->requestService->get_data($travel_agency);
 
         return $result_html;
 

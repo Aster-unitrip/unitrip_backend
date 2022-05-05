@@ -498,6 +498,48 @@ class RequestPService
 
     }
 
+    public function passengers_sheet($data){
+
+        $url = "https://reservation-generator-by4xskwu4q-de.a.run.app/passengers_sheet";
+        $postdata = json_encode($data);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        return $result;
+
+    }
+    
+    public function guide_out($data){
+
+        $url = "https://reservation-generator-by4xskwu4q-de.a.run.app/guide_out";
+        $postdata = json_encode($data);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        return $result;
+
+    }
+
     public static function send_req($options, $url)
     {
         try{
