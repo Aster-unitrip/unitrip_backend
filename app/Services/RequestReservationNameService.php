@@ -96,7 +96,7 @@ class RequestReservationNameService
                 for($j = 0; $j < count($compare_before); $j++){
                     if($i === array_keys($compare_before)[$j]){// 第一次
                         $reservation_data['accomendations'][$j]['reservation_sort'] = $j+1;
-                        $reservation_data['accomendations'][$j]['reservation_name'] = $cus_group_code."_".$data['accomendations'][$j]['name']."_".$this->date_format($data['accomendations'][$i]['date']);
+                        $reservation_data['accomendations'][$j]['reservation_name'] = $cus_group_code."_".$data['accomendations'][$i]['name']."_".$this->date_format($data['accomendations'][$i]['date']);
                         $reservation_data['accomendations'][$j]['type'] = 'accommodations';
                         $reservation_data['accomendations'][$j]['itinerary_group_id'] = $data['itinerary_group_id'];
                         $reservation_data['accomendations'][$j]['order_id'] = $data['order_id'];
@@ -125,14 +125,15 @@ class RequestReservationNameService
             for($i = 0; $i < count($data['restaurants']); $i++){
                 $compare_before[$i] = $data['restaurants'][$i]['_id'];
             }
+
             $compare_before = array_unique($compare_before);
 
             for($i = 0; $i < count($data['restaurants']); $i++){
                 for($j = 0; $j < count($compare_before); $j++){
                     if($i === array_keys($compare_before)[$j]){// 第一次
                         $reservation_data['restaurants'][$j]['reservation_sort'] = $j+1;
-                        $reservation_data['restaurants'][$j]['reservation_name'] = $cus_group_code."_".$data['restaurants'][$j]['name']."_".$this->date_format($data['restaurants'][$i]['date']);
-                        $reservation_data['restaurants'][$i]['type'] = 'restaurants';
+                        $reservation_data['restaurants'][$j]['reservation_name'] = $cus_group_code."_".$data['restaurants'][$i]['name']."_".$this->date_format($data['restaurants'][$i]['date']);
+                        $reservation_data['restaurants'][$j]['type'] = 'restaurants';
                         $reservation_data['restaurants'][$j]['itinerary_group_id'] = $data['itinerary_group_id'];
                         $reservation_data['restaurants'][$j]['order_id'] = $data['order_id'];
                         $s['sort'] = $data['restaurants'][$i]['sort'];

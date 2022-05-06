@@ -64,7 +64,6 @@ class ReservationController extends Controller
         $reservation_data['activities'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "activities");
         $reservation_data['transportations'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "transportations");
         $reservation_data['guides'] = $this->requestReservationNameService->is_array_empty($itinerary_group_component_type_data, "guides");
-
         $reservation_data_after = $this->requestReservationNameService->get_reservation_data($reservation_data);
         return $reservation_data_after;
     }
