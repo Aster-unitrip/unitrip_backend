@@ -480,6 +480,8 @@ class RequestPService
     public function get_data($data){
 
         $url = "https://reservation-generator-by4xskwu4q-de.a.run.app/get-data";
+        // $url = "http://127.0.0.1:8005/get-data";
+
         $postdata = json_encode($data);
         $options = array(
             'http' => array(
@@ -501,6 +503,7 @@ class RequestPService
     public function passengers_sheet($data){
 
         $url = "https://reservation-generator-by4xskwu4q-de.a.run.app/passengers_sheet";
+        // $url = "http://127.0.0.1:8005/passengers_sheet";
         $postdata = json_encode($data);
         $options = array(
             'http' => array(
@@ -518,9 +521,10 @@ class RequestPService
         return $result;
 
     }
-    
+
     public function guide_out($data){
 
+        // $url = "http://127.0.0.1:8005/guide_out";
         $url = "https://reservation-generator-by4xskwu4q-de.a.run.app/guide_out";
         $postdata = json_encode($data);
         $options = array(
