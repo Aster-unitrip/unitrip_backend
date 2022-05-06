@@ -37,9 +37,9 @@ class ReservationController extends Controller
         // 1-2 限制只能同公司員工作修正
         $order = $this->requestService->get_one('cus_orders', $id);
         $order_data = json_decode($order->getContent(), true);
-        /* if($owned_by !== $order_data['owned_by']){
+        if($owned_by !== $order_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
-        } */
+        }
 
         // 取得訂單相關資訊
         $order = $this->requestService->get_one('cus_orders', $id);
@@ -81,9 +81,9 @@ class ReservationController extends Controller
         // 1-2 限制只能同公司員工作修正
         $order = $this->requestService->get_one('cus_orders', $filter['order_id']);
         $order_data = json_decode($order->getContent(), true);
-        // if($owned_by !== $order_data['owned_by']){
-        //     return response()->json(['error' => 'you are not an employee of this company.'], 400);
-        // }
+        if($owned_by !== $order_data['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
 
         //取得所有公司資料
         $data['user'] = auth()->user();
@@ -98,7 +98,6 @@ class ReservationController extends Controller
                 $result_html = $this->requestService->guide_out($travel_agency);
             }
             if($filter['reservation_sort'] === 2){ //旅客資料總表
-                // return $travel_agency;
                 $result_html = $this->requestService->passengers_sheet($travel_agency);
             }
             if($filter['reservation_sort'] === 3){ // TODO 導遊預支單
@@ -110,13 +109,10 @@ class ReservationController extends Controller
             // 包裝公司資料
             $travel_agency['agency_data'] = $this->requestReservationNameService->get_travel_agency($data);
             $travel_agency['reservation_data'] = $filter;
-            // return $travel_agency;
             $result_html = $this->requestService->get_data($travel_agency);
         }
 
-
         return $result_html;
-
     }
 
 }
