@@ -103,7 +103,7 @@ class ReservationController extends Controller
             if($filter['reservation_sort'] === 3){ // TODO 導遊預支單
                 // 包裝公司資料
                 $travel_agency['agency_data'] = $this->requestReservationNameService->get_travel_agency($data);
-                // $result_html = $this->requestService->($travel_agency);
+                $result_html = $this->requestService->reimburse_sheet($travel_agency);
             }
         }else{
             // 包裝公司資料
