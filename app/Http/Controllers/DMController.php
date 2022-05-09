@@ -6,6 +6,7 @@ use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use App\Services\CompanyService;
+use App\Rules\Boolean;
 
 use Validator;
 
@@ -24,9 +25,12 @@ class DMController extends Controller
         $this->edit_rule = [
             '_id'=>'required|string|max:24',
             'price_per_person'=>'integer',
-            'dm_layout'=>'required|string',
-            'is_display'=>'required|string',
-            'if_show_logo'=>'required|string',
+            'dm_layout' => ['required', new Boolean],
+            'is_display' => ['required', new Boolean],
+            'if_show_logo'=>'required|string'
+
+            /* 'dm_layout'=>'required|string',
+            'is_display'=>'required|string', */
         ];
     }
 

@@ -24,7 +24,7 @@ class RequestService
             if (array_key_exists('categories', $filter) && gettype($filter['categories']) == 'array') {
                 $data['filter']['categories'] = ['$in' => $filter['categories']];
             }
-            
+
         }
         $postdata = json_encode($data);
         $options = array(
@@ -55,7 +55,7 @@ class RequestService
         // );
         $post_data['updated_at'] = date('Y-m-d H:i:s');
         $post_data['created_at'] = date('Y-m-d H:i:s');
-        
+
         $data = array(
             "collection" => $collection,
             "database" => "unitrip",
@@ -76,11 +76,11 @@ class RequestService
             )
         );
         return $this->send_req($options, $url);
-        
+
     }
 
     public function get_one($collection, $id)
-    {   
+    {
         $url = "https://data.mongodb-api.com/app/data-ruata/endpoint/data/beta/action/findOne";
         $data = array(
             "collection" => $collection,
@@ -107,7 +107,7 @@ class RequestService
     }
 
     public function update($collection, $update_data)
-    {   
+    {
         $url = "https://data.mongodb-api.com/app/data-ruata/endpoint/data/beta/action/replaceOne";
         $id = $update_data['_id'];
         unset($update_data['_id']);
@@ -175,7 +175,7 @@ class RequestService
             array_push($data['pipeline'], array('$lookup' => array(
                 'from' => $collection.'_private',
                 'localField' => '_id',
-                'foreignField' => 'public_attraction_id', 
+                'foreignField' => 'public_attraction_id',
                 'as' => 'private'
             )));
             array_push($data['pipeline'], array('$unwind'=>array('path'=>'$private', 'preserveNullAndEmptyArrays'=>true)));
@@ -266,7 +266,7 @@ class RequestService
             array_push($query_filter, array('$skip' => $page*$limit));
         }
         array_push($query_filter, array('$limit' => $limit));
-        
+
         // array_push($data['pipeline'], array('$project' => array('_id' => 0)));
         // $second_query_filter = $query_filter;
         // array_pop($second_query_filter);
@@ -281,7 +281,7 @@ class RequestService
         array_push($data['pipeline'], array('$unwind' => array('path' => '$count')));
         array_push($data['pipeline'], array('$set' => array('count' => '$count.totalCount')));
 
-        
+
         $postdata = json_encode($data);
         // dd($postdata);
         $options = array(
@@ -309,7 +309,7 @@ class RequestService
             if ($http_code == "200") {
                 $result = json_decode($result, true);
                 if (array_key_exists('documents', $result) && $result['documents'] != []) {
-                    return response()->json($result['documents'][0], $http_code);             
+                    return response()->json($result['documents'][0], $http_code);
                 }
                 elseif (array_key_exists('document', $result) && $result['document'] != []) {
                     return response()->json($result['document'], $http_code);
@@ -323,10 +323,10 @@ class RequestService
                 $result = json_decode($result, true);
                 return response()->json($result, $http_code);
 
-            }    
+            }
             else {
                 return response()->json(['error' => $result], 400);
-            }   
+            }
         }
         catch(\Exception $e) {
             return response()->json($e->getMessage(), 400);

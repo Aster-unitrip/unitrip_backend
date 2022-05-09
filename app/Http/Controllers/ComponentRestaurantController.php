@@ -91,6 +91,7 @@ class ComponentRestaurantController extends Controller
             "private" => 1,
             "intro_summary" => 1,
             "description" => 1,
+            "created_at" => 1,
         );
         $result = $this->requestService->aggregate_facet('restaurants', $projection, $company_id, $filter, $page, $query_private);
         return $result;

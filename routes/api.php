@@ -136,7 +136,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
 // 出團預訂單
 Route::group(['middleware'=>'api', 'prefix'=>'reservation'], function($router){
     Route::get('/{id}', [ReservationController::class, 'get_by_id']);
-    Route::post('/', [ReservationController::class, 'pass_to_python']);
+    Route::post('/passengers_sheet', [ReservationController::class, 'passengers_sheet']);
+    Route::post('/', [ReservationController::class, 'component_pass_to_python']);
 });
 
 // 行程

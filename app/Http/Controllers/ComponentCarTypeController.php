@@ -74,6 +74,7 @@ class ComponentCarTypeController extends Controller
                 ),
             "private" => 1,
             "experience" => '\$car_types_private.experience',
+            "created_at" => 1
         );
 
         $result = $this->requestService->aggregate_facet('car_types_with_company', null, $company_id, $filter, $page, $query_private);

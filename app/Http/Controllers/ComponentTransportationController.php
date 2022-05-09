@@ -66,6 +66,7 @@ class ComponentTransportationController extends Controller
             "address_town" => 1,    // 可能得從公司資料撈
             "address" => 1,         // 可能得從公司資料撈
             "private" => 1,
+            "created_at" => 1
         );
         $result = $this->requestService->aggregate_facet('transportations', $projection, $company_id, $filter, $page, $query_private);
         return $result;

@@ -364,6 +364,9 @@ class RequestPService
         if ($projection != []) {
             array_push($query_filter, array('$project' => $projection));
         }
+        // 排序 預設為按照新增日期
+        array_push($query_filter, array('$sort' => array('created_at' => 1)));
+
         $second_query_filter = $query_filter;
 
         // 分頁
@@ -472,6 +475,95 @@ class RequestPService
             )
         );
         return $this->send_req($options, $url);
+    }
+
+    public function get_data($data){
+
+        $url = "https://reservation-generator-by4xskwu4q-de.a.run.app/get-data";
+        // $url = "http://127.0.0.1:8005/get-data";
+
+        $postdata = json_encode($data);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        return $result;
+
+    }
+
+    public function passengers_sheet($data){
+
+        $url = "https://reservation-generator-by4xskwu4q-de.a.run.app/passengers_sheet";
+        // $url = "http://127.0.0.1:8005/passengers_sheet";
+        $postdata = json_encode($data);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        return $result;
+
+    }
+
+    public function reimburse_sheet($data){
+
+        $url = "https://reservation-generator-by4xskwu4q-de.a.run.app/reimburse_sheet";
+        // $url = "http://127.0.0.1:8005/reimburse_sheet";
+        $postdata = json_encode($data);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        return $result;
+
+    }
+
+    public function guide_out($data){
+
+        // $url = "http://127.0.0.1:8005/guide_out";
+        $url = "https://reservation-generator-by4xskwu4q-de.a.run.app/guide_out";
+        $postdata = json_encode($data);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => array(
+                    'Content-type:application/json',
+                    'Access-Control-Request-Headers: *',
+                ),
+                'content' => $postdata,
+                'timeout' => 10 // 超時時間（單位:s）
+            )
+        );
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        return $result;
+
     }
 
     public static function send_req($options, $url)
