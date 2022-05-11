@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
+use App\Rules\Boolean;
+
 
 use Validator;
 
