@@ -28,7 +28,7 @@ class PassengerController extends Controller
             'id_number' => 'string|max:50',
             'passport_number' => 'string|max:50',
             'birthday' => 'required|string|date',
-            'is_vegetarian' => 'string',
+            'is_vegetarian' => ['nullable', new Boolean],
             'email' => 'email',
             'phone' => 'required|string',
             'job' => 'string|max:50',
