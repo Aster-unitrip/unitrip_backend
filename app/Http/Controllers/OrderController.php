@@ -6,6 +6,7 @@ use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use App\Services\OrderService;
+use App\Rules\Boolean;
 
 use Validator;
 
@@ -72,11 +73,11 @@ class OrderController extends Controller
         ];
         $this->operator_rule = [
             '_id'=>'required|string|max:24',
-            'pay_deposit' => 'string',
-            'payment_status' => 'string',
-            'deposit' => 'numeric',
-            'balance' => 'numeric',
-            'amount' => 'numeric'
+            'pay_deposit' => ['required', new Boolean],
+            'payment_status' => 'required|string',
+            'deposit' => 'required|numeric',
+            'balance' => 'required|numeric',
+            'amount' => 'required|numeric'
         ];
     }
 
@@ -381,9 +382,6 @@ class OrderController extends Controller
 
     // filter: 訂單編號, 參團編號, 旅客代表人姓名, 來源, 訂購期間(ordertime_start、ordertime_end), 行程期間, 負責人, 出團狀態, 付款狀態, 頁數
 
-    // order_number, code, representative, source, order_status, estimated_travel_start, estimated_travel_end, user_name, payment_status, out_status, page
-    // code, out_status
-
     public function list(Request $request)
     {
         $filter = json_decode($request->getContent(), true);
@@ -550,8 +548,7 @@ class OrderController extends Controller
 
             // TODO381 是否付訂金此欄必須為true後才可以更改
             // 當此次輸入[是否需預付訂金]為[否] 或是 未輸入資料庫[是否需預付訂金]為[否]，若[付款狀態]不可以為[已付訂金]
-            if((array_key_exists('pay_deposit', $validated) && $validated['pay_deposit'] === 'false')
-            || $cus_orders_past['payment_status'] === "false" && $validated['payment_status'] === "已付訂金"){
+            if((array_key_exists('pay_deposit', $validated) && $validated['pay_deposit'] === 'false') && $validated['payment_status'] === "已付訂金"){
                 return response()->json(['error' => "當[是否需預付訂金]為[否]時，[付款狀態]不可以為[已付訂金]"], 400);
             }
         }
