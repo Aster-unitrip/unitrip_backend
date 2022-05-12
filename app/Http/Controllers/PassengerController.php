@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
+use App\Rules\Boolean;
+
 
 use Validator;
 
@@ -28,7 +30,7 @@ class PassengerController extends Controller
             'id_number' => 'string|max:50',
             'passport_number' => 'string|max:50',
             'birthday' => 'required|string|date',
-            'is_vegetarian' => 'boolean',
+            'is_vegetarian' => ['nullable', new Boolean],
             'email' => 'email',
             'phone' => 'required|string',
             'job' => 'string|max:50',

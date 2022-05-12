@@ -23,8 +23,9 @@ class RequestReservationNameService
                     $reservation_data['attractions'][$j]['type'] = 'attractions';
                     $reservation_data['attractions'][$j]['itinerary_group_id'] = $data['itinerary_group_id'];
                     $reservation_data['attractions'][$j]['order_id'] = $data['order_id'];
-                    $reservation_data['attractions'][$j]["detail"]['date'] = $data['attractions'][$i]['date'];
-                    $reservation_data['attractions'][$j]["detail"]['sort'] = $data['attractions'][$i]['sort'];
+                    // $reservation_data['attractions'][$j]["detail"]['date'] = $data['attractions'][$i]['date'];
+                    // $reservation_data['attractions'][$j]["detail"]['sort'] = $data['attractions'][$i]['sort'];
+                    $reservation_data['attractions'][$j]['component_id'] = $data['attractions'][$i]['_id'];
                     $j++;
                 }
             }
@@ -40,8 +41,10 @@ class RequestReservationNameService
                 $reservation_data['activities'][$i]['type'] = 'activities';
                 $reservation_data['activities'][$i]['itinerary_group_id'] = $data['itinerary_group_id'];
                 $reservation_data['activities'][$i]['order_id'] = $data['order_id'];
-                $reservation_data['activities'][$i]["detail"]['date'] = $data['activities'][$i]['date'];
-                $reservation_data['activities'][$i]["detail"]['sort'] = $data['activities'][$i]['sort'];
+                // $reservation_data['activities'][$i]["detail"]['date'] = $data['activities'][$i]['date'];
+                // $reservation_data['activities'][$i]["detail"]['sort'] = $data['activities'][$i]['sort'];
+                $reservation_data['activities'][$i]['component_id'] = $data['activities'][$i]['_id'];
+
             }
         }else{
             $reservation_data['activities'] = array();
@@ -57,9 +60,11 @@ class RequestReservationNameService
                 $reservation_data['transportations'][$i]['itinerary_group_id'] = $data['itinerary_group_id'];
                 $reservation_data['transportations'][$i]['type'] = 'transportations';
                 $reservation_data['transportations'][$i]['order_id'] = $data['order_id'];
-                $reservation_data['transportations'][$i]["detail"]['sort'] = $data['transportations'][$i]['sort'];
-                $reservation_data['transportations'][$i]["detail"]['date_start'] = $data['transportations'][$i]['date_start'];
-                $reservation_data['transportations'][$i]["detail"]['date_end'] = $data['transportations'][$i]['date_end'];
+                // $reservation_data['transportations'][$i]["detail"]['sort'] = $data['transportations'][$i]['sort'];
+                // $reservation_data['transportations'][$i]["detail"]['date_start'] = $data['transportations'][$i]['date_start'];
+                // $reservation_data['transportations'][$i]["detail"]['date_end'] = $data['transportations'][$i]['date_end'];
+                $reservation_data['transportations'][$i]['component_id'] = $data['transportations'][$i]['_id'];
+
             }
         }else{
             $reservation_data['transportations'] = array();
@@ -74,9 +79,10 @@ class RequestReservationNameService
                 $reservation_data['guides'][$i]['type'] = 'guides';
                 $reservation_data['guides'][$i]['itinerary_group_id'] = $data['itinerary_group_id'];
                 $reservation_data['guides'][$i]['order_id'] = $data['order_id'];
-                $reservation_data['guides'][$i]["detail"]['sort'] = $data['guides'][$i]['sort'];
-                $reservation_data['guides'][$i]["detail"]['date_start'] = $data['guides'][$i]['date_start'];
-                $reservation_data['guides'][$i]["detail"]['date_end'] = $data['guides'][$i]['date_end'];
+                // $reservation_data['guides'][$i]["detail"]['sort'] = $data['guides'][$i]['sort'];
+                // $reservation_data['guides'][$i]["detail"]['date_start'] = $data['guides'][$i]['date_start'];
+                // $reservation_data['guides'][$i]["detail"]['date_end'] = $data['guides'][$i]['date_end'];
+                $reservation_data['guides'][$i]['component_id'] = $data['guides'][$i]['_id'];
             }
         }else{
             $reservation_data['guides'] = array();
@@ -91,7 +97,6 @@ class RequestReservationNameService
             }
 
             $compare_before = array_unique($compare_before);
-
             for($i = 0; $i < count($data['accomendations']); $i++){
                 for($j = 0; $j < count($compare_before); $j++){
                     if($i === array_keys($compare_before)[$j]){// 第一次
@@ -100,16 +105,17 @@ class RequestReservationNameService
                         $reservation_data['accomendations'][$j]['type'] = 'accommodations';
                         $reservation_data['accomendations'][$j]['itinerary_group_id'] = $data['itinerary_group_id'];
                         $reservation_data['accomendations'][$j]['order_id'] = $data['order_id'];
-                        $s['sort'] = $data['accomendations'][$i]['sort'];
-                        $s['date'] = $data['accomendations'][$i]['date'];
-                        $reservation_data['accomendations'][$j]['detail'][] = $s;
+                        $reservation_data['accomendations'][$j]['component_id'] = $data['accomendations'][$i]['_id'];
+                        // $s['sort'] = $data['accomendations'][$i]['sort'];
+                        // $s['date'] = $data['accomendations'][$i]['date'];
+                        // $reservation_data['accomendations'][$j]['detail'][] = $s;
                         //$reservation_data['accomendations'][$j]['component_id'] = $data['accomendations'][$i]['_id'];
                         break;
                     }
                     else if($compare_before[$j] === $data['accomendations'][$i]['_id']){
-                        $s['sort'] = $data['accomendations'][$i]['sort'];
-                        $s['date'] = $data['accomendations'][$i]['date'];
-                        $reservation_data['accomendations'][$j]['detail'][] = $s;
+                        // $s['sort'] = $data['accomendations'][$i]['sort'];
+                        // $s['date'] = $data['accomendations'][$i]['date'];
+                        // $reservation_data['accomendations'][$j]['detail'][] = $s;
                         break;
                     }
                 }
@@ -136,15 +142,16 @@ class RequestReservationNameService
                         $reservation_data['restaurants'][$j]['type'] = 'restaurants';
                         $reservation_data['restaurants'][$j]['itinerary_group_id'] = $data['itinerary_group_id'];
                         $reservation_data['restaurants'][$j]['order_id'] = $data['order_id'];
-                        $s['sort'] = $data['restaurants'][$i]['sort'];
-                        $s['date'] = $data['restaurants'][$i]['date'];
-                        $reservation_data['restaurants'][$j]['detail'][] = $s;
+                        $reservation_data['restaurants'][$j]['component_id'] = $data['restaurants'][$i]['_id'];
+                        // $s['sort'] = $data['restaurants'][$i]['sort'];
+                        // $s['date'] = $data['restaurants'][$i]['date'];
+                        // $reservation_data['restaurants'][$j]['detail'][] = $s;
                         break;
                     }
                     elseif($compare_before[$j] === $data['restaurants'][$i]['_id']){
-                        $s['sort'] = $data['restaurants'][$i]['sort'];
-                        $s['date'] = $data['restaurants'][$i]['date'];
-                        $reservation_data['restaurants'][$j]['detail'][] = $s;
+                        // $s['sort'] = $data['restaurants'][$i]['sort'];
+                        // $s['date'] = $data['restaurants'][$i]['date'];
+                        // $reservation_data['restaurants'][$j]['detail'][] = $s;
                         break;
                     }
                 }

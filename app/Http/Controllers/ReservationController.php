@@ -90,7 +90,7 @@ class ReservationController extends Controller
         $company_id = auth()->user()->company_id;
         $data["company"] = Company::find($company_id);
 
-        if(!array_key_exists("detail", $filter)){ // 其他表單
+        if(!array_key_exists("type", $filter)){ // 其他表單
             $travel_agency['order_id'] = $filter['order_id'];
             if($filter['reservation_sort'] === 1){// 導遊出團預訂單
                 // 包裝公司資料
