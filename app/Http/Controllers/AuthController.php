@@ -24,7 +24,7 @@ class AuthController extends Controller
      */
     public function __construct(CompanyService $companyService, UserService $userService)
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'refresh']]);
         $this->companyService = $companyService;
         $this->userService = $userService;
         $this->supplierRegisterRule = [
@@ -196,7 +196,8 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function refresh() {
-        return $this->createNewToken(auth()->refresh());
+        // return $this->createNewToken(auth()->refresh());
+        return $this->respondWithToken(auth()->refresh());
     }
 
     /**
@@ -284,5 +285,21 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'User successfully updated',
         ], 201);
+    }
+
+    /**
+     * Get the token array structure.
+     *
+     * @param  string $token
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
+        ]);
     }
 }

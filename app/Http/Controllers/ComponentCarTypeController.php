@@ -77,7 +77,7 @@ class ComponentCarTypeController extends Controller
             "created_at" => 1
         );
 
-        $result = $this->requestService->aggregate_facet('car_types_with_company', null, $company_id, $filter, $page, $query_private);
+        $result = $this->requestService->aggregate_facet('car_types_with_company', null, $filter, $page);
 
         $result_data =  json_decode($result->content(), true);
 

@@ -57,8 +57,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'img'], function($router){
     Route::post('/remove', [ImgController::class, 'remove']);
 });
 
-Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router){
-    Route::post('/', [ComponentAttractionController::class, 'add2']);
+Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router) {
+    Route::post('/', [ComponentAttractionController::class, 'add']);
     Route::post('/list', [ComponentAttractionController::class, 'list']);
     Route::get('/{id}', [ComponentAttractionController::class, 'get_by_id']);
     Route::post('/update', [ComponentAttractionController::class, 'edit']);

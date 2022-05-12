@@ -115,7 +115,7 @@ class ComponentAccomendationController extends Controller
             "intro_summary" => 1,
             "description" => 1,
         );
-        $result = $this->requestService->aggregate_facet('accomendations', $projection, $company_id, $filter, $page, $query_private);
+        $result = $this->requestService->aggregate_facet('accomendations', $projection, $filter, $page);
         return $result;
     }
 

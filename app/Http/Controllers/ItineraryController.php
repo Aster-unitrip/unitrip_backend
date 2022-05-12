@@ -184,7 +184,7 @@ class ItineraryController extends Controller
                 // "areas" => 1,
                 // "created_at" => 1
             );
-        $result = $this->requestService->aggregate_facet('itineraries', $projection, $company_id, $filter, $page, $query_private);
+        $result = $this->requestService->aggregate_facet('itineraries', $projection, $filter, $page);
         return $result;
     }
 

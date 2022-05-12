@@ -324,7 +324,7 @@ class RequestPService
         $query_private: 是否查詢私有元件
         分頁、排序、計算筆數、查詢子槽
     */
-    public function aggregate_facet($collection, $projection, $company_id, $filter=[], $page=0, $query_private=false)
+    public function aggregate_facet($collection, $projection, $filter=[], $page=0)
     {
         $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/aggregate";
         $limit = 10;
@@ -346,20 +346,6 @@ class RequestPService
             }
         }
 
-        // 查詢子槽
-        if ($query_private) {
-            array_push($query_filter, array('$lookup' => array(
-                'from' => $collection.'_private',
-                'localField' => '_id',
-                'foreignField' => 'public_id',
-                'as' => 'private'
-            )));
-            array_push($query_filter, array('$unwind'=>array('path'=>'$private', 'preserveNullAndEmptyArrays'=>true)));
-            array_push($query_filter, array('$addFields' => array('private.owned_by' => array('$ifNull' => array('$private.owned_by', 0)))));
-        }
-        if ($query_private) {
-            array_push($query_filter, array('$match' => array('private.owned_by' => array('$in' => array($company_id, 0)) )));
-        }
         // 留下需要的欄位
         if ($projection != []) {
             array_push($query_filter, array('$project' => $projection));
@@ -375,10 +361,6 @@ class RequestPService
         }
         array_push($query_filter, array('$limit' => $limit));
 
-        // array_push($data['pipeline'], array('$project' => array('_id' => 0)));
-        // $second_query_filter = $query_filter;
-        // array_pop($second_query_filter);
-        // array_pop($second_query_filter);
         $second_query_filter[] = array('$count' => 'totalCount');
         $data['pipeline'] =array( array(
             '$facet' => array(

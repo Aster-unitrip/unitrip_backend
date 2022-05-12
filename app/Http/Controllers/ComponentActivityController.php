@@ -121,7 +121,7 @@ class ComponentActivityController extends Controller
             "created_at" => 1
 
         );
-        $result = $this->requestService->aggregate_facet('activities', $projection, $company_id, $filter, $page, $query_private);
+        $result = $this->requestService->aggregate_facet('activities', $projection, $filter, $page);
         return $result;
     }
 
