@@ -497,7 +497,6 @@ class OrderController extends Controller
         $validator = Validator::make($data, $this->operator_rule);
         $validated = $validator->validated();
 
-
         // 非旅行社及該旅行社人員不可修改訂單
         $owned_by = auth()->user()->company_id;
         $company_data = Company::find($owned_by);
@@ -506,10 +505,9 @@ class OrderController extends Controller
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
 
-        //將order調出
+        //將該筆 order 調出
         $cus_orders_past = $this->requestService->find_one('cus_orders', null, '_id', $validated['_id']);
         if(!$cus_orders_past) return response()->json(['error' => '訂單中沒有這個id'], 400);
-
         $cus_orders_past = $cus_orders_past['document'];
 
         //判斷是否為該公司
@@ -545,20 +543,29 @@ class OrderController extends Controller
                             break;
                     }
                 }
-            }else{
+            }
+            else{
                 return response()->json(['error' =>'沒有[付款狀態]欄位', 400]);
             }
+
             // TODO381 是否付訂金此欄必須為true後才可以更改
-            if(array_key_exists('pay_deposit', $validated) && $validated['pay_deposit'] === 'false' && $validated['payment_status'] === "已付訂金"){
-                return response()->json(['error' => "當不須預付訂金時，付款狀態不可以為已付訂金"], 400);
+            // 當此次輸入[是否需預付訂金]為[否] 或是 未輸入資料庫[是否需預付訂金]為[否]，若[付款狀態]不可以為[已付訂金]
+            if((array_key_exists('pay_deposit', $validated) && $validated['pay_deposit'] === 'false')
+            || $cus_orders_past['payment_status'] === "false" && $validated['payment_status'] === "已付訂金"){
+                return response()->json(['error' => "當[是否需預付訂金]為[否]時，[付款狀態]不可以為[已付訂金]"], 400);
             }
-        }else{
+        }
+        else{
             return response()->json(['error' => '[付款狀態]必須是[已成團]，才可以更改[付款狀態]'], 400);
         }
 
-        //TODO未完成 驗算
-        if($validated['payment_status'] === "已付訂金") $validated['actual_payment'] = $validated['amount'] - $validated['deposit'];
-        elseif($validated['payment_status'] === "已付全額") $validated['actual_payment'] = $validated['amount'];
+        //TODO未完成 將所有元件驗算
+        if($validated['payment_status'] === "已付訂金"){
+            $validated['actual_payment'] = $validated['amount'] - $validated['deposit'];
+        }
+        elseif($validated['payment_status'] === "已付全額"){
+            $validated['actual_payment'] = $validated['amount'];
+        }
 
         $cus_orders = $this->requestService->update_one('cus_orders', $validated);
         return $cus_orders;
