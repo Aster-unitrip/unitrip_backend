@@ -113,9 +113,12 @@ class ComponentAttractionController extends Controller
             );
         $result = $this->requestService->aggregate_facet('attractions', $projection, $filter, $page);
         // 相容舊格式
-        foreach($result['docs'] as $doc){
-            $doc['private']['experience'] = '';
+        $current_data = $result->getData();
+        foreach($current_data->docs as $doc){
+            $doc->private = array('experience' => '');
         }
+        $result->setData($current_data);
+        
         return $result;
     }
 
