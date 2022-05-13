@@ -860,9 +860,9 @@ class ItineraryGroupController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-        // if($owned_by !== $validated['owned_by']){
-        //     return response()->json(['error' => 'you are not an employee of this company.'], 400);
-        // }
+        if($owned_by !== $validated['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
 
         // 基本驗證 所有和金額有關必須不小於0
         if($validated['deposit'] < 0 && $validated['amount'] < 0){
