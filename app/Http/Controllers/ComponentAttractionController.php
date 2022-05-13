@@ -49,7 +49,11 @@ class ComponentAttractionController extends Controller
             'is_display' => 'required|boolean',
             'is_enabled' => 'required|boolean',
             'imgs' => 'nullable',
-
+            'bank_info' => 'nullable',
+            'bank_info.bank_name' => 'nullable|string|max:20',
+            'bank_info.bank_code' => 'nullable|string|max:20',
+            'bank_info.account_name' => 'nullable|string|max:20',
+            'bank_info.account_number' => 'nullable|string|max:20',
         ];
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $rule);
@@ -146,6 +150,8 @@ class ComponentAttractionController extends Controller
     // 旅行社使用者可以編輯自己的子槽元件
     // 旅行社使用者不能編輯母槽元件
     // 系統商可以修改所有元件
+    // 除了系統商以外的使用者都不能主動修改 is_display
+    // 若需母子槽異動，要使用 move_from_private_to_public 或 move_from_public_to_private
     public function edit(Request $request)
     {
         $rule = [
@@ -170,11 +176,13 @@ class ComponentAttractionController extends Controller
             'parking' => 'nullable|string|max:500',
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|st ring|max:500',
-            'is_display' => 'required|boolean',
             'is_enabled' => 'required|boolean',
             'imgs' => 'nullable',
-            "created_at" => 'nullable|date',
-
+            'bank_info' => 'nullable',
+            'bank_info.bank_name' => 'nullable|string|max:20',
+            'bank_info.bank_code' => 'nullable|string|max:20',
+            'bank_info.account_name' => 'nullable|string|max:20',
+            'bank_info.account_number' => 'nullable|string|max:20',
         ];
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $rule);
