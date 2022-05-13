@@ -53,7 +53,7 @@ class RequestStatesService
                     }
                 }
                 else if($validated['booking_status'] === '已退訂'){
-                    if($validated['payment_status'] !== '已棄單，已退款'){
+                    if($validated['payment_status'] !== '已棄單，已退款' && $validated['payment_status'] !== '已棄單，免退款'){
                         return response()->json(['error' => "預定狀態必須為[已退訂]，付款狀態只可是[已棄單，已退款]。"], 400);
                     }
                 }
