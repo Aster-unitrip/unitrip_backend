@@ -880,9 +880,10 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => "團行程沒有關聯的訂單"], 400);
         }
 
-        if($itinerary_group_order_data['document']['order_status'] !== "已成團" && $itinerary_group_order_data['document']['order_status'] !== "棄單"){
-            return response()->json(['error' => "訂單狀態不是[已成團]或[棄單]不可更改付款狀態"], 400);
-        }
+        // 註解原因 : 不管訂單狀態是甚麼，都可以去做供應商的預定
+        // if($itinerary_group_order_data['document']['order_status'] !== "已成團" && $itinerary_group_order_data['document']['order_status'] !== "棄單"){
+        //     return response()->json(['error' => "訂單狀態不是[已成團]或[棄單]不可更改付款狀態"], 400);
+        // }
 
         // 修改付款狀態
         if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
