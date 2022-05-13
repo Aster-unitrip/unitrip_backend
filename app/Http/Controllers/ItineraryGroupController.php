@@ -860,9 +860,9 @@ class ItineraryGroupController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-        if($owned_by !== $validated['owned_by']){
-            return response()->json(['error' => 'you are not an employee of this company.'], 400);
-        }
+        // if($owned_by !== $validated['owned_by']){
+        //     return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        // }
 
         // 基本驗證 所有和金額有關必須不小於0
         if($validated['deposit'] < 0 && $validated['amount'] < 0){
@@ -879,6 +879,7 @@ class ItineraryGroupController extends Controller
         if(!$itinerary_group_order_data){
             return response()->json(['error' => "團行程沒有關聯的訂單"], 400);
         }
+
         if($itinerary_group_order_data['document']['order_status'] !== "已成團" && $itinerary_group_order_data['document']['order_status'] !== "棄單"){
             return response()->json(['error' => "訂單狀態不是[已成團]或[棄單]不可更改付款狀態"], 400);
         }
@@ -896,23 +897,29 @@ class ItineraryGroupController extends Controller
                     $find_type = 'itinerary_content';
                     $find_name = $find_type.".".$find_day.".components.".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_day.".components.".$find_sort;
+
                     if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type][$find_day]['components']) &&$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
                         return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]." ，找不到該筆元件資訊。"], 400);
                     }
-                }elseif($validated["type"] === "transportations" || $validated["type"] === "guides"){
+                }
+                else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
                     $find_type =$validated["type"];
                     $find_name = $find_type.".".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_sort;
+
                     if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type]) &&$itinerary_group_past_data[$find_type][$find_sort] === null){
                         return response()->json(['error' => "位於[交通工具]或[導遊]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_sort]." ，找不到該筆元件資訊。"], 400);
                     }
                 }
-            }else{
-                return response()->json(['error' => '沒有傳回修改項目名稱(type)'], 400);
             }
-        }else{
-            return response()->json(['error' => 'date, sort are not defined.'], 400);
+            else{
+                return response()->json(['error' => '沒有傳回修改項目類別(type)'], 400);
+            }
         }
+        else{
+            return response()->json(['error' => '請輸入訂購日期(date), 排序(sort)'], 400);
+        }
+
         // 基本驗證 如果需要付訂金，改訂金
         if(array_key_exists("pay_deposit", $validated)){
             if($validated['pay_deposit'] === 'true'){
@@ -924,24 +931,27 @@ class ItineraryGroupController extends Controller
                 }else{
                     return response()->json(['error' => '必須存在訂金，且如選[pay_deposit=true]，金額必須大於0'], 400);
                 }
-            }elseif($validated['pay_deposit'] === 'false'){
-                if(array_key_exists("deposit", $validated) && $validated['deposit'] > 0){
+            }
+            else if($validated['pay_deposit'] === 'false'){
+                if(array_key_exists("deposit", $validated) && $validated['deposit'] !== 0){
                     return response()->json(['error' => "當必須存在訂金，且如選[pay_deposit=false]，不可以有訂金"], 400);
                 }
                 $validated['balance'] = $validated['amount'];
             }
         }
+
         // 判斷狀態
         if($validated['payment_status'] === "已付訂金"){
             if($validated['pay_deposit'] === "false"){
                 return response()->json(['error' => "付款狀態為[已付訂金]時，是否預付訂金不可為0"]);
             }
             $fixed[$find_name.'actual_payment'] = $validated['deposit'];
-        }elseif($validated['payment_status'] === "已付全額"){
+        }
+        else if($validated['payment_status'] === "已付全額"){
             $fixed[$find_name.'actual_payment'] = $validated['amount'];
         }
 
-        // 抓到更新欄位
+        // 抓到團行程更新欄位
         $fixed['_id'] = $validated['_id'];
         $fixed[$find_name.'pay_deposit'] = $validated['pay_deposit'];
         $fixed[$find_name.'booking_status'] = $validated['booking_status'];
@@ -958,7 +968,8 @@ class ItineraryGroupController extends Controller
             $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]);
             if($result_payment !== true) return $result_payment;
 
-        }else if($find_type === "transportations" || $find_type === "guides"){
+        }
+        else if($find_type === "transportations" || $find_type === "guides"){
             $result_booking = $this->requestStatesService->booking_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
             if($result_booking !== true) return $result_booking;
             $result_payment = $this->requestStatesService->payment_status($validated, $itinerary_group_past_data[$find_type][$find_sort]);
@@ -971,8 +982,9 @@ class ItineraryGroupController extends Controller
 
         // 當狀態須加上刪除判斷 如果待退已退則刪除該obj放入刪除DB中
         if($validated['booking_status'] === "未預訂" || $validated['booking_status']=== "已預訂"){
-            return response()->json(['success' => "預訂狀態為[未預訂]或[已預訂]，更新成功!"], 200);
-        }elseif($validated['booking_status'] === "待退訂"){
+            return response()->json(['success' => "更新成功!"], 200);
+        }
+        else if($validated['booking_status'] === "待退訂"){
 
             // 取得存後資料
             $operator_data = $this->requestService->get_one('itinerary_group', $validated['_id']);
@@ -981,36 +993,32 @@ class ItineraryGroupController extends Controller
             // 判斷該筆資料type，欲處理待退訂項目
             if($find_type === "itinerary_content"){
                 $to_deleted = $operator_data[$find_type][$find_day]['components'][$find_sort];
-            }elseif($find_type === "transportations" || $find_type === "guides"){
+            }
+            else if($find_type === "transportations" || $find_type === "guides"){
                 $to_deleted = $operator_data[$find_type][$find_sort];
             }
 
             // 取得 客製化團 人數
-            $find_people["_id"] = $operator_data['order_id'];
-            $cus_orders = $this->requestService->get_one('cus_orders', $find_people['_id']);
+            $cus_orders = $this->requestService->get_one('cus_orders', $operator_data['order_id']);
             $cus_orders_data = json_decode($cus_orders->getContent(), true);
-            $to_deleted["total_people"] = $cus_orders_data['total_people'];
+            $total_people = $cus_orders_data['total_people'];
 
-            $to_deleted['to_be_deleted'] = date('Y-m-d H:i:s');
-            $to_deleted['deleted_at'] = null;
-            $to_deleted['deleted_reason'] = null;
+            // 要放入元件刪除資料庫
             $to_deleted['order_id'] = $operator_data['order_id'];
             $to_deleted['itinerary_group_id'] = $operator_data['_id'];
-            $to_deleted['component_id'] = $validated['_id'];
-            unset($to_deleted['sort']);
 
+            $to_deleted = $this->requestStatesService->delete_data($to_deleted);
             // 加入刪除資料庫中
             $deleted_result = $this->requestService->insert_one('cus_delete_components', $to_deleted);
 
-            // 修改團行程成本(需要扣掉的)
-            $delete_component_data = $this->requestCostService->after_delete_component_cost($itinerary_group_past_data["accounting"],$itinerary_group_past_data['itinerary_group_cost'], $to_deleted);
+            // 修改團行程成本(需要扣掉的)，目前accounting大人小孩成本尚未處理
+            $delete_component_data = $this->requestCostService->after_delete_component_cost($itinerary_group_past_data["accounting"],$itinerary_group_past_data['itinerary_group_cost'], $to_deleted, $total_people);
 
             $result = $this->requestService->update_one('itinerary_group', $delete_component_data);
 
             // 刪除團行程該元件
             $to_deleted_itinerary['_id'] = $validated['_id'];
             $to_deleted_itinerary[$find_name_no_dot] = null;
-            dd($to_deleted_itinerary);
             $this->requestService->delete_field('itinerary_group', $to_deleted_itinerary);
             return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
 
