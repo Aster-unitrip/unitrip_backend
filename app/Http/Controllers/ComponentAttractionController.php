@@ -99,17 +99,23 @@ class ComponentAttractionController extends Controller
                 "address_town" => 1,
                 "address" => 1,
                 "name" => 1,
+                "categories" => 1,
                 "tel" => 1,
                 "ticket" => 1,
                 "imgs" => 1,
                 "private" => 1,
                 "intro_summary" => 1,
                 "description" => 1,
+                "experience" => 1,
                 "is_display" => 1,
                 "updated_at" => 1,
                 "created_at" => 1
             );
         $result = $this->requestService->aggregate_facet('attractions', $projection, $filter, $page);
+        // 相容舊格式
+        foreach($result['docs'] as $doc){
+            $doc['private']['experience'] = '';
+        }
         return $result;
     }
 
@@ -221,12 +227,29 @@ class ComponentAttractionController extends Controller
 
     // 把元件從子槽複製到母槽，要排除 experience, ticket 欄位
     // 母槽元件 ticket 只顯示票種不要票價
-    public function move_from_private_to_public(Request $request) {
-        
+    // 先確認此元件屬不屬於他自己，而且必須是子槽資料
+    public function copy_from_private_to_public(Request $request) {
+        $query = json_decode($request->getContent(), true);
+        $component = $this->requestService->get_one('attractions', $query['_id']);
+        if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
+            $component['is_display'] == true;
+            foreach($component as $key => $value){
+                
+            }
+            unset($component['ticket']);
+            unset($component['experience']);
+            $attraction = $this->requestService->insert_one('attractions', $component);
+            return response()->json([
+                'message' => 'Successfully copied component to public',
+                'id' => $query['_id']
+            ]);
+        } else {
+            return response()->json(['error' => 'You can not access this component'], 400);
+        }
     }
 
     // 把元件從母槽複製子槽
-    public function move_from_public_to_private(Request $request) {
+    public function copy_from_public_to_private(Request $request) {
 
     }
 
