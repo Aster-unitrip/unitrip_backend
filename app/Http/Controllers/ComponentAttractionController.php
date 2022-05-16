@@ -98,6 +98,7 @@ class ComponentAttractionController extends Controller
                 "address_city" => 1,
                 "address_town" => 1,
                 "address" => 1,
+                "categories" => 1,
                 "name" => 1,
                 "categories" => 1,
                 "tel" => 1,
