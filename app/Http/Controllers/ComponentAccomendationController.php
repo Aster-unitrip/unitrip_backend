@@ -110,6 +110,7 @@ class ComponentAccomendationController extends Controller
             "meals" => 1,
             "imgs" => 1,
             "room" => 1,
+            "star" => 1,
             "private" => 1,
             'updated_at' => 1,
             'created_at' => 1,
