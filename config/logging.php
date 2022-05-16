@@ -50,7 +50,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => ['stdout', 'slack'],
             'ignore_exceptions' => false,
         ],
 
@@ -93,6 +93,15 @@ return [
             'with' => [
                 'stream' => 'php://stderr',
             ],
+        ],
+
+        'stdout' => [
+            'driver' => 'monolog',
+            'handler' => StreamHandler::class,
+            'with' => [
+                'stream' => 'php://stdout',
+            ],
+            'level' => 'info',
         ],
 
         'syslog' => [

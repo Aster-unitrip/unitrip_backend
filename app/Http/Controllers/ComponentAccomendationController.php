@@ -48,6 +48,9 @@ class ComponentAccomendationController extends Controller
         ];
     }
 
+    // 旅行社使用者可以新增自己的子槽元件
+    // 旅行社使用者可以選擇在同公司成員的搜尋結果裡顯示／隱藏子槽元件(is_enabled)
+    // 旅行社使用者可以選擇是否將元件新增至母槽(is_display)
     public function add(Request $request)
     {
         $data = json_decode($request->getContent(), true);
@@ -66,10 +69,62 @@ class ComponentAccomendationController extends Controller
         
     }
 
+    // 旅行社搜尋母槽：is_display == true
+    // 旅行社搜尋子槽：is_display == false & owned_by == 自己公司 id & is_enabled == true
+    // 旅行社搜尋母槽＆子槽：is_display == true or (owned_by == 自己公司 id & is_enabled == true)
+    // 供應商只能得到母槽自己的元件
     public function list(Request $request)
     {
+        if (auth()->payload()->get('company_type') == 1) {
+            $filter = array(
+                'is_display' => true,
+                'owned_by' => auth()->user()->company_id
+            );
+            $page = 1;
+        } else if (auth()->payload()->get('company_type') == 2) {
+            
+            $travel_agency_query = $this->travel_agency_search($request);
+            $filter = $travel_agency_query['filter'];
+            $page = $travel_agency_query['page'];
+        } else if (auth()->payload()->get('company_type') == 3) {
+            
+        } else {
+            return response()->json(['error' => 'Wrong identity.'], 400);
+        }
+
+        // Handle projection content
+        $projection = array(
+            "_id" => 1,
+            "address_city" => 1,
+            "address_town" => 1,
+            "address" => 1,
+            "name" => 1,
+            "tel" => 1,
+            "category" => 1,
+            "meals" => 1,
+            "imgs" => 1,
+            "room" => 1,
+            "star" => 1,
+            "private" => 1,
+            'updated_at' => 1,
+            'created_at' => 1,
+            "intro_summary" => 1,
+            "description" => 1,
+        );
+        $result = $this->requestService->aggregate_facet('accomendations', $projection, $filter, $page);
+        // 相容舊格式
+        $current_data = $result->getData();
+        foreach($current_data->docs as $doc){
+            $doc->private = array('experience' => '');
+        }
+        $result->setData($current_data);
+        return $result;
+    }
+
+    protected function travel_agency_query(Request $request){
         // Handle filter content
         $filter = json_decode($request->getContent(), true);
+        $filter  = $this->ensure_query_key($filter);
         if (array_key_exists('page', $filter)) {
             $page = $filter['page'];
             unset($filter['page']);
@@ -83,13 +138,11 @@ class ComponentAccomendationController extends Controller
         else{
             $page = 0;
         }
-
         // Handle star level
         if (array_key_exists('star', $filter)) {
             $star = $filter['star'];
             $filter['star'] = array("\$in" => $star);
         }
-
         // Handle room type
         if (array_key_exists('room_type', $filter)) {
             $room_type = $filter['room_type'];
@@ -129,52 +182,32 @@ class ComponentAccomendationController extends Controller
                 ));
             }
         }
-        // {'activity_items.price': {'$all':[]}}
-
         unset($filter['fee']);
-        // Company_type: 1, Query public components belong to the company
-        // Company_type: 2, Query all public components and private data belong to the company
-        $company_type = auth()->payload()->get('company_type');
-        $company_id = auth()->payload()->get('company_id');
-        if ($company_type == 1){
-            $filter['owned_by'] = auth()->user()->company_id;
-            $query_private = false;
-        }
-        else if ($company_type == 2){
-            $query_private = true;
-            $filter['is_display'] = true;
-        }
-        else{
-            return response()->json(['error' => 'company_type must be 1 or 2'], 400);
+
+        if (array_key_exists('search_location', $filter)) {
+            if ($filter['search_location'] == 'public') {
+                $filter['is_display'] = true;
+            } else if ($filter['search_location'] == 'private') {
+                $filter['is_display'] = false;
+                $filter['is_enabled'] = true;
+                $filter['owned_by'] = auth()->user()->company_id;
+                
+            } else if ($filter['search_location'] == 'both') {
+                $filter['$or'] = array(
+                    array('is_display' => true),
+                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+                );
+            } else {
+                return response()->json(['error' => 'search_location must be public, private or both'], 400);
+            }
+        } else if (!array_key_exists('search_location', $filter)) {
+            $filter['$or'] = array(
+                array('is_display' => true),
+                array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+            );
         }
 
-        // Handle projection content
-        $projection = array(
-            "_id" => 1,
-            "address_city" => 1,
-            "address_town" => 1,
-            "address" => 1,
-            "name" => 1,
-            "tel" => 1,
-            "category" => 1,
-            "meals" => 1,
-            "imgs" => 1,
-            "room" => 1,
-            "star" => 1,
-            "private" => 1,
-            'updated_at' => 1,
-            'created_at' => 1,
-            "intro_summary" => 1,
-            "description" => 1,
-        );
-        $result = $this->requestService->aggregate_facet('accomendations', $projection, $filter, $page);
-        // 相容舊格式
-        $current_data = $result->getData();
-        foreach($current_data->docs as $doc){
-            $doc->private = array('experience' => '');
-        }
-        $result->setData($current_data);
-        return $result;
+        return array('page'=>$page, 'filter'=>$filter);
     }
 
 }

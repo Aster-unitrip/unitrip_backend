@@ -9,6 +9,7 @@ use App\Services\UserService;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 use Validator;
 
@@ -103,13 +104,15 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
+            Log::info('User failed to login', ['id' => $request->email]);
             return response()->json($validator->errors(), 422);
         }
 
         if (! $token = auth()->attempt($validator->validated())) {
+            Log::info('User failed to login', ['id' => $request->email]);
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
+        Log::info('User logged in', ['id' => auth()->user()->email]);
         return $this->createNewToken($token);
     }
 
@@ -172,7 +175,7 @@ class AuthController extends Controller
             // }
             return response()->json(['error' => $e->getMessage()], 400);
         }
-
+        Log::info('User registered', ['id' => $input_user['email']]);
         return response()->json([
             'message' => 'User successfully registered',
         ], 201);
