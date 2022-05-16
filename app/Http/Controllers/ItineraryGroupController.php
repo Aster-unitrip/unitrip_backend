@@ -361,7 +361,8 @@ class ItineraryGroupController extends Controller
             $result = $this->requestService->update_one('cus_orders', $fixed);
             return $result;
 
-        }elseif(array_key_exists('_id', $validated)){
+        }
+        else if(array_key_exists('_id', $validated)){
             //3.2(編輯團行程)
             if($validated['code']!== null && $result_code_data["count"] > 1){
                 if($result_code_data["docs"][0]['_id'] !== $validated['_id']){
@@ -386,15 +387,19 @@ class ItineraryGroupController extends Controller
 
             if(array_key_exists('itinerary_content', $validated)){
                 for($i = 0; $i < count($validated['itinerary_content']); $i++){
+
                     $validated['itinerary_content'][$i]['date'] = date("Y-m-d H:i:s", strtotime($validated['travel_start'].$i."day"));
+                    // 日期重新組合
                     if(!array_key_exists('sort', $validated['itinerary_content'][$i])){
                         $validated['itinerary_content'][$i]['sort'] = $i+1;
                     }
+                    // 當日行程重新組合
                     if(array_key_exists('components', $validated['itinerary_content'][$i])){
                         for($j = 0; $j < count($validated['itinerary_content'][$i]['components']); $j++){
                             $validated['itinerary_content'][$i]['components'][$j]['date'] = $validated['itinerary_content'][$i]['date'];
+                            $validated['itinerary_content'][$i]['components'][$j]['sort'] = $j+1;
                             if(!array_key_exists('sort', $validated['itinerary_content'][$i]['components'][$j])){
-                                $validated['itinerary_content'][$i]['components'][$j]['sort'] = $j+1;
+                                // $validated['itinerary_content'][$i]['components'][$j]['sort'] = $j+1;
                                 $validated['itinerary_content'][$i]['components'][$j]['operator_note'] = null;
                                 $validated['itinerary_content'][$i]['components'][$j]['pay_deposit'] = 'false';
                                 $validated['itinerary_content'][$i]['components'][$j]['booking_status'] = "未預訂";
@@ -406,12 +411,15 @@ class ItineraryGroupController extends Controller
                             }
                         }
                     }
+
+                    // 驗算
                     if(array_key_exists('components', $validated['itinerary_content'][$i])){
                         for($j = 0; $j < count($validated['itinerary_content'][$i]['components']); $j++){
                             $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['itinerary_content'][$i]['components'][$j]['type'], $validated['itinerary_content'][$i]['components'][$j]);
                             $amount_validated['total'] += $amount['total'];
                         }
                     }
+
                 }
             }
 
@@ -419,6 +427,7 @@ class ItineraryGroupController extends Controller
                 for($i = 0; $i < count($validated['guides']); $i++){
                     $validated['guides'][$i]['date_start'] = $validated['guides'][$i]['date_start']."T00:00:00.000+08:00";
                     $validated['guides'][$i]['date_end'] = $validated['guides'][$i]['date_end']."T23:59:59.000+08:00";
+                    $validated['guides'][$i]['sort'] = $i+1;
                     if(strtotime($validated['guides'][$i]['date_end']) - strtotime($validated['guides'][$i]['date_start']) <= 0){
                         return response()->json(['error' => '(導遊)結束時間不可早於開始時間'], 400);
                     }
@@ -428,8 +437,9 @@ class ItineraryGroupController extends Controller
                     if(strtotime($validated['guides'][$i]['date_start']) - strtotime($validated['travel_start']) < 0){
                         return response()->json(['error' => '導遊開始時間不可早於旅程期間'], 400);
                     }
+                    //新增後改值
                     if(!array_key_exists('sort', $validated['guides'][$i])){
-                        $validated['guides'][$i]['sort'] = $i+1;
+                        // $validated['guides'][$i]['sort'] = $i+1;
                         $validated['guides'][$i]['operator_note'] = null;
                         $validated['guides'][$i]['pay_deposit'] = 'false';
                         $validated['guides'][$i]['booking_status'] = "未預訂"; //預定狀態
@@ -440,6 +450,7 @@ class ItineraryGroupController extends Controller
                         $validated['guides'][$i]['actual_payment'] = 0;
                     }
                 }
+                // 驗算
                 for($i = 0; $i < count($validated['guides']); $i++){
                     $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['guides'][$i]['type'], $validated['guides'][$i]);
                     $amount_validated['total'] += $amount['total'];
@@ -450,6 +461,7 @@ class ItineraryGroupController extends Controller
                 for($i = 0; $i < count($validated['transportations']); $i++){
                     $validated['transportations'][$i]['date_start'] = $validated['transportations'][$i]['date_start']."T00:00:00.000+08:00";
                     $validated['transportations'][$i]['date_end'] = $validated['transportations'][$i]['date_end']."T23:59:59.000+08:00";
+                    $validated['transportations'][$i]['sort'] = $i+1;
                     if(strtotime($validated['transportations'][$i]['date_end']) - strtotime($validated['transportations'][$i]['date_start']) <= 0){
                         return response()->json(['error' => '(交通工具)結束時間不可早於開始時間'], 400);
                     }
@@ -459,8 +471,9 @@ class ItineraryGroupController extends Controller
                     if(strtotime($validated['transportations'][$i]['date_start']) - strtotime($validated['travel_start']) < 0){
                         return response()->json(['error' => '交通工具開始時間不可早於旅程期間'], 400);
                     }
+                    //新增後改值
                     if(!array_key_exists('sort', $validated['transportations'][$i])){
-                        $validated['transportations'][$i]['sort'] = $i+1;
+                        // $validated['transportations'][$i]['sort'] = $i+1;
                         $validated['transportations'][$i]['operator_note'] = null;
                         $validated['transportations'][$i]['pay_deposit'] = 'false';
                         $validated['transportations'][$i]['booking_status'] = "未預訂"; //預定狀態
@@ -471,17 +484,21 @@ class ItineraryGroupController extends Controller
                         $validated['transportations'][$i]['actual_payment'] = 0;
                     }
                 }
+                // 驗算
                 for($i = 0; $i < count($validated['transportations']); $i++){
                     $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['transportations'][$i]['type'], $validated['transportations'][$i]);
                     $amount_validated['total'] += $amount['total'];
                 }
             }
+
             if(array_key_exists('misc', $validated)){
                 for($i = 0; $i < count($validated['misc']); $i++){
-                    if(!array_key_exists('sort', $validated['misc'][$i])){
-                        $validated['misc'][$i]['sort'] = $i+1;
-                    }
+                    $validated['misc'][$i]['sort'] = $i+1;
+                    // if(!array_key_exists('sort', $validated['misc'][$i])){
+                    //     $validated['misc'][$i]['sort'] = $i+1;
+                    // }
                 }
+                // 驗算
                 for($i = 0; $i < count($validated['misc']); $i++){
                     $amount = $this->requestCostService->validated_cost($cus_orders_data, $validated['misc'][$i]['type'], $validated['misc'][$i]);
                     $amount_validated['total'] += $amount['total'];
@@ -673,7 +690,8 @@ class ItineraryGroupController extends Controller
             $itinerary_group_after_edit_data =  json_decode($itinerary_group_after_edit->content(), true);
             return $itinerary_group_after_edit_data;
 
-        }elseif(!$cus_order_data['itinerary_group_id']){ //new
+        }
+        else if(!$cus_order_data['itinerary_group_id']){ //new
 
             // TODO 這部分感覺可以優化
             $itinerary_group_data_new['order_id'] = $cus_order_data['_id'];
@@ -713,7 +731,8 @@ class ItineraryGroupController extends Controller
             $itinerary_group_data_new['itinerary_group_note'] = "";
             $itinerary_group_data_new['owned_by'] = $owned_by;
             return $itinerary_group_data_new;
-        }else{
+        }
+        else{
             return response()->json(['error' => '發生一些問題，可能是資料沒給正確!']);
         }
     }
@@ -880,11 +899,6 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => "團行程沒有關聯的訂單"], 400);
         }
 
-        // 註解原因 : 不管訂單狀態是甚麼，都可以去做供應商的預定
-        // if($itinerary_group_order_data['document']['order_status'] !== "已成團" && $itinerary_group_order_data['document']['order_status'] !== "棄單"){
-        //     return response()->json(['error' => "訂單狀態不是[已成團]或[棄單]不可更改付款狀態"], 400);
-        // }
-
         // 修改付款狀態
         if(array_key_exists("date", $validated) && array_key_exists("sort", $validated)){
             if($validated["sort"]<=0){
@@ -898,9 +912,17 @@ class ItineraryGroupController extends Controller
                     $find_type = 'itinerary_content';
                     $find_name = $find_type.".".$find_day.".components.".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_day.".components.".$find_sort;
+                    // return $find_day;
+                    // return $itinerary_group_past_data[$find_type][$find_day]['components'];
 
-                    if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type][$find_day]['components']) &&$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
-                        return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]." ，找不到該筆元件資訊。"], 400);
+                    if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type][$find_day]['components'])){
+                        if($itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
+                            return response()->json(['error' => "位於[景點]或[住宿]或[活動]或[餐廳]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]." ，找不到該筆元件資訊。"], 400);
+                        }
+                        else if($itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]['type'] !== $validated['type']){
+                            return response()->json(['error' => "元件類型為 ".$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]['type']." ，搜尋類型為" .$validated['type']." 兩者有誤，可能是[date]欄位有問題導致。"], 400);
+                        }
+
                     }
                 }
                 else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
@@ -908,8 +930,13 @@ class ItineraryGroupController extends Controller
                     $find_name = $find_type.".".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_sort;
 
-                    if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type]) &&$itinerary_group_past_data[$find_type][$find_sort] === null){
-                        return response()->json(['error' => "位於[交通工具]或[導遊]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_sort]." ，找不到該筆元件資訊。"], 400);
+                    if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type])){
+                        if($itinerary_group_past_data[$find_type][$find_sort] === null){
+                            return response()->json(['error' => "位於[交通工具]或[導遊]元件中，元件內容為 ".$itinerary_group_past_data[$find_type][$find_sort]." ，找不到該筆元件資訊。"], 400);
+                        }
+                        else if($itinerary_group_past_data[$find_type][$find_sort]['type'] !== $validated['type']){
+                            return response()->json(['error' => "元件類型為 ".$itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort]['type']." ，搜尋類型為" .$validated['type']." 兩者有誤，可能是[date]欄位有問題導致。"], 400);
+                        }
                     }
                 }
             }
@@ -978,6 +1005,7 @@ class ItineraryGroupController extends Controller
         }
 
         // 確定沒錯後存入團行程中
+        // return $fixed;
         $update = $this->requestService->update_one('itinerary_group', $fixed);
 
 
@@ -1075,7 +1103,7 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
 
-        // 直接針對待退已退做判斷
+        // 直接針對待退已退做判斷(過去資料和送入資料比對)
         if(array_key_exists("payment_status", $validated) && array_key_exists("booking_status", $validated)){
             if($data_before['document']['booking_status'] === "待退訂"){
                 if($validated['booking_status'] !== "待退訂" && $validated['booking_status'] !== "已退訂"){
@@ -1085,12 +1113,14 @@ class ItineraryGroupController extends Controller
                     if($validated['payment_status'] !== '已棄單，待退款' && $validated['payment_status'] !== '已棄單，免退款'){
                         return response()->json(['error' => '預定狀態[待退訂]，付款狀態不可為[未付款]、[已付訂金]、[已付全額]、[已棄單，已退款]。'] , 400);
                     }
-                }elseif($validated['booking_status'] === '已退訂'){
+                }
+                else if($validated['booking_status'] === '已退訂'){
                     if($validated['payment_status'] !== '已棄單，已退款' && $validated['payment_status'] !== '已棄單，免退款'){
-                        return response()->json(['error' => '預定狀態[待退訂]，付款狀態不可為[未付款]、[已付訂金]、[已付全額]、[已棄單，已退款]。'] , 400);
+                        return response()->json(['error' => '預定狀態[已退訂]，付款狀態不可為[未付款]、[已付訂金]、[已付全額]、[已棄單，待退款]。'] , 400);
                     }
                 }
-            }elseif($data_before['document']['booking_status'] === "已退訂"){
+            }
+            else if($data_before['document']['booking_status'] === "已退訂"){
                 if($validated['booking_status'] !== "已退訂"){
                     return response()->json(['error' => '預定狀態只可以維持[已退訂]，不可更改。'], 400);
                 }
@@ -1112,9 +1142,11 @@ class ItineraryGroupController extends Controller
         if($data_before['document']['payment_status'] === "已棄單，免退款" && $validated['payment_status'] !== "已棄單，免退款"){
             return response()->json(['error' => "付款狀態只可維持[已棄單，免退款]"], 400);
         }
+
         if($data_before['document']['payment_status'] === "已棄單，待退款" && $validated['payment_status'] === "已棄單，已退款"){
             $validated['deleted_at'] = date('Y-m-d H:i:s');
-        }elseif($data_before['document']['payment_status'] === "未付款" &&  $validated['payment_status'] === "已棄單，免退款"){
+        }
+        else if($data_before['document']['payment_status'] === "未付款" &&  $validated['payment_status'] === "已棄單，免退款"){
             $validated['deleted_at'] = date('Y-m-d H:i:s');
         }
         $result = $this->requestService->update_one('cus_delete_components', $validated);
