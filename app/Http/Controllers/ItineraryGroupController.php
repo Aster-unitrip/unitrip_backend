@@ -880,9 +880,9 @@ class ItineraryGroupController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-        if($owned_by !== $validated['owned_by']){
-            return response()->json(['error' => 'you are not an employee of this company.'], 400);
-        }
+        // if($owned_by !== $validated['owned_by']){
+        //     return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        // }
 
         // 基本驗證 所有和金額有關必須不小於0
         if($validated['deposit'] < 0 && $validated['amount'] < 0){
@@ -1023,9 +1023,12 @@ class ItineraryGroupController extends Controller
             // 判斷該筆資料type，欲處理待退訂項目
             if($find_type === "itinerary_content"){
                 $to_deleted = $operator_data[$find_type][$find_day]['components'][$find_sort];
+                $to_deleted_itinerary[$find_name_no_dot] = $operator_data[$find_type][$find_day]['components'][$find_sort];
             }
             else if($find_type === "transportations" || $find_type === "guides"){
                 $to_deleted = $operator_data[$find_type][$find_sort];
+                $to_deleted_itinerary[$find_name_no_dot] = $operator_data[$find_type][$find_sort];
+
             }
 
             // 取得 客製化團 人數
@@ -1049,7 +1052,7 @@ class ItineraryGroupController extends Controller
 
             // 刪除團行程該元件
             $to_deleted_itinerary['_id'] = $validated['_id'];
-            $to_deleted_itinerary[$find_name_no_dot] = null;
+            // $to_deleted_itinerary[$find_name_no_dot] = null;
             $this->requestService->pull_element('itinerary_group', $to_deleted_itinerary);
             return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
 

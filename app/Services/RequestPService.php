@@ -329,10 +329,7 @@ class RequestPService
             ),
             "pull" => $delete_data
         );
-        //dd($data);
         $postdata = json_encode($data);
-        //return $postdata;
-
         $options = array(
             'http' => array(
                 'method' => 'POST',
@@ -345,6 +342,7 @@ class RequestPService
                 'timeout' => 10 // 超時時間（單位:s）
             )
         );
+        // dump($postdata);
         try{
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
