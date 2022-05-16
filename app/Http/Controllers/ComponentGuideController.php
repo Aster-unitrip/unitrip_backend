@@ -82,6 +82,12 @@ class ComponentGuideController extends Controller
             "created_at" => 1
         );
         $result = $this->requestService->aggregate_facet('guides', $projection, $filter, $page);
+        // 相容舊格式
+        $current_data = $result->getData();
+        foreach($current_data->docs as $doc){
+            $doc->private = array('experience' => '');
+        }
+        $result->setData($current_data);
         return $result;
     }
 
