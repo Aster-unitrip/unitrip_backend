@@ -109,6 +109,7 @@ class ComponentActivityController extends Controller
             "name" => 1,
             "attraction_name" => 1,
             "tel" => 1,
+            "categories" => 1,
             "activity_items" => 1,
             "pax_size_threshold" => 1,
             "max_pax_size" => 1,

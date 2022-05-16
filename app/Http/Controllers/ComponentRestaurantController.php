@@ -84,6 +84,7 @@ class ComponentRestaurantController extends Controller
             "address_town" => 1,
             "address" => 1,
             "name" => 1,
+            "categories" => 1,
             "tel" => 1,
             "cost_per_person" => 1,
             "meals" => 1,
