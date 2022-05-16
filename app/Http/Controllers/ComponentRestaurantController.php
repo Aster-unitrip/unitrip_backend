@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 use Validator;
 

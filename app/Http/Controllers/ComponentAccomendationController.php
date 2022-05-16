@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
+use Illuminate\Support\Facades\Log;
 
 class ComponentAccomendationController extends Controller
 {
@@ -46,6 +47,7 @@ class ComponentAccomendationController extends Controller
             'bank_info.account_name' => 'nullable|string|max:20',
             'bank_info.account_number' => 'nullable|string|max:20',
         ];
+        $this->edit_rule = $this->generate_edit_rule_from_add_rule($this->add_rule);
     }
 
     // 旅行社使用者可以新增自己的子槽元件
@@ -53,6 +55,7 @@ class ComponentAccomendationController extends Controller
     // 旅行社使用者可以選擇是否將元件新增至母槽(is_display)
     public function add(Request $request)
     {
+        Log::info('User add accomendation', ['user' => auth()->user()->email, 'request' => $request->all()]);
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->add_rule);
         if ($validator->fails()) {
@@ -75,6 +78,7 @@ class ComponentAccomendationController extends Controller
     // 供應商只能得到母槽自己的元件
     public function list(Request $request)
     {
+        Log::info('User list accomendation', ['user' => auth()->user()->email, 'request' => $request->all()]);
         if (auth()->payload()->get('company_type') == 1) {
             $filter = array(
                 'is_display' => true,
@@ -89,6 +93,7 @@ class ComponentAccomendationController extends Controller
         } else if (auth()->payload()->get('company_type') == 3) {
             
         } else {
+            Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access accomendation list', ['request' => $request->all(), 'user_id' => auth()->user()->id]);
             return response()->json(['error' => 'Wrong identity.'], 400);
         }
 
@@ -106,6 +111,7 @@ class ComponentAccomendationController extends Controller
             "room" => 1,
             "star" => 1,
             "private" => 1,
+            "is_display" => 1,
             'updated_at' => 1,
             'created_at' => 1,
             "intro_summary" => 1,
@@ -119,6 +125,87 @@ class ComponentAccomendationController extends Controller
         }
         $result->setData($current_data);
         return $result;
+    }
+
+    // 供應商(type: 1)只能得到母槽元件
+    // 旅行社(type: 2)搜尋無法存取子槽非自己公司的元件
+    // 系統商(type: 3)可以得到所有元件
+    public function get_by_id($id)
+    {
+        Log::info('User get accomendation by id', ['user' => auth()->user()->email, 'component_id' => $id]);
+        $company_id = auth()->user()->company_id;
+        $result = $this->requestService->get_one('accomendations', $id);
+        $content =  json_decode($result->content(), true);
+        if (auth()->payload()->get('company_type') == 1) {
+            if ($content['is_display'] == false) {
+                return response()->json(['error' => 'You can not access this accomendation'], 400);
+            }
+        } else if (auth()->payload()->get('company_type') == 2) {
+            if ($content['is_display'] == false && $content['owned_by'] != $company_id) {
+                return response()->json(['error' => 'You can not access this accomendation'], 400);
+            }
+        } else if (auth()->payload()->get('company_type') == 3) {
+
+        } else {
+            Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access accomendation list', ['user_id' => auth()->user()->id]);
+            return response()->json(['error' => 'Wrong identity.'], 400);
+        }
+        
+        if (array_key_exists('imgs', $content)){
+            foreach ($content['imgs'] as $value){
+                $n = 0;
+                $split_url = explode('/', $value['url']);
+                $content['imgs'][$n]['filename'] = end($split_url);
+            }
+        }
+
+        return $content;
+    }
+
+    // 供應商(type: 1)只能編輯自己的元件
+    // 旅行社使用者可以編輯自己的子槽元件
+    // 旅行社使用者不能編輯母槽元件
+    // 系統商可以修改所有元件
+    // 除了系統商以外的使用者都不能主動修改 is_display, owned_by
+    // 若需母子槽異動，要使用 move_from_private_to_public 或 move_from_public_to_private
+    public function edit(Request $request)
+    {
+        Log::info('User edit accomendation', ['user' => auth()->user()->email, 'request' => $request->all()]);
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->edit_rule);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validated = $validator->validated();
+        $company_id = auth()->user()->company_id;
+        // Override owned_by
+        $validated['owned_by'] = $company_id;
+        $record = $this->requestService->get_one('accomendations', $validated['_id']);
+        $content =  json_decode($record->content(), true);
+        // Supplier
+        if (auth()->payload()->get('company_type') == 1) {
+            if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
+                $accomendation = $this->requestService->update('accomendations', $validated);
+            } else {
+                return response()->json(['error' => 'You can not access this accomendation'], 400);
+            }
+        // Travel agency
+        } else if (auth()->payload()->get('company_type') == 2) {
+            if ($content['is_display'] == false && $content['owned_by'] == $company_id) {
+                $accomendation = $this->requestService->update('accomendations', $validated);
+            } else if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
+                $accomendation = $this->requestService->update('accomendations', $validated);
+            } else {
+                return response()->json(['error' => 'You can not access this accomendation'], 400);
+            }
+        // System admin
+        } else if (auth()->payload()->get('company_type') == 3) {
+            $accomendation = $this->requestService->update('accomendations', $validated);
+        } else {
+            return response()->json(['error' => 'Wrong identity.'], 400);
+        }
+        return $accomendation;
+
     }
 
     protected function travel_agency_query(Request $request){
@@ -210,4 +297,9 @@ class ComponentAccomendationController extends Controller
         return array('page'=>$page, 'filter'=>$filter);
     }
 
+    protected function generate_edit_rule_from_add_rule($rule)
+    {
+        unset($rule['is_display']);
+        return $rule;
+    }
 }

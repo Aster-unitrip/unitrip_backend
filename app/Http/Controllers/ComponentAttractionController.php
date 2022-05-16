@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\AttractionService;
 use App\Services\RequestPService;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 use Validator;
 
@@ -76,7 +77,7 @@ class ComponentAttractionController extends Controller
     // 旅行社搜尋母槽＆子槽：is_display == true or (owned_by == 自己公司 id & is_enabled == true)
     // 供應商只能得到母槽自己的元件
     public function list(Request $request)
-    {        
+    {
         if (auth()->payload()->get('company_type') == 1) {
             $filter = array(
                 'is_display' => true,
@@ -91,6 +92,7 @@ class ComponentAttractionController extends Controller
         } else if (auth()->payload()->get('company_type') == 3) {
             
         } else {
+            Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access attractions list. Wrong identity.', ['request' => $request->all(), 'user' => auth()->user()->email]);
             return response()->json(['error' => 'Wrong identity.'], 400);
         }
 
@@ -145,6 +147,7 @@ class ComponentAttractionController extends Controller
         } else if (auth()->payload()->get('company_type') == 3) {
 
         } else {
+            Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access attractions list. Wrong identity.', ['user' => auth()->user()->email]);
             return response()->json(['error' => 'Wrong identity.'], 400);
         }
         
@@ -215,7 +218,6 @@ class ComponentAttractionController extends Controller
                 return response()->json(['error' => 'You can not access this attraction'], 400);
             }
         } else if (auth()->payload()->get('company_type') == 2) {
-            $record = $this->requestService->get_one('attractions', $validated['_id']);
             if ($content['is_display'] == false && $content['owned_by'] == $company_id) {
                 $attraction = $this->requestService->update('attractions', $validated);
             } else if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
