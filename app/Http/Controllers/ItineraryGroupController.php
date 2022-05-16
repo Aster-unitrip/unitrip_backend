@@ -242,8 +242,9 @@ class ItineraryGroupController extends Controller
             if(array_key_exists('itinerary_content', $validated)){
                 for($i = 0; $i < count($validated['itinerary_content']); $i++){
                     $validated['itinerary_content'][$i]['sort'] = $i+1;
-                    $date_add_days = date("Y-m-d H:i:s", strtotime($validated['travel_start'].$i."day"));
-                    $validated['itinerary_content'][$i]['date'] = date("Y-m-d H:i:s", strtotime($date_add_days."-8 hours"));
+                    // $date_add_days = date("Y-m-d H:i:s", strtotime($validated['travel_start'].$i."day"));
+                    // $validated['itinerary_content'][$i]['date'] = date("Y-m-d H:i:s", strtotime($date_add_days."-8 hours"));
+                    $validated['itinerary_content'][$i]['date'] = date("Y-m-d H:i:s", strtotime($validated['travel_start'].$i."day"));
                     if(array_key_exists('components', $validated['itinerary_content'][$i])){
                         for($j = 0; $j < count($validated['itinerary_content'][$i]['components']); $j++){
                             $validated['itinerary_content'][$i]['components'][$j]['sort'] = $j+1;
@@ -1037,6 +1038,7 @@ class ItineraryGroupController extends Controller
             $to_deleted['itinerary_group_id'] = $operator_data['_id'];
 
             $to_deleted = $this->requestStatesService->delete_data($to_deleted);
+
             // 加入刪除資料庫中
             $deleted_result = $this->requestService->insert_one('cus_delete_components', $to_deleted);
 
@@ -1048,7 +1050,7 @@ class ItineraryGroupController extends Controller
             // 刪除團行程該元件
             $to_deleted_itinerary['_id'] = $validated['_id'];
             $to_deleted_itinerary[$find_name_no_dot] = null;
-            $this->requestService->delete_field('itinerary_group', $to_deleted_itinerary);
+            $this->requestService->pull_element('itinerary_group', $to_deleted_itinerary);
             return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
 
         }
