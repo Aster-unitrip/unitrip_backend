@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\AttractionService;
 use App\Services\RequestPService;
+use Illuminate\Validation\Rule;
 
 use Validator;
 
@@ -49,6 +50,7 @@ class ComponentAttractionController extends Controller
             'is_display' => 'required|boolean',
             'is_enabled' => 'required|boolean',
             'imgs' => 'nullable',
+            'source' => 'nullable|string|max:10',
             'bank_info' => 'nullable',
             'bank_info.bank_name' => 'nullable|string|max:20',
             'bank_info.bank_code' => 'nullable|string|max:20',
@@ -109,6 +111,7 @@ class ComponentAttractionController extends Controller
                 "description" => 1,
                 "experience" => 1,
                 "is_display" => 1,
+                "source" => 1,
                 "updated_at" => 1,
                 "created_at" => 1
             );
@@ -188,6 +191,7 @@ class ComponentAttractionController extends Controller
             'experience' => 'nullable|st ring|max:500',
             'is_enabled' => 'required|boolean',
             'imgs' => 'nullable',
+            'source' => ['required', Rule::in(['unitrip', 'supplier', 'gov', 'kkday', 'ota', 'ta'])],
             'bank_info' => 'nullable',
             'bank_info.bank_name' => 'nullable|string|max:20',
             'bank_info.bank_code' => 'nullable|string|max:20',
