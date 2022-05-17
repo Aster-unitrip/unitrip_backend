@@ -398,7 +398,6 @@ class ItineraryGroupController extends Controller
                     if(array_key_exists('components', $validated['itinerary_content'][$i])){
                         for($j = 0; $j < count($validated['itinerary_content'][$i]['components']); $j++){
                             $validated['itinerary_content'][$i]['components'][$j]['date'] = $validated['itinerary_content'][$i]['date'];
-                            $validated['itinerary_content'][$i]['components'][$j]['sort'] = $j+1;
                             if(!array_key_exists('sort', $validated['itinerary_content'][$i]['components'][$j])){
                                 // $validated['itinerary_content'][$i]['components'][$j]['sort'] = $j+1;
                                 $validated['itinerary_content'][$i]['components'][$j]['operator_note'] = null;
@@ -410,6 +409,7 @@ class ItineraryGroupController extends Controller
                                 $validated['itinerary_content'][$i]['components'][$j]['amount'] = $validated['itinerary_content'][$i]['components'][$j]['sum'];
                                 $validated['itinerary_content'][$i]['components'][$j]['actual_payment'] = 0;
                             }
+                            $validated['itinerary_content'][$i]['components'][$j]['sort'] = $j+1;
                         }
                     }
 
@@ -428,7 +428,6 @@ class ItineraryGroupController extends Controller
                 for($i = 0; $i < count($validated['guides']); $i++){
                     $validated['guides'][$i]['date_start'] = $validated['guides'][$i]['date_start']."T00:00:00.000+08:00";
                     $validated['guides'][$i]['date_end'] = $validated['guides'][$i]['date_end']."T23:59:59.000+08:00";
-                    $validated['guides'][$i]['sort'] = $i+1;
                     if(strtotime($validated['guides'][$i]['date_end']) - strtotime($validated['guides'][$i]['date_start']) <= 0){
                         return response()->json(['error' => '(導遊)結束時間不可早於開始時間'], 400);
                     }
@@ -450,6 +449,7 @@ class ItineraryGroupController extends Controller
                         $validated['guides'][$i]['amount'] = $validated['guides'][$i]['subtotal'];
                         $validated['guides'][$i]['actual_payment'] = 0;
                     }
+                    $validated['guides'][$i]['sort'] = $i+1;
                 }
                 // 驗算
                 for($i = 0; $i < count($validated['guides']); $i++){
@@ -462,7 +462,6 @@ class ItineraryGroupController extends Controller
                 for($i = 0; $i < count($validated['transportations']); $i++){
                     $validated['transportations'][$i]['date_start'] = $validated['transportations'][$i]['date_start']."T00:00:00.000+08:00";
                     $validated['transportations'][$i]['date_end'] = $validated['transportations'][$i]['date_end']."T23:59:59.000+08:00";
-                    $validated['transportations'][$i]['sort'] = $i+1;
                     if(strtotime($validated['transportations'][$i]['date_end']) - strtotime($validated['transportations'][$i]['date_start']) <= 0){
                         return response()->json(['error' => '(交通工具)結束時間不可早於開始時間'], 400);
                     }
@@ -484,6 +483,7 @@ class ItineraryGroupController extends Controller
                         $validated['transportations'][$i]['amount'] = $validated['transportations'][$i]['sum'];
                         $validated['transportations'][$i]['actual_payment'] = 0;
                     }
+                    $validated['transportations'][$i]['sort'] = $i+1;
                 }
                 // 驗算
                 for($i = 0; $i < count($validated['transportations']); $i++){
@@ -495,9 +495,6 @@ class ItineraryGroupController extends Controller
             if(array_key_exists('misc', $validated)){
                 for($i = 0; $i < count($validated['misc']); $i++){
                     $validated['misc'][$i]['sort'] = $i+1;
-                    // if(!array_key_exists('sort', $validated['misc'][$i])){
-                    //     $validated['misc'][$i]['sort'] = $i+1;
-                    // }
                 }
                 // 驗算
                 for($i = 0; $i < count($validated['misc']); $i++){
@@ -880,9 +877,9 @@ class ItineraryGroupController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-        // if($owned_by !== $validated['owned_by']){
-        //     return response()->json(['error' => 'you are not an employee of this company.'], 400);
-        // }
+        if($owned_by !== $validated['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
 
         // 基本驗證 所有和金額有關必須不小於0
         if($validated['deposit'] < 0 && $validated['amount'] < 0){
@@ -913,8 +910,8 @@ class ItineraryGroupController extends Controller
                     $find_type = 'itinerary_content';
                     $find_name = $find_type.".".$find_day.".components.".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_day.".components.".$find_sort;
-                    // return $find_day;
-                    // return $itinerary_group_past_data[$find_type][$find_day]['components'];
+                    $find_name_using_pull = $find_type.".".$find_day.".components";
+
 
                     if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type][$find_day]['components'])){
                         if($itinerary_group_past_data[$find_type][$find_day]['components'][$find_sort] === null){
@@ -930,6 +927,8 @@ class ItineraryGroupController extends Controller
                     $find_type =$validated["type"];
                     $find_name = $find_type.".".$find_sort.".";
                     $find_name_no_dot = $find_type.".".$find_sort;
+                    $find_name_using_pull = $find_type;
+
 
                     if(array_key_exists($find_sort, $itinerary_group_past_data[$find_type])){
                         if($itinerary_group_past_data[$find_type][$find_sort] === null){
@@ -1006,8 +1005,7 @@ class ItineraryGroupController extends Controller
         }
 
         // 確定沒錯後存入團行程中
-        // return $fixed;
-        $update = $this->requestService->update_one('itinerary_group', $fixed);
+        $this->requestService->update_one('itinerary_group', $fixed);
 
 
         // 當狀態須加上刪除判斷 如果待退已退則刪除該obj放入刪除DB中
@@ -1023,12 +1021,9 @@ class ItineraryGroupController extends Controller
             // 判斷該筆資料type，欲處理待退訂項目
             if($find_type === "itinerary_content"){
                 $to_deleted = $operator_data[$find_type][$find_day]['components'][$find_sort];
-                $to_deleted_itinerary[$find_name_no_dot] = $operator_data[$find_type][$find_day]['components'][$find_sort];
             }
             else if($find_type === "transportations" || $find_type === "guides"){
                 $to_deleted = $operator_data[$find_type][$find_sort];
-                $to_deleted_itinerary[$find_name_no_dot] = $operator_data[$find_type][$find_sort];
-
             }
 
             // 取得 客製化團 人數
@@ -1043,19 +1038,36 @@ class ItineraryGroupController extends Controller
             $to_deleted = $this->requestStatesService->delete_data($to_deleted);
 
             // 加入刪除資料庫中
-            $deleted_result = $this->requestService->insert_one('cus_delete_components', $to_deleted);
+            $this->requestService->insert_one('cus_delete_components', $to_deleted);
 
             // 修改團行程成本(需要扣掉的)，目前accounting大人小孩成本尚未處理
             $delete_component_data = $this->requestCostService->after_delete_component_cost($itinerary_group_past_data["accounting"],$itinerary_group_past_data['itinerary_group_cost'], $to_deleted, $total_people);
 
-            $result = $this->requestService->update_one('itinerary_group', $delete_component_data);
+            $this->requestService->update_one('itinerary_group', $delete_component_data);
+
+            // 先將資料轉換
+            $change_component_data['_id'] = $validated['_id'];
+            $change_component_data[$find_name_no_dot] = array("a" => "1");
+            $this->requestService->update_one('itinerary_group', $change_component_data);
+
 
             // 刪除團行程該元件
             $to_deleted_itinerary['_id'] = $validated['_id'];
-            // $to_deleted_itinerary[$find_name_no_dot] = null;
+            $to_deleted_itinerary[$find_name_using_pull] = array("a" => "1");
             $this->requestService->pull_element('itinerary_group', $to_deleted_itinerary);
+            
+            // 修正sort順序
+            // if($validated["type"] === "attractions" || $validated["type"] === "accomendations" || $validated["type"] === "activities" || $validated["type"] === "restaurants"){
+            //     for($i = 0; $i < count($validated['itinerary_content'][$find_day]['components']); $i++){
+            //         $operator_data['itinerary_content'][$find_day]['components'][$i]["sort"] = $i+1;
+            //     }
+            // }
+            // else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
+            //     for($i = 0; $i < count($operator_data[$validated["type"]]); $i++){
+            //         $operator_data[$validated["type"]]['sort']= $i+1;
+            //     }
+            // }
             return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
-
         }
     }
 
