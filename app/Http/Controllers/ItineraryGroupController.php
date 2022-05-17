@@ -1055,18 +1055,26 @@ class ItineraryGroupController extends Controller
             $to_deleted_itinerary['_id'] = $validated['_id'];
             $to_deleted_itinerary[$find_name_using_pull] = array("a" => "1");
             $this->requestService->pull_element('itinerary_group', $to_deleted_itinerary);
-            
+
+
             // 修正sort順序
-            // if($validated["type"] === "attractions" || $validated["type"] === "accomendations" || $validated["type"] === "activities" || $validated["type"] === "restaurants"){
-            //     for($i = 0; $i < count($validated['itinerary_content'][$find_day]['components']); $i++){
-            //         $operator_data['itinerary_content'][$find_day]['components'][$i]["sort"] = $i+1;
-            //     }
-            // }
-            // else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
-            //     for($i = 0; $i < count($operator_data[$validated["type"]]); $i++){
-            //         $operator_data[$validated["type"]]['sort']= $i+1;
-            //     }
-            // }
+            // 取得存後資料
+            $operator_data_after_delete = $this->requestService->get_one('itinerary_group', $validated['_id']);
+            $operator_data_after_delete = json_decode($operator_data_after_delete->getContent(), true);
+            $update_data["_id"] = $validated['_id'];
+            if($validated["type"] === "attractions" || $validated["type"] === "accomendations" || $validated["type"] === "activities" || $validated["type"] === "restaurants"){
+                for($i = 0; $i < count($operator_data_after_delete['itinerary_content'][$find_day]['components']); $i++){
+                    $operator_data_after_delete['itinerary_content'][$find_day]['components'][$i]["sort"] = $i+1;
+                }
+                $update_data['itinerary_content'] = $operator_data_after_delete['itinerary_content'];
+            }
+            else if($validated["type"] === "transportations" || $validated["type"] === "guides"){
+                for($i = 0; $i < count($operator_data_after_delete[$validated["type"]]); $i++){
+                    $operator_data_after_delete[$validated["type"]]['sort']= $i+1;
+                }
+                $update_data[$validated["type"]] = $operator_data_after_delete[$validated["type"]];
+            }
+            $this->requestService->update_one('itinerary_group', $update_data);
             return response()->json(["已成功刪除此元件、更新成本，請至團行程編輯中修改定價!"], 200);
         }
     }
