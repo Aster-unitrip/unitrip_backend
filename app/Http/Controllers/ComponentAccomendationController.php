@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class ComponentAccomendationController extends Controller
 {
@@ -14,6 +13,57 @@ class ComponentAccomendationController extends Controller
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
+        $this->add_rule = [
+            'name' => 'required|string|max:30',
+            'website' => 'nullable|string|max:100',
+            'tel' => 'required|string|max:20',
+            'address_city' => 'required|string|max:4',
+            'address_town' => 'required|string|max:10',
+            'address' => 'required|string|max:30',
+            'room' => 'nullable',
+            'star' => 'nullable|string|max:2',
+            'total_rooms' => 'nullable|integer',
+            'category' => 'nullable|string|max:10',
+            'fax' => 'nullable|string|max:10',
+            'lng' => 'nullable|numeric',
+            'lat' => 'nullable|numeric',
+            'map_url' => 'nullable|string',
+            'imgs' => 'nullable',
+            'intro_summary' => 'nullable|string|max:150',
+            'refund_rule' => 'nullable|string|max:300',
+            'memo' => 'nullable|string|max:4096',
+            'check_in' => 'nullable|string|max:10',
+            'check_out' => 'nullable|string|max:10',
+            'foc' => 'nullable|string|max:200',
+            'service_content' => 'nullable|string|max:200',
+            'facility' => 'nullable|string|max:200',
+            'is_display' => 'required|boolean',
+            'is_enabled' => 'required|boolean',
+            'source' => 'nullable|string|max:10',
+            'bank_info' => 'nullable',
+            'bank_info.bank_name' => 'nullable|string|max:20',
+            'bank_info.bank_code' => 'nullable|string|max:20',
+            'bank_info.account_name' => 'nullable|string|max:20',
+            'bank_info.account_number' => 'nullable|string|max:20',
+        ];
+    }
+
+    public function add(Request $request)
+    {
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->add_rule);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->all(),
+            ], 400);
+        }
+        $company_id = auth()->user()->company_id;
+        $validated = $validator->validated();
+        $validated['owned_by'] = $company_id;
+        $accomendation = $this->requestService->insert_one('accomendations', $validated);
+        return $accomendation;
+        
     }
 
     public function list(Request $request)
@@ -118,6 +168,12 @@ class ComponentAccomendationController extends Controller
             "description" => 1,
         );
         $result = $this->requestService->aggregate_facet('accomendations', $projection, $filter, $page);
+        // 相容舊格式
+        $current_data = $result->getData();
+        foreach($current_data->docs as $doc){
+            $doc->private = array('experience' => '');
+        }
+        $result->setData($current_data);
         return $result;
     }
 
