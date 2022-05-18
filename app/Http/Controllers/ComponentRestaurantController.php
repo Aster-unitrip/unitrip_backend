@@ -17,6 +17,30 @@ class ComponentRestaurantController extends Controller
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
+        $this->add_rule = [
+            'name' => 'required|string|max:30',
+            'website' => 'nullable|string|max:100',
+            'tel' => 'required|string|max:20',
+            'address_city' => 'required|string|max:4',
+            'address_town' => 'required|string|max:10',
+            'address' => 'required|string|max:30',
+            'category' => 'nullable|string|max:10',
+            'fax' => 'nullable|string|max:10',
+            'lng' => 'nullable|numeric',
+            'lat' => 'nullable|numeric',
+            'imgs' => 'nullable',
+            'intro_summary' => 'nullable|string|max:150',
+            // 這裡還沒寫完
+
+            'is_display' => 'required|boolean',
+            'is_enabled' => 'required|boolean',
+            'source' => 'nullable|string|max:10',
+            'bank_info' => 'nullable',
+            'bank_info.bank_name' => 'nullable|string|max:20',
+            'bank_info.bank_code' => 'nullable|string|max:20',
+            'bank_info.account_name' => 'nullable|string|max:20',
+            'bank_info.account_number' => 'nullable|string|max:20',
+        ]
     }
 
     public function list(Request $request)
