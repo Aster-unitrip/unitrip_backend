@@ -39,7 +39,7 @@ class ComponentAttractionController extends Controller
             'address' => 'required|string|max:30',
             'lng' => 'nullable|numeric',
             'lat' => 'nullable|numeric',
-            'bussiness_time' => 'nullable',
+            'business_time' => 'nullable',
             'stay_time' => 'nullable|integer',
             'intro_summary' => 'nullable|string|max:150',
             'description' => 'nullable|string|max:300',
@@ -85,12 +85,12 @@ class ComponentAttractionController extends Controller
             );
             $page = 1;
         } else if (auth()->payload()->get('company_type') == 2) {
-            
+
             $travel_agency_query = $this->travel_agency_search($request);
             $filter = $travel_agency_query['filter'];
             $page = $travel_agency_query['page'];
         } else if (auth()->payload()->get('company_type') == 3) {
-            
+
         } else {
             Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access attractions list. Wrong identity.', ['request' => $request->all(), 'user' => auth()->user()->email]);
             return response()->json(['error' => 'Wrong identity.'], 400);
@@ -124,7 +124,7 @@ class ComponentAttractionController extends Controller
             $doc->private = array('experience' => '');
         }
         $result->setData($current_data);
-        
+
         return $result;
     }
 
@@ -150,7 +150,7 @@ class ComponentAttractionController extends Controller
             Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access attractions list. Wrong identity.', ['user' => auth()->user()->email]);
             return response()->json(['error' => 'Wrong identity.'], 400);
         }
-        
+
         if (array_key_exists('imgs', $content)){
             foreach ($content['imgs'] as $value){
                 $n = 0;
@@ -244,7 +244,7 @@ class ComponentAttractionController extends Controller
         if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
             $component['is_display'] == true;
             foreach($component as $key => $value){
-                
+
             }
             unset($component['ticket']);
             unset($component['experience']);
@@ -307,7 +307,7 @@ class ComponentAttractionController extends Controller
                 $filter['is_display'] = false;
                 $filter['is_enabled'] = true;
                 $filter['owned_by'] = auth()->user()->company_id;
-                
+
             } else if ($filter['search_location'] == 'both') {
                 $filter['$or'] = array(
                     array('is_display' => true),

@@ -21,15 +21,30 @@ class ComponentRestaurantController extends Controller
             'name' => 'required|string|max:30',
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
+            'email' => 'nullable|string|max:30',
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',
             'address' => 'required|string|max:30',
-            'category' => 'nullable|string|max:10',
+            'categories' => 'required',
+            'business_time' => 'nullable',
+            'stay_time' => 'nullable|integer',
+            'cost_per_person' => 'nullable|integer',
+            'has_vegetarian_meal' => 'required|boolean',
+            'latest_reserve_day' => 'nullable|integer',
             'fax' => 'nullable|string|max:10',
             'lng' => 'nullable|numeric',
             'lat' => 'nullable|numeric',
             'imgs' => 'nullable',
             'intro_summary' => 'nullable|string|max:150',
+            'description' => 'nullable|string|max:300',
+            // 餐型
+            'meals.name' => 'nullable|string|max:30',
+            'meals.name' => 'nullable|string|max:30',
+            'meals.name' => 'nullable|string|max:30',
+            'meals.name' => 'nullable|string|max:30',
+            'meals.name' => 'nullable|string|max:30',
+
+
             // 這裡還沒寫完
 
             'is_display' => 'required|boolean',
