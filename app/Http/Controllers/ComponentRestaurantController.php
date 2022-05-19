@@ -58,16 +58,13 @@ class ComponentRestaurantController extends Controller
             'meals.content' => 'nullable|string|max:100',
             'meals.memo' => 'nullable|string|max:50',
             'meals.price' => 'nullable|integer|min:0',
-
             'refund_rule' => 'nullable|string|max:300',
             'memo' => 'nullable|string|max:300',
             'driver_tour_memo' => 'nullable|string|max:50',
-
             'is_display' => 'required|boolean',
             'is_enabled' => 'required|boolean',
-            'source' => 'nullable|string|max:10',
-
-            'bank_info' => 'nullable',
+            'bank_info' => 'array',
+            'bank_info.sort' => 'nullable|string|max:20',
             'bank_info.bank_name' => 'nullable|string|max:20',
             'bank_info.bank_code' => 'nullable|string|max:20',
             'bank_info.account_name' => 'nullable|string|max:20',
@@ -83,6 +80,8 @@ class ComponentRestaurantController extends Controller
         $validated = $validator->validated();
 
         $validated['owned_by'] = $company_id;
+        $validated['source'] = "ta"; //旅行社預設為ta
+
         $restaurants = $this->requestService->insert_one('restaurants', $validated);
         return $restaurants;
 
