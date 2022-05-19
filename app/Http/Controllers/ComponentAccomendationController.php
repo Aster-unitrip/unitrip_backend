@@ -208,7 +208,7 @@ class ComponentAccomendationController extends Controller
 
     }
 
-    protected function travel_agency_query(Request $request){
+    protected function travel_agency_search(Request $request){
         // Handle filter content
         $filter = json_decode($request->getContent(), true);
         $filter  = $this->ensure_query_key($filter);
@@ -295,6 +295,18 @@ class ComponentAccomendationController extends Controller
         }
 
         return array('page'=>$page, 'filter'=>$filter);
+    }
+
+    // 刪除不必要的 key，避免回傳不該傳的資料
+    public function ensure_query_key($filter) {
+        $fields = ['address_city', 'address_town', 'name', 'category', 'star', 'room_type', 'with_meals', 'page', 'search_location', 'fee', 'is_display'];
+        $new_filter = array();
+        foreach ($filter as $key => $value) {
+            if (in_array($key, $fields)) {
+                $new_filter[$key] = $value;
+            }
+        }
+        return $new_filter;
     }
 
     protected function generate_edit_rule_from_add_rule($rule)
