@@ -208,7 +208,7 @@ class ComponentAccomendationController extends Controller
 
     }
 
-    protected function travel_agency_query(Request $request){
+    protected function travel_agency_search(Request $request){
         // Handle filter content
         $filter = json_decode($request->getContent(), true);
         $filter  = $this->ensure_query_key($filter);
