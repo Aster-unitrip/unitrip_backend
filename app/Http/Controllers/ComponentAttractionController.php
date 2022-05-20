@@ -322,6 +322,7 @@ class ComponentAttractionController extends Controller
                 array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
             );
         }
+        unset($filter['search_location']);
 
         return array('page'=>$page, 'filter'=>$filter);
     }

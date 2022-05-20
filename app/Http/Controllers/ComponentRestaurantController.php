@@ -322,6 +322,7 @@ class ComponentRestaurantController extends Controller
             $page = 0;
         }
         // Handle ticket prices
+        // Handle
         if (array_key_exists('fee', $filter)) {
             if ($filter['fee']['free'] == true){
                 $filter['ticket.free'] = true;
@@ -363,6 +364,7 @@ class ComponentRestaurantController extends Controller
                 array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
             );
         }
+        unset($filter['search_location']);
 
         return array('page'=>$page, 'filter'=>$filter);
     }
