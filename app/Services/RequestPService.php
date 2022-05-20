@@ -190,9 +190,9 @@ class RequestPService
             ),
             "replacement" => $update_data
         );
-        //dd($data);
-        $postdata = json_encode($data);
 
+        $postdata = json_encode($data);
+        dd($postdata);
         $options = array(
             'http' => array(
                 'method' => 'POST',
