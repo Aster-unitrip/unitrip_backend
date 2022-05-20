@@ -213,24 +213,24 @@ class ComponentAttractionController extends Controller
         $content =  json_decode($record->content(), true);
         if (auth()->payload()->get('company_type') == 1) {
             if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
-                $attraction = $this->requestService->update('attractions', $validated);
+                $attraction = $this->requestService->update_one('attractions', $validated);
             } else {
                 return response()->json(['error' => 'You can not access this attraction'], 400);
             }
         } else if (auth()->payload()->get('company_type') == 2) {
             if ($content['is_display'] == false && $content['owned_by'] == $company_id) {
-                $attraction = $this->requestService->update('attractions', $validated);
+                $attraction = $this->requestService->update_one('attractions', $validated);
             } else if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
-                $attraction = $this->requestService->update('attractions', $validated);
+                $attraction = $this->requestService->update_one('attractions', $validated);
             } else {
                 return response()->json(['error' => 'You can not access this attraction'], 400);
             }
         } else if (auth()->payload()->get('company_type') == 3) {
-            $attraction = $this->requestService->update('attractions', $validated);
+            $attraction = $this->requestService->update_one('attractions', $validated);
         } else {
             return response()->json(['error' => 'Wrong identity.'], 400);
         }
-        // $attraction = $this->requestService->update('attractions', $validated);
+        // $attraction = $this->requestService->update_one('attractions', $validated);
         return $attraction;
 
     }
