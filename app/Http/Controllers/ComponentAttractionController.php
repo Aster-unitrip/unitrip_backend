@@ -183,7 +183,7 @@ class ComponentAttractionController extends Controller
             'address' => 'required|string|max:30',
             'lng' => 'nullable|numeric',
             'lat' => 'nullable|numeric',
-            'bussiness_time' => 'nullable',
+            'business_time' => 'nullable',
             'stay_time' => 'nullable|integer',
             'intro_summary' => 'nullable|string|max:150',
             'description' => 'nullable|string|max:300',
@@ -192,6 +192,7 @@ class ComponentAttractionController extends Controller
             'parking' => 'nullable|string|max:500',
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|st ring|max:500',
+            'is_display' => 'required|boolean', //新增
             'is_enabled' => 'required|boolean',
             'imgs' => 'nullable',
             'source' => ['required', Rule::in(['unitrip', 'supplier', 'gov', 'kkday', 'ota', 'ta'])],
