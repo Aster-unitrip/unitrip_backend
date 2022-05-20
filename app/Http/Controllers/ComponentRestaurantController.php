@@ -242,7 +242,7 @@ class ComponentRestaurantController extends Controller
         $validated['owned_by'] = $company_id;
 
         $record = $this->requestService->get_one('restaurants', $validated['_id']);
-        $content =  json_decode($record->content(), true);
+        $content = json_decode($record->content(), true);
 
         if(auth()->payload()->get('company_type') == 1){  // 供應商
             if($content['is_display'] == true && $content['owned_by'] == $company_id){ // 母槽
