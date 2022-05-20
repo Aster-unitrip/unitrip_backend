@@ -246,7 +246,7 @@ class ComponentRestaurantController extends Controller
 
         if(auth()->payload()->get('company_type') == 1){  // 供應商
             if($content['is_display'] == true && $content['owned_by'] == $company_id){ // 母槽
-                $restaurant = $this->requestService->update('restaurants', $validated);
+                $restaurant = $this->requestService->update_one('restaurants', $validated);
             }
             else{
                 return response()->json(['error' => 'You can not access this restaurant'], 400);
@@ -254,17 +254,17 @@ class ComponentRestaurantController extends Controller
         }
         else if(auth()->payload()->get('company_type') == 2){ // 旅行社
             if($content['is_display'] == false && $content['owned_by'] == $company_id){ // 子槽
-                $restaurant = $this->requestService->update('restaurants', $validated);
+                $restaurant = $this->requestService->update_one('restaurants', $validated);
             }
             else if($content['is_display'] == true && $content['owned_by'] == $company_id){ // 母槽
-                $restaurant = $this->requestService->update('restaurants', $validated);
+                $restaurant = $this->requestService->update_one('restaurants', $validated);
             }
             else{
                 return response()->json(['error' => 'You can not access this restaurant'], 400);
             }
         }
         else if(auth()->payload()->get('company_type') == 3){ // 系統商
-            $restaurant = $this->requestService->update('restaurants', $validated);
+            $restaurant = $this->requestService->update_one('restaurants', $validated);
         }
         else{
             return response()->json(['error' => 'Wrong identity.'], 400);
