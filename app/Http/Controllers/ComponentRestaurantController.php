@@ -28,6 +28,7 @@ class ComponentRestaurantController extends Controller
 
         $rule = [
             'name' => 'required|string|max:30',
+            'experience' => 'nullable|string|max:500',
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
             'fax' => 'nullable|string|max:10',
@@ -187,6 +188,7 @@ class ComponentRestaurantController extends Controller
     {
         $rule = [
             '_id' => 'required|string',
+            'experience' => 'nullable|string|max:500',
             'name' => 'required|string|max:30',
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
