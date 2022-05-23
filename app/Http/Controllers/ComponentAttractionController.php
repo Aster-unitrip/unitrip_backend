@@ -320,8 +320,8 @@ class ComponentAttractionController extends Controller
         } else if (!array_key_exists('search_location', $filter)) {
             $filter['$or'] = array(
                 array('is_display' => true),
-                array('owned_by' => auth()->user()->company_id)
-                // array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+                // array('owned_by' => auth()->user()->company_id)
+                array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
             );
         }
         unset($filter['search_location']);
