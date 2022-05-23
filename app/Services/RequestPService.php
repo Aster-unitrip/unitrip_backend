@@ -438,7 +438,12 @@ class RequestPService
     public function aggregate_search($collection, $projection, $filter=[], $page=0){
 
         $url = "https://fast-mongo-by4xskwu4q-de.a.run.app/aggregate";
-        $limit = 10;
+        if($collection === "cus_delete_components"){
+            $limit = null;
+        }else{
+            $limit = 10;
+        }
+
         $data = array(
             "collection" => $collection,
             "database" => "unitrip",
@@ -471,7 +476,10 @@ class RequestPService
         if ($page>0) {
             array_push($query_filter, array('$skip' => $page*$limit));
         }
-        array_push($query_filter, array('$limit' => $limit));
+        if ($limit !== null) {
+            array_push($query_filter, array('$limit' => $limit));
+        }
+
 
         $second_query_filter[] = array('$count' => 'totalCount');
         $data['pipeline'] =array( array(
