@@ -28,6 +28,7 @@ class ComponentRestaurantController extends Controller
 
         $rule = [
             'name' => 'required|string|max:30',
+            'experience' => 'nullable|string|max:500',
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
             'fax' => 'nullable|string|max:10',
@@ -36,7 +37,7 @@ class ComponentRestaurantController extends Controller
             'address_town' => 'required|string|max:10',
             'address' => 'required|string|max:30',
             'business_time' => 'nullable',//
-            'categories' => 'nullable|array',
+            'categories' => 'array',
             'cost_per_person' => 'nullable',
             'cost_per_person.min_cost_per_person' => 'nullable|integer|min:0',
             'cost_per_person.max_cost_per_person' => 'nullable|integer',
@@ -58,16 +59,13 @@ class ComponentRestaurantController extends Controller
             'meals.content' => 'nullable|string|max:100',
             'meals.memo' => 'nullable|string|max:50',
             'meals.price' => 'nullable|integer|min:0',
-
             'refund_rule' => 'nullable|string|max:300',
             'memo' => 'nullable|string|max:300',
             'driver_tour_memo' => 'nullable|string|max:50',
-
             'is_display' => 'required|boolean',
             'is_enabled' => 'required|boolean',
-            'source' => 'nullable|string|max:10',
-
-            'bank_info' => 'nullable',
+            'bank_info' => 'array',
+            'bank_info.sort' => 'nullable|string|max:20',
             'bank_info.bank_name' => 'nullable|string|max:20',
             'bank_info.bank_code' => 'nullable|string|max:20',
             'bank_info.account_name' => 'nullable|string|max:20',
@@ -83,6 +81,8 @@ class ComponentRestaurantController extends Controller
         $validated = $validator->validated();
 
         $validated['owned_by'] = $company_id;
+        $validated['source'] = "ta"; //旅行社預設為ta
+
         $restaurants = $this->requestService->insert_one('restaurants', $validated);
         return $restaurants;
 
@@ -187,67 +187,92 @@ class ComponentRestaurantController extends Controller
     public function edit(Request $request)
     {
         $rule = [
-            '_id' => 'required|string|max:24',
+            '_id' => 'required|string',
+            'experience' => 'nullable|string|max:500',
             'name' => 'required|string|max:30',
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
-            'historic_level' => 'nullable|string|max:6',
-            'org_name' => 'string|max:20',
-            'categories' => 'required',
+            'fax' => 'nullable|string|max:10',
+            'email' => 'nullable|string|max:30',
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',
             'address' => 'required|string|max:30',
+            'business_time' => 'nullable',//
+            'categories' => 'nullable|array',
+            'cost_per_person' => 'nullable',
+            'cost_per_person.min_cost_per_person' => 'nullable|integer|min:0',
+            'cost_per_person.max_cost_per_person' => 'nullable|integer',
+            'has_vegetarian_meal' => 'nullable|boolean',
+            'latest_reserve_day' => 'nullable|integer',
+            'imgs' => 'nullable',
+            'intro_summary' => 'nullable|string',
+            'description' => 'nullable|string',
+            'stay_time' => 'nullable|integer',//
             'lng' => 'nullable|numeric',
             'lat' => 'nullable|numeric',
-            'bussiness_time' => 'nullable',
-            'stay_time' => 'nullable|integer',
-            'intro_summary' => 'nullable|string|max:150',
-            'description' => 'nullable|string|max:300',
-            'ticket' => 'nullable',
-            'memo' => 'nullable|string|max:4096',
-            'parking' => 'nullable|string|max:500',
-            'attention' => 'nullable|string|max:500',
-            'experience' => 'nullable|st ring|max:500',
+            // 餐型
+            'meals' => 'nullable',
+            'meals.name' => 'nullable|string|max:30',
+            'meals.imgs' => 'nullable|array',//
+            'meals.type' => 'nullable|string|max:10',
+            'meals.supply_people' => 'nullable|integer',
+            'meals.status' => 'nullable|string|max:10',
+            'meals.content' => 'nullable|string|max:100',
+            'meals.memo' => 'nullable|string|max:50',
+            'meals.price' => 'nullable|integer|min:0',
+            'refund_rule' => 'nullable|string|max:300',
+            'memo' => 'nullable|string|max:300',
+            'driver_tour_memo' => 'nullable|string|max:50',
+            'is_display' => 'required|boolean',
             'is_enabled' => 'required|boolean',
-            'imgs' => 'nullable',
-            'source' => ['required', Rule::in(['unitrip', 'supplier', 'gov', 'kkday', 'ota', 'ta'])],
-            'bank_info' => 'nullable',
+            'bank_info' => 'array',
+            'bank_info.sort' => 'nullable|string|max:20',
             'bank_info.bank_name' => 'nullable|string|max:20',
             'bank_info.bank_code' => 'nullable|string|max:20',
             'bank_info.account_name' => 'nullable|string|max:20',
             'bank_info.account_number' => 'nullable|string|max:20',
         ];
+
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $rule);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
+
         $validated = $validator->validated();
         $company_id = auth()->user()->company_id;
         $validated['owned_by'] = $company_id;
-        $record = $this->requestService->get_one('attractions', $validated['_id']);
-        $content =  json_decode($record->content(), true);
-        if (auth()->payload()->get('company_type') == 1) {
-            if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
-                $attraction = $this->requestService->update('attractions', $validated);
-            } else {
-                return response()->json(['error' => 'You can not access this attraction'], 400);
+
+        $record = $this->requestService->get_one('restaurants', $validated['_id']);
+        $content = json_decode($record->content(), true);
+
+        if(auth()->payload()->get('company_type') == 1){  // 供應商
+            if($content['is_display'] == true && $content['owned_by'] == $company_id){ // 母槽
+                $restaurant = $this->requestService->update_one('restaurants', $validated);
             }
-        } else if (auth()->payload()->get('company_type') == 2) {
-            if ($content['is_display'] == false && $content['owned_by'] == $company_id) {
-                $attraction = $this->requestService->update('attractions', $validated);
-            } else if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
-                $attraction = $this->requestService->update('attractions', $validated);
-            } else {
-                return response()->json(['error' => 'You can not access this attraction'], 400);
+            else{
+                return response()->json(['error' => 'You can not access this restaurant'], 400);
             }
-        } else if (auth()->payload()->get('company_type') == 3) {
-            $attraction = $this->requestService->update('attractions', $validated);
-        } else {
+        }
+        else if(auth()->payload()->get('company_type') == 2){ // 旅行社
+            if($content['is_display'] == false && $content['owned_by'] == $company_id){ // 子槽
+                $restaurant = $this->requestService->update_one('restaurants', $validated);
+            }
+            else if($content['is_display'] == true && $content['owned_by'] == $company_id){ // 母槽
+                $restaurant = $this->requestService->update_one('restaurants', $validated);
+            }
+            else{
+                return response()->json(['error' => 'You can not access this restaurant'], 400);
+            }
+        }
+        else if(auth()->payload()->get('company_type') == 3){ // 系統商
+            $restaurant = $this->requestService->update_one('restaurants', $validated);
+        }
+        else{
             return response()->json(['error' => 'Wrong identity.'], 400);
         }
-        // $attraction = $this->requestService->update('attractions', $validated);
-        return $attraction;
+
+        return $restaurant;
 
     }
 
@@ -297,6 +322,7 @@ class ComponentRestaurantController extends Controller
             $page = 0;
         }
         // Handle ticket prices
+        // Handle
         if (array_key_exists('fee', $filter)) {
             if ($filter['fee']['free'] == true){
                 $filter['ticket.free'] = true;
@@ -338,6 +364,7 @@ class ComponentRestaurantController extends Controller
                 array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
             );
         }
+        unset($filter['search_location']);
 
         return array('page'=>$page, 'filter'=>$filter);
     }

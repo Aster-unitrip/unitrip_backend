@@ -1098,7 +1098,7 @@ class ItineraryGroupController extends Controller
         }
 
         $filter['itinerary_group_id'] = $id;
-        $result_code = $this->requestService->aggregate_search('cus_delete_components', null, $filter, $page=0);
+        $result_code = $this->requestService->aggregate_search('cus_delete_components', null, $filter, null);
         $result_code_data = json_decode($result_code->getContent(), true);
         return $result_code_data;
 

@@ -34,7 +34,7 @@ class ComponentAttractionController extends Controller
             'fax' => 'nullable|string|max:12',
             'historic_level' => 'nullable|string|max:6',
             'org_name' => 'string|max:20',
-            'categories' => 'required',
+            'categories' => 'array',
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',
             'address' => 'required|string|max:30',
@@ -74,7 +74,7 @@ class ComponentAttractionController extends Controller
 
     }
 
-    // 旅行社搜尋母槽：is_display == true
+    // 旅行社搜尋母槽：is_display == true & is_enabled == true
     // 旅行社搜尋子槽：is_display == false & owned_by == 自己公司 id & is_enabled == true
     // 旅行社搜尋母槽＆子槽：is_display == true or (owned_by == 自己公司 id & is_enabled == true)
     // 供應商只能得到母槽自己的元件
@@ -87,7 +87,6 @@ class ComponentAttractionController extends Controller
             );
             $page = 1;
         } else if (auth()->payload()->get('company_type') == 2) {
-
             $travel_agency_query = $this->travel_agency_search($request);
             $filter = $travel_agency_query['filter'];
             $page = $travel_agency_query['page'];
@@ -179,13 +178,13 @@ class ComponentAttractionController extends Controller
             'tel' => 'required|string|max:20',
             'historic_level' => 'nullable|string|max:6',
             'org_name' => 'string|max:20',
-            'categories' => 'required',
+            'categories' => 'array',
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',
             'address' => 'required|string|max:30',
             'lng' => 'nullable|numeric',
             'lat' => 'nullable|numeric',
-            'bussiness_time' => 'nullable',
+            'business_time' => 'nullable',
             'stay_time' => 'nullable|integer',
             'intro_summary' => 'nullable|string|max:150',
             'description' => 'nullable|string|max:300',
@@ -194,6 +193,7 @@ class ComponentAttractionController extends Controller
             'parking' => 'nullable|string|max:500',
             'attention' => 'nullable|string|max:500',
             'experience' => 'nullable|st ring|max:500',
+            'is_display' => 'required|boolean', //新增
             'is_enabled' => 'required|boolean',
             'imgs' => 'nullable',
             'source' => ['required', Rule::in(['unitrip', 'supplier', 'gov', 'kkday', 'ota', 'ta'])],
@@ -216,24 +216,24 @@ class ComponentAttractionController extends Controller
         $content =  json_decode($record->content(), true);
         if (auth()->payload()->get('company_type') == 1) {
             if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
-                $attraction = $this->requestService->update('attractions', $validated);
+                $attraction = $this->requestService->update_one('attractions', $validated);
             } else {
                 return response()->json(['error' => 'You can not access this attraction'], 400);
             }
         } else if (auth()->payload()->get('company_type') == 2) {
             if ($content['is_display'] == false && $content['owned_by'] == $company_id) {
-                $attraction = $this->requestService->update('attractions', $validated);
+                $attraction = $this->requestService->update_one('attractions', $validated);
             } else if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
-                $attraction = $this->requestService->update('attractions', $validated);
+                $attraction = $this->requestService->update_one('attractions', $validated);
             } else {
                 return response()->json(['error' => 'You can not access this attraction'], 400);
             }
         } else if (auth()->payload()->get('company_type') == 3) {
-            $attraction = $this->requestService->update('attractions', $validated);
+            $attraction = $this->requestService->update_one('attractions', $validated);
         } else {
             return response()->json(['error' => 'Wrong identity.'], 400);
         }
-        // $attraction = $this->requestService->update('attractions', $validated);
+        // $attraction = $this->requestService->update_one('attractions', $validated);
         return $attraction;
 
     }
@@ -308,13 +308,14 @@ class ComponentAttractionController extends Controller
                 $filter['is_display'] = true;
             } else if ($filter['search_location'] == 'private') {
                 $filter['is_display'] = false;
-                $filter['is_enabled'] = true;
+                // $filter['is_enabled'] = true;
                 $filter['owned_by'] = auth()->user()->company_id;
 
             } else if ($filter['search_location'] == 'both') {
                 $filter['$or'] = array(
                     array('is_display' => true),
-                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+                    array('owned_by' => auth()->user()->company_id)
+                    // array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
                 );
             } else {
                 return response()->json(['error' => 'search_location must be public, private or both'], 400);
@@ -322,9 +323,11 @@ class ComponentAttractionController extends Controller
         } else if (!array_key_exists('search_location', $filter)) {
             $filter['$or'] = array(
                 array('is_display' => true),
+                // array('owned_by' => auth()->user()->company_id)
                 array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
             );
         }
+        unset($filter['search_location']);
 
         return array('page'=>$page, 'filter'=>$filter);
     }
