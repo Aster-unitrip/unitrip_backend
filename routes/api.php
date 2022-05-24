@@ -92,6 +92,9 @@ Route::group(['middleware'=>'api', 'prefix'=>'restaurants'], function($router){
 
 Route::group(['middleware'=>'api', 'prefix'=>'accomendations'], function($router){
     Route::post('/list', [ComponentAccomendationController::class, 'list']);
+    Route::post('/', [ComponentAccomendationController::class, 'add']);
+    Route::get('/{id}', [ComponentAccomendationController::class, 'get_by_id']);
+    Route::post('/update', [ComponentRestaurantController::class, 'edit']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'transportations'], function($router){
