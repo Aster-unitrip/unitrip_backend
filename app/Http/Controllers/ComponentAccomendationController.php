@@ -37,6 +37,7 @@ class ComponentAccomendationController extends Controller
             'memo' => 'nullable|string|max:4096',
             'check_in' => 'nullable|string|max:10',
             'check_out' => 'nullable|string|max:10',
+            "breakfast_served_time" => "nullable",
             'foc' => 'nullable|string|max:200',
             'service_content' => 'nullable|string|max:200',
             'facility' => 'nullable|string|max:200',
