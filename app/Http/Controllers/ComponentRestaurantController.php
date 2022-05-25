@@ -122,10 +122,9 @@ class ComponentRestaurantController extends Controller
                 "address_town" => 1,
                 "address" => 1,
                 "categories" => 1,
-                "name" => 1,
-                "categories" => 1,
                 "tel" => 1,
-                "ticket" => 1,
+                "meals" => 1,
+                "business_time" => 1,
                 "imgs" => 1,
                 "private" => 1,
                 "intro_summary" => 1,
@@ -137,6 +136,8 @@ class ComponentRestaurantController extends Controller
                 "created_at" => 1
             );
         $result = $this->requestService->aggregate_facet('restaurants', $projection, $filter, $page);
+        return $result;
+
         // 相容舊格式
         $current_data = $result->getData();
         foreach($current_data->docs as $doc){
@@ -324,26 +325,38 @@ class ComponentRestaurantController extends Controller
         else{
             $page = 0;
         }
-        // Handle ticket prices
-        if (array_key_exists('fee', $filter)) {
-            if ($filter['fee']['free'] == true){
-                $filter['ticket.free'] = true;
-            }else if ($filter['fee']['free'] == false){
-                $filter['ticket.free'] = false;
-                $price_range = array();
-                if (array_key_exists('price_max', $filter['fee'])){
-                    $price_range['$lte'] = $filter['fee']['price_max'];
-                }
-                if (array_key_exists('price_min', $filter['fee'])){
-                    $price_range['$gte'] = $filter['fee']['price_min'];
-                }
-                if (count($price_range) > 0){
-                    $filter['ticket.full_ticket.price'] = $price_range;
-                }
+
+        // Handle meal types
+        if (array_key_exists('meal_type', $filter)) {
+            $meal_type = $filter['meal_type'];
+            if($meal_type === "合菜" || $meal_type === "套餐"){
+                $filter['meals'] = array('$elemMatch' => array('type' => $meal_type));
+            }
+            else if($meal_type === "全部"){
+
+            }
+            unset($filter['meal_type']);
+        }
+
+        // Handle cost_per_person range
+        if (array_key_exists('cost_per_person', $filter)){
+            if(array_key_exists('min_cost_per_person', $filter['cost_per_person'])){
+                $price_range_min['$gte'] = $filter['cost_per_person']['min_cost_per_person'];
+            }
+            if(array_key_exists('max_cost_per_person', $filter['cost_per_person'])){
+                $price_range_max['$lte'] = $filter['cost_per_person']['max_cost_per_person'];
+
+            }
+            unset($filter['cost_per_person']);
+            if(!empty($price_range_min)){
+                $filter['cost_per_person.min_cost_per_person'] = $price_range_min;
+            }
+            if(!empty($price_range_max)){
+                $filter['cost_per_person.max_cost_per_person'] = $price_range_max;
             }
         }
-        unset($filter['fee']);
 
+        // Handle search_location
         if(array_key_exists('search_location', $filter)){
             if($filter['search_location'] == 'public'){
                 $filter['is_display'] = true;
@@ -381,7 +394,7 @@ class ComponentRestaurantController extends Controller
 
     // 刪除不必要的 key，避免回傳不該傳的資料
     public function ensure_query_key($filter) {
-        $fields = ['address_city', 'address_town', 'name', 'categories', 'page', 'search_location', 'fee'];
+        $fields = ['address_city', 'address_town', 'name', 'categories', 'page', 'search_location', 'meal_type', 'cost_per_person'];
         $new_filter = array();
         foreach ($filter as $key => $value) {
             if (in_array($key, $fields)) {
