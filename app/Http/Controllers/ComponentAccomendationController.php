@@ -73,7 +73,7 @@ class ComponentAccomendationController extends Controller
         $validated['owned_by'] = $company_id;
         $accomendation = $this->requestService->insert_one('accomendations', $validated);
         return $accomendation;
-        
+
     }
 
     // 旅行社搜尋母槽：is_display == true
@@ -90,12 +90,12 @@ class ComponentAccomendationController extends Controller
             );
             $page = 1;
         } else if (auth()->payload()->get('company_type') == 2) {
-            
+
             $travel_agency_query = $this->travel_agency_search($request);
             $filter = $travel_agency_query['filter'];
             $page = $travel_agency_query['page'];
         } else if (auth()->payload()->get('company_type') == 3) {
-            
+
         } else {
             Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access accomendation list', ['request' => $request->all(), 'user_id' => auth()->user()->id]);
             return response()->json(['error' => 'Wrong identity.'], 400);
@@ -116,6 +116,7 @@ class ComponentAccomendationController extends Controller
             "star" => 1,
             "private" => 1,
             "is_display" => 1,
+            "is_enabled" => 1,
             'updated_at' => 1,
             'created_at' => 1,
             "intro_summary" => 1,
@@ -154,7 +155,7 @@ class ComponentAccomendationController extends Controller
             Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access accomendation list', ['user_id' => auth()->user()->id]);
             return response()->json(['error' => 'Wrong identity.'], 400);
         }
-        
+
         if (array_key_exists('imgs', $content)){
             foreach ($content['imgs'] as $value){
                 $n = 0;
@@ -282,11 +283,12 @@ class ComponentAccomendationController extends Controller
                 $filter['is_display'] = false;
                 $filter['is_enabled'] = true;
                 $filter['owned_by'] = auth()->user()->company_id;
-                
+
             } else if ($filter['search_location'] == 'both') {
                 $filter['$or'] = array(
                     array('is_display' => true),
-                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+                    array('owned_by' => auth()->user()->company_id)
+//                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
                 );
             } else {
                 return response()->json(['error' => 'search_location must be public, private or both'], 400);
