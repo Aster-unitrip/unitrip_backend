@@ -276,29 +276,38 @@ class ComponentAccomendationController extends Controller
         }
         unset($filter['fee']);
 
-        if (array_key_exists('search_location', $filter)) {
-            if ($filter['search_location'] == 'public') {
+        if(array_key_exists('search_location', $filter)){
+            if($filter['search_location'] == 'public'){
                 $filter['is_display'] = true;
-            } else if ($filter['search_location'] == 'private') {
+            }
+            else if($filter['search_location'] == 'private'){
                 $filter['is_display'] = false;
-                $filter['is_enabled'] = true;
                 $filter['owned_by'] = auth()->user()->company_id;
-
-            } else if ($filter['search_location'] == 'both') {
+            }
+            else if($filter['search_location'] == 'all'){
+                $filter['$or'] = array(
+                    array('is_display' => true),
+                    array('owned_by' => auth()->user()->company_id)
+                );
+            }
+            else if($filter['search_location'] == 'enabled'){
                 $filter['$or'] = array(
                     array('is_display' => true),
                     array('owned_by' => auth()->user()->company_id)
 //                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
                 );
-            } else {
+            }
+            else{
                 return response()->json(['error' => 'search_location must be public, private or both'], 400);
             }
-        } else if (!array_key_exists('search_location', $filter)) {
+        }
+        else if(!array_key_exists('search_location', $filter)){
             $filter['$or'] = array(
                 array('is_display' => true),
                 array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
             );
         }
+        unset($filter['search_location']);
 
         return array('page'=>$page, 'filter'=>$filter);
     }

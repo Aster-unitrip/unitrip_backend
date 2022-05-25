@@ -94,27 +94,30 @@ class ComponentRestaurantController extends Controller
     // 供應商只能得到母槽自己的元件
     public function list(Request $request)
     {
-        if (auth()->payload()->get('company_type') == 1) {
+        if(auth()->payload()->get('company_type') == 1){
             $filter = array(
                 'is_display' => true,
                 'owned_by' => auth()->user()->company_id
             );
             $page = 1;
-        } else if (auth()->payload()->get('company_type') == 2) {
-
+        }
+        else if(auth()->payload()->get('company_type') == 2){
             $travel_agency_query = $this->travel_agency_search($request);
             $filter = $travel_agency_query['filter'];
             $page = $travel_agency_query['page'];
-        } else if (auth()->payload()->get('company_type') == 3) {
+        }
+        else if(auth()->payload()->get('company_type') == 3){
 
-        } else {
-            Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access attractions list. Wrong identity.', ['request' => $request->all(), 'user' => auth()->user()->email]);
+        }
+        else{
+            Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access restaurants list. Wrong identity.', ['request' => $request->all(), 'user' => auth()->user()->email]);
             return response()->json(['error' => 'Wrong identity.'], 400);
         }
 
         // Handle projection content
         $projection = array(
                 "_id" => 1,
+                "name" => 1,
                 "address_city" => 1,
                 "address_town" => 1,
                 "address" => 1,
@@ -133,7 +136,7 @@ class ComponentRestaurantController extends Controller
                 "updated_at" => 1,
                 "created_at" => 1
             );
-        $result = $this->requestService->aggregate_facet('attractions', $projection, $filter, $page);
+        $result = $this->requestService->aggregate_facet('restaurants', $projection, $filter, $page);
         // 相容舊格式
         $current_data = $result->getData();
         foreach($current_data->docs as $doc){
@@ -280,23 +283,23 @@ class ComponentRestaurantController extends Controller
     // 母槽元件 ticket 只顯示票種不要票價
     // 先確認此元件屬不屬於他自己，而且必須是子槽資料
     public function copy_from_private_to_public(Request $request) {
-        $query = json_decode($request->getContent(), true);
-        $component = $this->requestService->get_one('attractions', $query['_id']);
-        if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
-            $component['is_display'] == true;
-            foreach($component as $key => $value){
+        // $query = json_decode($request->getContent(), true);
+        // $component = $this->requestService->get_one('attractions', $query['_id']);
+        // if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
+        //     $component['is_display'] == true;
+        //     foreach($component as $key => $value){
 
-            }
-            unset($component['ticket']);
-            unset($component['experience']);
-            $attraction = $this->requestService->insert_one('attractions', $component);
-            return response()->json([
-                'message' => 'Successfully copied component to public',
-                'id' => $query['_id']
-            ]);
-        } else {
-            return response()->json(['error' => 'You can not access this component'], 400);
-        }
+        //     }
+        //     unset($component['ticket']);
+        //     unset($component['experience']);
+        //     $attraction = $this->requestService->insert_one('attractions', $component);
+        //     return response()->json([
+        //         'message' => 'Successfully copied component to public',
+        //         'id' => $query['_id']
+        //     ]);
+        // } else {
+        //     return response()->json(['error' => 'You can not access this component'], 400);
+        // }
     }
 
     // 把元件從母槽複製子槽
@@ -322,7 +325,6 @@ class ComponentRestaurantController extends Controller
             $page = 0;
         }
         // Handle ticket prices
-        // Handle
         if (array_key_exists('fee', $filter)) {
             if ($filter['fee']['free'] == true){
                 $filter['ticket.free'] = true;
@@ -342,23 +344,31 @@ class ComponentRestaurantController extends Controller
         }
         unset($filter['fee']);
 
-        if (array_key_exists('search_location', $filter)) {
-            if ($filter['search_location'] == 'public') {
+        if(array_key_exists('search_location', $filter)){
+            if($filter['search_location'] == 'public'){
                 $filter['is_display'] = true;
-            } else if ($filter['search_location'] == 'private') {
+            }
+            else if($filter['search_location'] == 'private'){
                 $filter['is_display'] = false;
-                $filter['is_enabled'] = true;
                 $filter['owned_by'] = auth()->user()->company_id;
-
-            } else if ($filter['search_location'] == 'both') {
+            }
+            else if($filter['search_location'] == 'all'){
+                $filter['$or'] = array(
+                    array('is_display' => true),
+                    array('owned_by' => auth()->user()->company_id)
+                );
+            }
+            else if($filter['search_location'] == 'enabled'){
                 $filter['$or'] = array(
                     array('is_display' => true),
                     array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
                 );
-            } else {
+            }
+            else{
                 return response()->json(['error' => 'search_location must be public, private or both'], 400);
             }
-        } else if (!array_key_exists('search_location', $filter)) {
+        }
+        else if(!array_key_exists('search_location', $filter)){
             $filter['$or'] = array(
                 array('is_display' => true),
                 array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
