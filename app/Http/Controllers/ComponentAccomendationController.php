@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use Illuminate\Support\Facades\Log;
 
+use Validator;
+
 class ComponentAccomendationController extends Controller
 {
     private $requestService;
@@ -25,7 +27,7 @@ class ComponentAccomendationController extends Controller
             'star' => 'nullable|string|max:2',
             'total_rooms' => 'nullable|integer',
             'category' => 'nullable|string|max:10',
-            'fax' => 'nullable|string|max:10',
+            'fax' => 'nullable|string|max:12',
             'lng' => 'nullable|numeric',
             'lat' => 'nullable|numeric',
             'map_url' => 'nullable|string',
@@ -35,13 +37,15 @@ class ComponentAccomendationController extends Controller
             'memo' => 'nullable|string|max:4096',
             'check_in' => 'nullable|string|max:10',
             'check_out' => 'nullable|string|max:10',
+            "breakfast_served_time" => "nullable",
             'foc' => 'nullable|string|max:200',
             'service_content' => 'nullable|string|max:200',
             'facility' => 'nullable|string|max:200',
             'is_display' => 'required|boolean',
             'is_enabled' => 'required|boolean',
             'source' => 'nullable|string|max:10',
-            'bank_info' => 'nullable',
+            'bank_info' => 'array',
+            'bank_info.sort' => 'nullable|string|max:20',
             'bank_info.bank_name' => 'nullable|string|max:20',
             'bank_info.bank_code' => 'nullable|string|max:20',
             'bank_info.account_name' => 'nullable|string|max:20',
