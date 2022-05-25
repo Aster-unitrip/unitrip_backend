@@ -116,6 +116,7 @@ class ComponentAccomendationController extends Controller
             "star" => 1,
             "private" => 1,
             "is_display" => 1,
+            "is_enabled" => 1,
             'updated_at' => 1,
             'created_at' => 1,
             "intro_summary" => 1,
@@ -292,7 +293,8 @@ class ComponentAccomendationController extends Controller
             else if($filter['search_location'] == 'enabled'){
                 $filter['$or'] = array(
                     array('is_display' => true),
-                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+                    array('owned_by' => auth()->user()->company_id)
+//                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
                 );
             }
             else{

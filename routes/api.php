@@ -62,6 +62,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router) {
     Route::post('/list', [ComponentAttractionController::class, 'list']);
     Route::get('/{id}', [ComponentAttractionController::class, 'get_by_id']);
     Route::post('/update', [ComponentAttractionController::class, 'edit']);
+    Route::post('/private2public', [ComponentAttractionController::class, 'copy_from_private_to_public']);
+    Route::post('/public2private', [ComponentAttractionController::class, 'copy_from_public_to_private']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'activities'], function($router){
