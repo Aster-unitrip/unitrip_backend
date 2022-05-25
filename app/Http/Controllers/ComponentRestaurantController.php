@@ -340,11 +340,11 @@ class ComponentRestaurantController extends Controller
 
         // Handle cost_per_person range
         if (array_key_exists('cost_per_person', $filter)){
-            if(array_key_exists('min_cost_per_person', $filter['cost_per_person'])){
-                $price_range_min['$gte'] = $filter['cost_per_person']['min_cost_per_person'];
+            if(array_key_exists('price_min', $filter['cost_per_person'])){
+                $price_range_min['$gte'] = $filter['cost_per_person']['price_min'];
             }
-            if(array_key_exists('max_cost_per_person', $filter['cost_per_person'])){
-                $price_range_max['$lte'] = $filter['cost_per_person']['max_cost_per_person'];
+            if(array_key_exists('price_max', $filter['cost_per_person'])){
+                $price_range_max['$lte'] = $filter['cost_per_person']['price_max'];
 
             }
             unset($filter['cost_per_person']);
