@@ -280,23 +280,23 @@ class ComponentRestaurantController extends Controller
     // 母槽元件 ticket 只顯示票種不要票價
     // 先確認此元件屬不屬於他自己，而且必須是子槽資料
     public function copy_from_private_to_public(Request $request) {
-        $query = json_decode($request->getContent(), true);
-        $component = $this->requestService->get_one('attractions', $query['_id']);
-        if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
-            $component['is_display'] == true;
-            foreach($component as $key => $value){
+        // $query = json_decode($request->getContent(), true);
+        // $component = $this->requestService->get_one('attractions', $query['_id']);
+        // if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
+        //     $component['is_display'] == true;
+        //     foreach($component as $key => $value){
 
-            }
-            unset($component['ticket']);
-            unset($component['experience']);
-            $attraction = $this->requestService->insert_one('attractions', $component);
-            return response()->json([
-                'message' => 'Successfully copied component to public',
-                'id' => $query['_id']
-            ]);
-        } else {
-            return response()->json(['error' => 'You can not access this component'], 400);
-        }
+        //     }
+        //     unset($component['ticket']);
+        //     unset($component['experience']);
+        //     $attraction = $this->requestService->insert_one('attractions', $component);
+        //     return response()->json([
+        //         'message' => 'Successfully copied component to public',
+        //         'id' => $query['_id']
+        //     ]);
+        // } else {
+        //     return response()->json(['error' => 'You can not access this component'], 400);
+        // }
     }
 
     // 把元件從母槽複製子槽
@@ -322,7 +322,6 @@ class ComponentRestaurantController extends Controller
             $page = 0;
         }
         // Handle ticket prices
-        // Handle
         if (array_key_exists('fee', $filter)) {
             if ($filter['fee']['free'] == true){
                 $filter['ticket.free'] = true;
@@ -347,13 +346,14 @@ class ComponentRestaurantController extends Controller
                 $filter['is_display'] = true;
             } else if ($filter['search_location'] == 'private') {
                 $filter['is_display'] = false;
-                $filter['is_enabled'] = true;
+                // $filter['is_enabled'] = true;
                 $filter['owned_by'] = auth()->user()->company_id;
 
             } else if ($filter['search_location'] == 'both') {
                 $filter['$or'] = array(
                     array('is_display' => true),
-                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+                    array('owned_by' => auth()->user()->company_id)
+                    // array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
                 );
             } else {
                 return response()->json(['error' => 'search_location must be public, private or both'], 400);
@@ -361,6 +361,7 @@ class ComponentRestaurantController extends Controller
         } else if (!array_key_exists('search_location', $filter)) {
             $filter['$or'] = array(
                 array('is_display' => true),
+                // array('owned_by' => auth()->user()->company_id)
                 array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
             );
         }
