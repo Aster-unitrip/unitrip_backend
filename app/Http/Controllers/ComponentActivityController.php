@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 use App\Services\RequestPService;
 
 use Validator;
@@ -20,27 +22,50 @@ class ComponentActivityController extends Controller
     public function add(Request $request)
     {
         $rule = [
-            'attraction_name' => 'string|max:20',
-            'attraction_id' => 'string',
-            'name' => 'required|max:30',
-            'tel' => 'required|max:15',
-            'fax' => 'max:15',
-            'categories' => 'required',
-            'language' => 'required',
+            'activity_company_name' => 'required|string|max:30',
+            'name' => 'required|string|max:30',
+            'tel' => 'required|string|max:20',
+            'fax' => 'nullable|string|max:15',
+            'email' => 'nullable|string|max:30',
+            'address_city' => 'required|string|max:4',
+            'address_town' => 'required|string|max:10',
+            'address' => 'required|string|max:30',
             'gather_at' => 'required',
             'dismiss_at' => 'required',
             'activity_location' => 'string|max:300',
-            'imgs' => 'required',
-            'intro_summary' => 'string|max:150',
-            'description' => 'string|max:300',
-            'activity_items' => 'required',
+            'language' => 'array',
+            'categories' => 'array',
+            'pax_size_threshold' => 'nullable|integer',
+            'stay_time' => 'nullable|numeric',
+            'imgs' => 'nullable',
+            'intro_summary' => 'nullable|string|max:150',
+            'description' => 'nullable|string|max:500',
+            'activity_items' => 'nullable',
+            'activity_items.sort' => 'nullable|integer|max:5',
+            'activity_items.name' => 'nullable|string|max:30',
+            'activity_items.price' => 'nullable|integer|min:0',
+            'activity_items.memo' => 'nullable|string|max:50',
             'price_include' => 'required',
             'price_exclude' => 'required',
-            'attention' => 'required',
+            'attention' => 'nullable',
             'detail_before_buy' => 'string|max:300',
             'additional_fee' => 'string|max:300',
             'refund' => 'string|max:300',
             'note' => 'string|max:300',
+            'bank_info' => 'array',
+            'bank_info.sort' => 'nullable|integer|max:20',
+            'bank_info.bank_name' => 'nullable|string|max:20',
+            'bank_info.bank_code' => 'nullable|string|max:20',
+            'bank_info.account_name' => 'nullable|string|max:20',
+            'bank_info.account_number' => 'nullable|string|max:20',
+            'is_enabled' => 'required|boolean',
+            'attraction_name' => 'string|max:20',
+            'attraction_id' => 'string',
+            // 不確定是否需加
+            'lng' => 'nullable|numeric',
+            'lat' => 'nullable|numeric',
+            'source' => 'nullable|string|max:10',
+            'experience' => 'nullable|string|max:500',
             'is_display' => 'required|boolean'
         ];
         $data = json_decode($request->getContent(), true);
@@ -48,12 +73,17 @@ class ComponentActivityController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
+        $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
+
+        $validated['owned_by'] = $company_id;
+        $validated['source'] = "ta"; //旅行社預設為ta
+
         $activity = $this->requestService->insert_one('activities', $validated);
         return $activity;
     }
 
-    //
+
     public function list(Request $request)
     {
         // Handle filter content
@@ -158,7 +188,7 @@ class ComponentActivityController extends Controller
             'activity_items' => 'required',
             'price_include' => 'required',
             'price_exclude' => 'required',
-            'attention' => 'required',
+            'attention' => 'nullable',
             'detail_before_buy' => 'string|max:300',
             'additional_fee' => 'string|max:300',
             'refund' => 'string|max:300',
