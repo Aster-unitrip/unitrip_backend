@@ -132,11 +132,11 @@ class ComponentRestaurantController extends Controller
                 "experience" => 1,
                 "is_display" => 1,
                 "source" => 1,
+                "cost_per_person" => 1,
                 "updated_at" => 1,
                 "created_at" => 1
             );
         $result = $this->requestService->aggregate_facet('restaurants', $projection, $filter, $page);
-        return $result;
 
         // 相容舊格式
         $current_data = $result->getData();
