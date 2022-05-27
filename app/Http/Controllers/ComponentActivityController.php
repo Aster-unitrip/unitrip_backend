@@ -210,52 +210,29 @@ class ComponentActivityController extends Controller
         return $activity;
     }
 
+    // 旅行社搜尋母槽：is_display == true & is_enabled == true
+    // 旅行社搜尋子槽：is_display == false & owned_by == 自己公司 id & is_enabled == true
+    // 旅行社搜尋母槽＆子槽：is_display == true or (owned_by == 自己公司 id & is_enabled == true)
+    // 供應商只能得到母槽自己的元件
     public function list(Request $request)
     {
-        // Handle filter content
-        $filter = json_decode($request->getContent(), true);
-        if (array_key_exists('page', $filter)) {
-            $page = $filter['page'];
-            unset($filter['page']);
-            if ($page <= 0) {
-                return response()->json(['error' => 'page must be greater than 0'], 400);
-            } else {
-                $page = $page - 1;
-            }
-        } else {
-            $page = 0;
+        if (auth()->payload()->get('company_type') == 1) {
+            $filter = array(
+                'is_display' => true,
+                'owned_by' => auth()->user()->company_id
+            );
+            $page = 1;
         }
-        // Handle ticket prices
-        if (array_key_exists('fee', $filter)) {
-
-            $price_range = array();
-            if (array_key_exists('price_max', $filter['fee'])) {
-                $price_range['$lte'] = $filter['fee']['price_max'];
-            }
-            if (array_key_exists('price_min', $filter['fee'])) {
-                $price_range['$gte'] = $filter['fee']['price_min'];
-            }
-            if (!empty($price_range)) {
-                $filter['activity_items'] = array('$all' => array(
-                    array('$elemMatch' => array('price' => $price_range))
-                ));
-            }
+        else if(auth()->payload()->get('company_type') == 2){
+            $travel_agency_query = $this->travel_agency_search($request);
+            $filter = $travel_agency_query['filter'];
+            $page = $travel_agency_query['page'];
         }
-        // {'activity_items.price': {'$all':[]}}
-
-        unset($filter['fee']);
-        // Company_type: 1, Query public components belong to the company
-        // Company_type: 2, Query all public components and private data belong to the company
-        $company_type = auth()->payload()->get('company_type');
-        $company_id = auth()->payload()->get('company_id');
-        if ($company_type == 1) {
-            $filter['owned_by'] = auth()->user()->company_id;
-            $query_private = false;
-        } else if ($company_type == 2) {
-            $query_private = true;
-            $filter['is_display'] = true;
-        } else {
-            return response()->json(['error' => 'company_type must be 1 or 2'], 400);
+        else if(auth()->payload()->get('company_type') == 3){
+        }
+        else{
+            Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access attractions list. Wrong identity.', ['request' => $request->all(), 'user' => auth()->user()->email]);
+            return response()->json(['error' => 'Wrong identity.'], 400);
         }
 
         // Handle projection content
@@ -285,10 +262,99 @@ class ComponentActivityController extends Controller
             $doc->private = array('experience' => '');
         }
         $result->setData($current_data);
+
         return $result;
     }
 
+    private function travel_agency_search(Request $request) {
+        // Handle filter content
+        $filter = json_decode($request->getContent(), true);
+        $filter  = $this->ensure_query_key($filter);
+        if (array_key_exists('page', $filter)) {
+            $page = $filter['page'];
+            unset($filter['page']);
+            if ($page <= 0) {
+                return response()->json(['error' => 'page must be greater than 0'], 400);
+            }
+            else{
+                $page = $page - 1;
+            }
+        }
+        else{
+            $page = 0;
+        }
 
+        // Handle ticket prices
+        if (array_key_exists('fee', $filter)) {
+
+            $price_range = array();
+            if (array_key_exists('price_max', $filter['fee'])) {
+                $price_range['$lte'] = $filter['fee']['price_max'];
+            }
+            if (array_key_exists('price_min', $filter['fee'])) {
+                $price_range['$gte'] = $filter['fee']['price_min'];
+            }
+            if (!empty($price_range)) {
+                // 目前體驗項目只要有一個符合即可
+                // $filter['activity_items'] = array('$all' => array(
+                //     array('$elemMatch' => array('price' => $price_range))
+                // ));
+                $filter['activity_items'] = array('$elemMatch' => array('price' => $price_range));
+            }
+        }
+
+        unset($filter['fee']);
+
+        if (array_key_exists('stay_time', $filter)) {
+            $filter['stay_time'] = array('$lte' => $filter['stay_time']);
+        }
+
+        if(array_key_exists('search_location', $filter)){
+            if($filter['search_location'] == 'public'){
+                $filter['is_display'] = true;
+            }
+            else if($filter['search_location'] == 'private'){
+                $filter['is_display'] = false;
+                $filter['owned_by'] = auth()->user()->company_id;
+            }
+            else if($filter['search_location'] == 'all'){
+                $filter['$or'] = array(
+                    array('is_display' => true),
+                    array('owned_by' => auth()->user()->company_id)
+                );
+            }
+            else if($filter['search_location'] == 'enabled'){
+                $filter['$or'] = array(
+                    array('is_display' => true),
+                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+                );
+            }
+            else{
+                return response()->json(['error' => 'search_location must be public, private or all'], 400);
+            }
+        }
+        else if(!array_key_exists('search_location', $filter)){
+            $filter['$or'] = array(
+                array('is_display' => true),
+                array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+            );
+        }
+        unset($filter['search_location']);
+
+        return array('page'=>$page, 'filter'=>$filter);
+    }
+
+    // 刪除不必要的 key，避免回傳不該傳的資料
+    public function ensure_query_key($filter) {
+        $fields = ['address_city', 'address_town', 'name', 'categories', 'page', 'search_location', 'fee', 'stay_time'];
+        $new_filter = array();
+        foreach ($filter as $key => $value) {
+            if (in_array($key, $fields)) {
+                $new_filter[$key] = $value;
+            }
+        }
+        return $new_filter;
+    }
 
 
 }

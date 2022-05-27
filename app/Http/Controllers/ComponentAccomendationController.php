@@ -298,7 +298,7 @@ class ComponentAccomendationController extends Controller
                 );
             }
             else{
-                return response()->json(['error' => 'search_location must be public, private or both'], 400);
+                return response()->json(['error' => 'search_location must be public, private or all'], 400);
             }
         }
         else if(!array_key_exists('search_location', $filter)){
