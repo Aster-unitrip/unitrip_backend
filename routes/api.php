@@ -90,13 +90,15 @@ Route::group(['middleware'=>'api', 'prefix'=>'restaurants'], function($router){
     Route::post('/list', [ComponentRestaurantController::class, 'list']);
     Route::get('/{id}', [ComponentRestaurantController::class, 'get_by_id']);
     Route::post('/update', [ComponentRestaurantController::class, 'edit']);
+    Route::post('/private2public', [ComponentRestaurantController::class, 'copy_from_private_to_public']);
+    Route::post('/public2private', [ComponentRestaurantController::class, 'copy_from_public_to_private']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'accomendations'], function($router){
     Route::post('/list', [ComponentAccomendationController::class, 'list']);
     Route::post('/', [ComponentAccomendationController::class, 'add']);
     Route::get('/{id}', [ComponentAccomendationController::class, 'get_by_id']);
-    Route::post('/update', [ComponentRestaurantController::class, 'edit']);
+    Route::post('/update', [ComponentAccomendationController::class, 'edit']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'transportations'], function($router){
