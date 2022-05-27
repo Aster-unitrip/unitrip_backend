@@ -33,7 +33,7 @@ class ComponentActivityController extends Controller
             'gather_at' => 'required',
             'dismiss_at' => 'required',
             'activity_location' => 'string|max:300',
-            'language' => 'array',
+            'languages' => 'array',
             'categories' => 'array',
             'pax_size_threshold' => 'nullable|integer',
             'stay_time' => 'nullable|numeric',
@@ -59,9 +59,9 @@ class ComponentActivityController extends Controller
             'bank_info.account_name' => 'nullable|string|max:20',
             'bank_info.account_number' => 'nullable|string|max:20',
             'is_enabled' => 'required|boolean',
-            'attraction_name' => 'string|max:20',
-            'attraction_id' => 'string',
-            // 不確定是否需加
+            // 'attraction_name' => 'string|max:20',
+            // 'attraction_id' => 'string',
+
             'lng' => 'nullable|numeric',
             'lat' => 'nullable|numeric',
             'source' => 'nullable|string|max:10',
@@ -119,20 +119,29 @@ class ComponentActivityController extends Controller
     {
         $rule = [
             '_id' => 'required|string|max:24',
-            'attraction_name' => 'string|max:20',
-            'attraction_id' => 'array',
-            'name' => 'required|max:30',
-            'tel' => 'required|max:15',
-            'fax' => 'max:15',
-            'categories' => 'required',
-            'language' => 'required',
+            'activity_company_name' => 'required|string|max:30',
+            'name' => 'required|string|max:30',
+            'tel' => 'required|string|max:20',
+            'fax' => 'nullable|string|max:15',
+            'email' => 'nullable|string|max:30',
+            'address_city' => 'required|string|max:4',
+            'address_town' => 'required|string|max:10',
+            'address' => 'required|string|max:30',
             'gather_at' => 'required',
             'dismiss_at' => 'required',
             'activity_location' => 'string|max:300',
-            'imgs' => 'required',
-            'intro_summary' => 'string|max:150',
-            'description' => 'string|max:300',
-            'activity_items' => 'required',
+            'languages' => 'array',
+            'categories' => 'array',
+            'pax_size_threshold' => 'nullable|integer',
+            'stay_time' => 'nullable|numeric',
+            'imgs' => 'nullable',
+            'intro_summary' => 'nullable|string|max:150',
+            'description' => 'nullable|string|max:500',
+            'activity_items' => 'nullable',
+            'activity_items.sort' => 'nullable|integer|max:5',
+            'activity_items.name' => 'nullable|string|max:30',
+            'activity_items.price' => 'nullable|integer|min:0',
+            'activity_items.memo' => 'nullable|string|max:50',
             'price_include' => 'required',
             'price_exclude' => 'required',
             'attention' => 'nullable',
@@ -140,10 +149,21 @@ class ComponentActivityController extends Controller
             'additional_fee' => 'string|max:300',
             'refund' => 'string|max:300',
             'note' => 'string|max:300',
-            'is_display' => 'required|boolean',
-            'created_at' => 'required|string',
-            "intro_summary" => 1,
-            "description" => 1,
+            'bank_info' => 'array',
+            'bank_info.sort' => 'nullable|integer|max:20',
+            'bank_info.bank_name' => 'nullable|string|max:20',
+            'bank_info.bank_code' => 'nullable|string|max:20',
+            'bank_info.account_name' => 'nullable|string|max:20',
+            'bank_info.account_number' => 'nullable|string|max:20',
+            'is_enabled' => 'required|boolean',
+            // 'attraction_name' => 'string|max:20',
+            // 'attraction_id' => 'string',
+
+            'lng' => 'nullable|numeric',
+            'lat' => 'nullable|numeric',
+            'source' => 'nullable|string|max:10',
+            'experience' => 'nullable|string|max:500',
+            'is_display' => 'required|boolean'
         ];
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $rule);
@@ -151,10 +171,42 @@ class ComponentActivityController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
         $validated = $validator->validated();
-        $validated['attraction_id'] = array(
-            "_id" => array("\$oid" => $validated['attraction_id']['_id'])
-        );
-        $activity = $this->requestService->update('activities', $validated);
+        $company_id = auth()->user()->company_id;
+        $validated['owned_by'] = $company_id;
+
+        // $validated['attraction_id'] = array(
+        //     "_id" => array("\$oid" => $validated['attraction_id']['_id'])
+        // );
+
+        $record = $this->requestService->get_one('activities', $validated['_id']);
+        $content =  json_decode($record->content(), true);
+
+        if(auth()->payload()->get('company_type') == 1){
+            if($content['is_display'] == true && $content['owned_by'] == $company_id){
+                $activity = $this->requestService->update_one('activities', $validated);
+            }
+            else{
+                return response()->json(['error' => 'You can not access this attraction'], 400);
+            }
+        }
+        else if(auth()->payload()->get('company_type') == 2){
+            if($content['is_display'] == false && $content['owned_by'] == $company_id){
+                $activity = $this->requestService->update_one('activities', $validated);
+            }
+            else if($content['is_display'] == true && $content['owned_by'] == $company_id){
+                $activity = $this->requestService->update_one('activities', $validated);
+            }
+            else{
+                return response()->json(['error' => 'You can not access this attraction'], 400);
+            }
+        }
+        else if(auth()->payload()->get('company_type') == 3){
+            $activity = $this->requestService->update_one('activities', $validated);
+        }
+        else{
+            return response()->json(['error' => 'Wrong identity.'], 400);
+        }
+
         return $activity;
     }
 
