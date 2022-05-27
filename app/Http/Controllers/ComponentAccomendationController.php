@@ -190,22 +190,22 @@ class ComponentAccomendationController extends Controller
         // Supplier
         if (auth()->payload()->get('company_type') == 1) {
             if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
-                $accomendation = $this->requestService->update('accomendations', $validated);
+                $accomendation = $this->requestService->update_one('accomendations', $validated);
             } else {
                 return response()->json(['error' => 'You can not access this accomendation'], 400);
             }
         // Travel agency
         } else if (auth()->payload()->get('company_type') == 2) {
             if ($content['is_display'] == false && $content['owned_by'] == $company_id) {
-                $accomendation = $this->requestService->update('accomendations', $validated);
+                $accomendation = $this->requestService->update_one('accomendations', $validated);
             } else if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
-                $accomendation = $this->requestService->update('accomendations', $validated);
+                $accomendation = $this->requestService->update_one('accomendations', $validated);
             } else {
                 return response()->json(['error' => 'You can not access this accomendation'], 400);
             }
         // System admin
         } else if (auth()->payload()->get('company_type') == 3) {
-            $accomendation = $this->requestService->update('accomendations', $validated);
+            $accomendation = $this->requestService->update_one('accomendations', $validated);
         } else {
             return response()->json(['error' => 'Wrong identity.'], 400);
         }
@@ -326,6 +326,10 @@ class ComponentAccomendationController extends Controller
 
     protected function generate_edit_rule_from_add_rule($rule)
     {
+        $add_rule = [
+            "_id" => 'required|string'
+        ];
+        $rule += $add_rule;
         unset($rule['is_display']);
         return $rule;
     }
