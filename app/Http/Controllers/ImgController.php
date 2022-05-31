@@ -32,4 +32,14 @@ class ImgController extends Controller
     {
         return $this->gCloudService->removeImg($request);
     }
+
+    public function dmUpload(Request $request)
+    {
+        return $this->gCloudService->dm_upload($request);
+    }
+
+    public function dm_remove(Request $request)
+    {
+        return $this->gCloudService->dm_remove($request);
+    }
 }
