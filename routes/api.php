@@ -50,6 +50,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'companies'], function($router){
 Route::group(['middleware'=>'api', 'prefix'=>'components'], function($router){
     Route::get('/parent_types', [ComponentCategoryController::class, 'parentCategories']);
     Route::get('/types', [ComponentCategoryController::class, 'childCategories']);
+    Route::post('/private2public', [ComponentCategoryController::class, 'copy_from_private_to_public']);
+    Route::post('/public2private', [ComponentCategoryController::class, 'copy_from_public_to_private']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'img'], function($router){

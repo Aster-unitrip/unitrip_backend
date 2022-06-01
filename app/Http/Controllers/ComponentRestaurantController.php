@@ -280,7 +280,7 @@ class ComponentRestaurantController extends Controller
 
     }
 
-    // 把元件從子槽複製到母槽，要排除 experience, ticket 欄位
+    // 把元件從子槽複製到母槽，餐廳 要排除 experience, meals, cost_per_person, driver_tour_memo 欄位
     // 母槽元件 ticket 只顯示票種不要票價
     // 須紀錄該元件是否有分享過
     // 先確認此元件屬不屬於他自己，而且必須是子槽資料
@@ -301,12 +301,12 @@ class ComponentRestaurantController extends Controller
             $component['experience'] = '';
             unset($component['_id']);
 
-            $attraction = $this->requestService->insert_one('restaurants', $component);
-            $attraction = json_decode($attraction->content(), true);
-            Log::info("Copied component to public", ['id' => $attraction['inserted_id'], 'user' => auth()->user()->email]);
+            $restaurant = $this->requestService->insert_one('restaurants', $component);
+            $restaurant = json_decode($restaurant->content(), true);
+            Log::info("Copied component to public", ['id' => $restaurant['inserted_id'], 'user' => auth()->user()->email]);
             return response()->json([
                 'message' => 'Successfully copied component to public',
-                'id' => $attraction['inserted_id']
+                'id' => $restaurant['inserted_id']
             ]);
         } else {
             return response()->json(['error' => 'You can not access this component'], 400);
