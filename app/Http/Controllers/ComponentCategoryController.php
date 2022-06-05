@@ -5,18 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use App\Services\ComponentCategoryService;
+use App\Services\ComponentLogService;
 use Illuminate\Support\Facades\Log;
-
 class ComponentCategoryController extends Controller
 {
     private $componentCategoryService;
 
-    public function __construct(ComponentCategoryService $componentCategoryService, RequestPService $requestPService)
+    public function __construct(ComponentCategoryService $componentCategoryService, ComponentLogService $componentLogService, RequestPService $requestPService)
     {
         $this->middleware('auth');
         $this->componentCategoryService = $componentCategoryService;
         $this->requestService = $requestPService;
-
+        $this->componentLogService = $componentLogService;
     }
 
     public function parentCategories()
@@ -37,14 +37,19 @@ class ComponentCategoryController extends Controller
         $query = json_decode($request->getContent(), true);
         // 查詢元件 處理沒找到元件的使用情境
         if(array_key_exists('type', $query) && array_key_exists('_id',$query)){
-        $component = $this->requestService->get_one($query['type'], $query['_id']);
-        $component = json_decode($component->content(), true);
-        if(array_key_exists('count',$component) && $component['count'] === 0){
-            return response()->json(['error' => 'You must input correct _id or this _id is not exist.'], 400);
-        }
+            $component = $this->requestService->get_one($query['type'], $query['_id']);
+            $component = json_decode($component->content(), true);
+            if(array_key_exists('count', $component) && $component['count'] === 0){
+                return response()->json(['error' => 'You must input correct _id or this _id is not exist.'], 400);
+            }
         }else{
             return response()->json(['error' => 'You must input type and _id'], 400);
         }
+
+        //查詢
+        $filter = $this->componentLogService->checkPrivateToPublic($component);
+        $component = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
+        return $component;
 
 
         // 確認該元件是否屬於該公司
