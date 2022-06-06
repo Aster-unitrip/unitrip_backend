@@ -37,15 +37,24 @@ class ComponentLogService
         $add_log_private2public["user_id"]= auth()->user()->id;
         $add_log_private2public["created_at"]= $data['created_at'];
 
-
         return $add_log_private2public;
     }
 
 
 
-    public function recordPublicToPrivate()
+    public function recordPublicToPrivate($input, $insert_id, $data)
     {
+        // TODO: check it is correct
+        $add_log_public2private['type'] = $input['type'];
+        $add_log_public2private['action'] = 'public2private';
+        $add_log_public2private["source_company"] = auth()->user()->company_id;
+        $add_log_public2private["target_company"] = $data['owned_by'];
+        $add_log_public2private['source_id'] = $input['_id'];
+        $add_log_public2private["target_id"]= $insert_id;
+        $add_log_public2private["user_id"]= auth()->user()->id;
+        $add_log_public2private["created_at"]= $data['created_at'];
 
+        return $add_log_public2private;
     }
 
     public function recordCreate()
