@@ -346,7 +346,7 @@ class ComponentActivityController extends Controller
 
     // 刪除不必要的 key，避免回傳不該傳的資料
     public function ensure_query_key($filter) {
-        $fields = ['address_city', 'address_town', 'name', 'categories', 'page', 'search_location', 'fee', 'stay_time'];
+        $fields = ['address_city', 'address_town', 'name', 'categories', 'page', 'search_location', 'fee', 'stay_time', 'activity_company_name'];
         $new_filter = array();
         foreach ($filter as $key => $value) {
             if (in_array($key, $fields)) {
