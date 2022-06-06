@@ -32,15 +32,19 @@ class ComponentCategoryController extends Controller
     }
 
     // 先確認此元件屬不屬於他自己，而且必須是子槽資料
-    // TODO: 紀錄該元件是否已複製至母槽過
     public function copy_from_private_to_public(Request $request) {
         $query = json_decode($request->getContent(), true);
         // 查詢元件 處理沒找到元件的使用情境
         if(array_key_exists('type', $query) && array_key_exists('_id',$query)){
             $component = $this->requestService->get_one($query['type'], $query['_id']);
             $component = json_decode($component->content(), true);
+            // 判斷是否有該元件
             if(array_key_exists('count', $component) && $component['count'] === 0){
                 return response()->json(['error' => 'You must input correct _id or this _id is not exist.'], 400);
+            }
+            // 元件分享只可以為子到母
+            if($component['is_display'] === true){
+                return response()->json(['error' => 'This component is public, you can not copy to public again.'], 400);
             }
         }else{
             return response()->json(['error' => 'You must input type and _id'], 400);
@@ -66,32 +70,19 @@ class ComponentCategoryController extends Controller
             $private2public = $this->requestService->insert_one($query['type'], $component);
             $private2public = json_decode($private2public->content(), true);
             Log::info("Copied component to public", ['id' => $private2public['inserted_id'], 'user' => auth()->user()->email]);
+
+            // 紀錄該元件是否已複製至母槽過
+            $add_flied = $this->componentLogService->recordPrivateToPublic($query, $private2public['inserted_id'], $component);
+            $add_flied = $this->requestService->insert_one('components_log', $add_flied);
+
             return response()->json([
                 'message' => 'Successfully copied component to public',
                 'id' => $private2public['inserted_id']
             ]);
-
-            // 新增log表
-            $filter = $this->componentLogService->recordPrivateToPublic($query['type'], $private2public['inserted_id'], $component);
-            return $filter;
         }
-
-
-        // if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
-        //     $component['is_display'] = true;
-        //     $component['is_enabled'] = true;
-        //     $component = $this -> ensure_query_key($query['type'], $component);
-
-        //     $private2public = $this->requestService->insert_one($query['type'], $component);
-        //     $private2public = json_decode($private2public->content(), true);
-        //     Log::info("Copied component to public", ['id' => $private2public['inserted_id'], 'user' => auth()->user()->email]);
-        //     return response()->json([
-        //         'message' => 'Successfully copied component to public',
-        //         'id' => $private2public['inserted_id']
-        //     ]);
-        // } else {
-        //     return response()->json(['error' => 'You can not access this component'], 400);
-        // }
+        else{
+            return $resultSearchLog;
+        }
     }
 
     // 把元件從母槽複製子槽
