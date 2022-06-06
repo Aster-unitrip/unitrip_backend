@@ -46,13 +46,39 @@ class ComponentCategoryController extends Controller
             return response()->json(['error' => 'You must input type and _id'], 400);
         }
 
-        //查詢
+        // 查詢
+        // 母到(子到母)
         $filter = $this->componentLogService->checkPrivateToPublic($component);
-        $component = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
-        return $component;
+        $searchResultPrivateToPublic = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
+        $searchResultPrivateToPublic = json_decode($searchResultPrivateToPublic->content(), true);
+        // (母到子)到母
+        $filter = $this->componentLogService->checkPublicToPrivate($component);
+        $searchResultPublicToPrivate = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
+        $searchResultPublicToPrivate = json_decode($searchResultPublicToPrivate->content(), true);
+
+        $resultSearchLog = $this->componentLogService->checkLogFilter($searchResultPrivateToPublic, $searchResultPublicToPrivate);
+
+        if($resultSearchLog === true){// 確認該元件是否屬於該公司
+            $component['is_display'] = true;
+            $component['is_enabled'] = true;
+            $component = $this -> ensure_query_key($query['type'], $component);
+
+            $private2public = $this->requestService->insert_one($query['type'], $component);
+            $private2public = json_decode($private2public->content(), true);
+            Log::info("Copied component to public", ['id' => $private2public['inserted_id'], 'user' => auth()->user()->email]);
+            return response()->json([
+                'message' => 'Successfully copied component to public',
+                'id' => $private2public['inserted_id']
+            ]);
+
+            // 新增log表
+            $filter = $this->componentLogService->recordPrivateToPublic($query['type'],  $component);
+            return $filter;
+        }
 
 
-        // 確認該元件是否屬於該公司
+
+
         if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
             $component['is_display'] = true;
             $component['is_enabled'] = true;
