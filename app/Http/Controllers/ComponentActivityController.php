@@ -253,6 +253,7 @@ class ComponentActivityController extends Controller
             "intro_summary" => 1,
             "updated_at" => 1,
             "created_at" => 1,
+            "is_display" => 1,
             "activity_company_name" => 1,
         );
         $result = $this->requestService->aggregate_facet('activities', $projection, $filter, $page);
