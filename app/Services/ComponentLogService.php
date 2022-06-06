@@ -26,7 +26,7 @@ class ComponentLogService
         return $filter;
     }
 
-    public function recordPrivateToPublic($type, $data)
+    public function recordPrivateToPublic($type, $insert_id, $data)
     {
         $add_log_private2public['type'] = $type;
         $add_log_private2public['action'] = 'public2private';

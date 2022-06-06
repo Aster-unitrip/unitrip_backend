@@ -72,28 +72,26 @@ class ComponentCategoryController extends Controller
             ]);
 
             // 新增log表
-            $filter = $this->componentLogService->recordPrivateToPublic($query['type'],  $component);
+            $filter = $this->componentLogService->recordPrivateToPublic($query['type'], $private2public['inserted_id'], $component);
             return $filter;
         }
 
 
+        // if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
+        //     $component['is_display'] = true;
+        //     $component['is_enabled'] = true;
+        //     $component = $this -> ensure_query_key($query['type'], $component);
 
-
-        if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
-            $component['is_display'] = true;
-            $component['is_enabled'] = true;
-            $component = $this -> ensure_query_key($query['type'], $component);
-
-            $private2public = $this->requestService->insert_one($query['type'], $component);
-            $private2public = json_decode($private2public->content(), true);
-            Log::info("Copied component to public", ['id' => $private2public['inserted_id'], 'user' => auth()->user()->email]);
-            return response()->json([
-                'message' => 'Successfully copied component to public',
-                'id' => $private2public['inserted_id']
-            ]);
-        } else {
-            return response()->json(['error' => 'You can not access this component'], 400);
-        }
+        //     $private2public = $this->requestService->insert_one($query['type'], $component);
+        //     $private2public = json_decode($private2public->content(), true);
+        //     Log::info("Copied component to public", ['id' => $private2public['inserted_id'], 'user' => auth()->user()->email]);
+        //     return response()->json([
+        //         'message' => 'Successfully copied component to public',
+        //         'id' => $private2public['inserted_id']
+        //     ]);
+        // } else {
+        //     return response()->json(['error' => 'You can not access this component'], 400);
+        // }
     }
 
     // 把元件從母槽複製子槽
