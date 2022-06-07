@@ -64,8 +64,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router) {
     Route::post('/list', [ComponentAttractionController::class, 'list']);
     Route::get('/{id}', [ComponentAttractionController::class, 'get_by_id']);
     Route::post('/update', [ComponentAttractionController::class, 'edit']);
-    Route::post('/private2public', [ComponentAttractionController::class, 'copy_from_private_to_public']);
-    Route::post('/public2private', [ComponentAttractionController::class, 'copy_from_public_to_private']);
+    // Route::post('/private2public', [ComponentAttractionController::class, 'copy_from_private_to_public']);
+    // Route::post('/public2private', [ComponentAttractionController::class, 'copy_from_public_to_private']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'activities'], function($router){
@@ -92,8 +92,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'restaurants'], function($router){
     Route::post('/list', [ComponentRestaurantController::class, 'list']);
     Route::get('/{id}', [ComponentRestaurantController::class, 'get_by_id']);
     Route::post('/update', [ComponentRestaurantController::class, 'edit']);
-    Route::post('/private2public', [ComponentRestaurantController::class, 'copy_from_private_to_public']);
-    Route::post('/public2private', [ComponentRestaurantController::class, 'copy_from_public_to_private']);
+    // Route::post('/private2public', [ComponentRestaurantController::class, 'copy_from_private_to_public']);
+    // Route::post('/public2private', [ComponentRestaurantController::class, 'copy_from_public_to_private']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'accomendations'], function($router){
