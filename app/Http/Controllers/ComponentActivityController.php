@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use App\Services\RequestPService;
+use App\Services\ComponentLogService;
+
 
 use Validator;
 
@@ -13,10 +15,12 @@ class ComponentActivityController extends Controller
 {
     private $requestService;
 
-    public function __construct(RequestPService $requestService)
+    public function __construct(RequestPService $requestService, ComponentLogService $componentLogService)
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
+        $this->componentLogService = $componentLogService;
+
     }
 
     public function add(Request $request)
@@ -80,6 +84,15 @@ class ComponentActivityController extends Controller
         $validated['source'] = "ta"; //旅行社預設為ta
 
         $activity = $this->requestService->insert_one('activities', $validated);
+        $activity =  json_decode($activity->content(), true);
+
+
+        // 建立 Log
+        $activity = $this->requestService->get_one('activities', $activity['inserted_id']);
+        $activity =  json_decode($activity->content(), true);
+        $filter = $this->componentLogService->recordCreate('activities', $activity);
+        $create_components_log = $this->requestService->insert_one("components_log", $filter);
+
         return $activity;
     }
 
