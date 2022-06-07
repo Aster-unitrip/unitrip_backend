@@ -44,7 +44,10 @@ class ComponentCategoryController extends Controller
             }
             // 元件分享只可以為子到母
             if($component['is_display'] === true){
-                return response()->json(['error' => 'This component is public, you can not copy to public again.'], 400);
+                return response()->json(['error' => 'This component is public, you can not copy it.'], 400);
+            }
+            if($component['owned_by'] !== auth()->user()->company_id){
+                return response()->json(['error' => 'This component is not yours, you can not copy it.'], 400);
             }
         }else{
             return response()->json(['error' => 'You must input type and _id'], 400);
@@ -63,8 +66,6 @@ class ComponentCategoryController extends Controller
         $resultSearchLog = $this->componentLogService->checkLogFilter($searchResultPrivateToPublic, $searchResultPublicToPrivate);
 
         if($resultSearchLog === true){// 確認該元件是否屬於該公司
-            $component['is_display'] = true;
-            $component['is_enabled'] = true;
             $component = $this -> ensure_private2public_key($query['type'], $component);
 
             $private2public = $this->requestService->insert_one($query['type'], $component);
@@ -99,7 +100,7 @@ class ComponentCategoryController extends Controller
             }
             // 元件分享只可以為母到子
             if($component['is_display'] === false){
-                return response()->json(['error' => 'This component is private, you can not copy to private again.'], 400);
+                return response()->json(['error' => 'This component is private, you can not copy it.'], 400);
             }
         }else{
             return response()->json(['error' => 'You must input type and _id'], 400);
@@ -118,32 +119,30 @@ class ComponentCategoryController extends Controller
         $searchResultPrivateToPublic = json_decode($searchResultPrivateToPublic->content(), true);
 
 
-        $resultSearchLog = $this->componentLogService->checkLogFilter($searchResultPrivateToPublic, $searchResultPublicToPrivate);
+
+        $resultSearchLog = $this->componentLogService->checkLogFilter($searchResultPublicToPrivate, $searchResultPrivateToPublic);
 
         if($resultSearchLog === true){// 確認該元件是否屬於該公司
-        // 修改擁有公司
-        $component['owned_by'] = auth()->user()->company_id;
-        $component['is_display'] = false;
-        $public2private = $this->requestService->insert_one($query['type'], $component);
-        $public2private = json_decode($public2private->content(), true);
-        Log::info("Copied component to private", ['id' => $public2private['inserted_id'], 'user' => auth()->user()->email]);
-        // 紀錄該元件是否已複製至母槽過
-        $add_flied = $this->componentLogService->recordPublicToPrivate($query, $public2private['inserted_id'], $component);
-        $add_flied = $this->requestService->insert_one('components_log', $add_flied);
+            $query['source_company'] = $component['owned_by'];
+            $component = $this -> ensure_public2private_key($query['type'], $component);
 
-        return response()->json([
-            'message' => 'Successfully copied component to private',
-            'id' => $public2private['inserted_id']
-        ]);
+            $public2private = $this->requestService->insert_one($query['type'], $component);
+            $public2private = json_decode($public2private->content(), true);
+
+            Log::info("Copied component to private", ['id' => $public2private['inserted_id'], 'user' => auth()->user()->email]);
+
+            // 紀錄該元件是否已複製至母槽過
+            $add_flied = $this->componentLogService->recordPublicToPrivate($query, $public2private['inserted_id'], $component);
+            $add_flied = $this->requestService->insert_one('components_log', $add_flied);
+
+            return response()->json([
+                'message' => 'Successfully copied component to private',
+                'id' => $public2private['inserted_id']
+            ]);
         }
         else{
             return $resultSearchLog;
         }
-
-
-
-
-
     }
 
     // 刪除不必要的 key，避免回傳不該傳的資料
@@ -175,7 +174,33 @@ class ComponentCategoryController extends Controller
         }
 
         // $component['experience'] = '';
+        $component['is_display'] = true;
+        $component['is_enabled'] = true;
         $component['source'] = 'ta';
+        $component['owned_by'] = auth()->user()->company_id;
+        $component['updated_at'] = date('Y-m-d H:i:s');
+        $component['created_at'] = date('Y-m-d H:i:s');
+        unset($component['_id']);
+
+        return $component;
+    }
+
+    public function ensure_public2private_key($type, $component) {
+
+        // 區分類型
+        // if($type === 'attractions'){
+        // }
+        // if($type === 'restaurants'){
+        // }
+        // if($type === 'accomendations'){
+        // }
+        // if($type === 'activities'){
+        // }
+
+        $component['is_display'] = false;
+        $component['is_enabled'] = true;
+        $component['source'] = 'ta';
+        $component['owned_by'] = auth()->user()->company_id;
         $component['updated_at'] = date('Y-m-d H:i:s');
         $component['created_at'] = date('Y-m-d H:i:s');
         unset($component['_id']);
