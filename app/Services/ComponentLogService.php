@@ -36,6 +36,8 @@ class ComponentLogService
         $add_log_private2public["target_id"]= $insert_id;
         $add_log_private2public["user_id"]= auth()->user()->id;
         $add_log_private2public["created_at"]= $data['created_at'];
+        $add_log_private2public["updated_at"]= $data['updated_at'];
+
 
         return $add_log_private2public;
     }
@@ -52,13 +54,29 @@ class ComponentLogService
         $add_log_public2private["target_id"]= $insert_id;
         $add_log_public2private["user_id"]= auth()->user()->id;
         $add_log_public2private["created_at"]= $data['created_at'];
+        $add_log_public2private["updated_at"]= $data['updated_at'];
+
 
         return $add_log_public2private;
     }
 
-    public function recordCreate()
+    public function recordCreate($type, $data)
     {
+        $add_log_create['type'] = $type;
+        $add_log_create["source_company"] = null;
+        $add_log_create["target_company"] = auth()->user()->company_id;
+        $add_log_create["source_id"] = null;
+        $add_log_create["target_id"]= $data["_id"];
+        $add_log_create["user_id"]= auth()->user()->id;
+        $add_log_create["created_at"]= $data['created_at'];
+        $add_log_create["updated_at"]= $data['updated_at'];
 
+        if($data['is_display'] === true) {
+            $add_log_create['action'] = 'create_public';
+        }else{
+            $add_log_create['action'] = 'create_private';
+        }
+        return $add_log_create;
     }
 
     public function recordDelete()
