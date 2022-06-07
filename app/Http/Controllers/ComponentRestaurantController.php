@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use Illuminate\Validation\Rule;
+use App\Services\ComponentLogService;
 use Illuminate\Support\Facades\Log;
 
 use Validator;
@@ -14,10 +15,12 @@ class ComponentRestaurantController extends Controller
 
     private $requestService;
 
-    public function __construct(RequestPService $requestService)
+    public function __construct(RequestPService $requestService, ComponentLogService $componentLogService)
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
+        $this->componentLogService = $componentLogService;
+
     }
 
     // 旅行社使用者可以新增自己的子槽元件
@@ -83,8 +86,16 @@ class ComponentRestaurantController extends Controller
         $validated['owned_by'] = $company_id;
         $validated['source'] = "ta"; //旅行社預設為ta
 
-        $restaurants = $this->requestService->insert_one('restaurants', $validated);
-        return $restaurants;
+        $restaurant = $this->requestService->insert_one('restaurants', $validated);
+        $restaurant =  json_decode($restaurant->content(), true);
+
+
+        // 建立 Log
+        $restaurant = $this->requestService->get_one('restaurants', $restaurant['inserted_id']);
+        $restaurant =  json_decode($restaurant->content(), true);
+        $filter = $this->componentLogService->recordCreate('restaurants', $restaurant);
+        $create_components_log = $this->requestService->insert_one("components_log", $filter);
+        return $restaurant;
 
     }
 

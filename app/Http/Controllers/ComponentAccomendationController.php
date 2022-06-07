@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use Illuminate\Support\Facades\Log;
+use App\Services\ComponentLogService;
+
 
 use Validator;
 
@@ -12,10 +14,12 @@ class ComponentAccomendationController extends Controller
 {
     private $requestService;
 
-    public function __construct(RequestPService $requestService)
+    public function __construct(RequestPService $requestService, ComponentLogService $componentLogService)
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
+        $this->componentLogService = $componentLogService;
+
         $this->add_rule = [
             'name' => 'required|string|max:30',
             'website' => 'nullable|string|max:100',
@@ -72,6 +76,14 @@ class ComponentAccomendationController extends Controller
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
         $accomendation = $this->requestService->insert_one('accomendations', $validated);
+        $accomendation =  json_decode($accomendation->content(), true);
+
+
+        // 建立 Log
+        $accomendation = $this->requestService->get_one('accomendations', $accomendation['inserted_id']);
+        $accomendation =  json_decode($accomendation->content(), true);
+        $filter = $this->componentLogService->recordCreate('accomendations', $accomendation);
+        $create_components_log = $this->requestService->insert_one("components_log", $filter);
         return $accomendation;
 
     }
