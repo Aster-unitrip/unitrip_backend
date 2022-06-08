@@ -25,12 +25,17 @@ class DMController extends Controller
         $this->edit_rule = [
             '_id'=>'required|string|max:24',
             'price_per_person'=>'integer',
-            'dm_layout' => ['required', new Boolean],
+            'itinerary_group_id' => 'required|string|max:24',
+            'itinerary_group_cost' => 'required|integer',
+            'itinerary_group_price' => 'required|integer',
+            'dm_layout' => 'required|string|max:24',
             'is_display' => ['required', new Boolean],
-            'if_show_logo'=>'required|string'
-
-            /* 'dm_layout'=>'required|string',
-            'is_display'=>'required|string', */
+            'if_show_logo'=> ['required', new Boolean],
+            'if_show_locations'=> ['required', new Boolean],
+            'if_show_signup'=> ['required', new Boolean],
+            'if_show_agent_info'=> ['required', new Boolean],
+            'locations'=>'required|array',
+            'imgs' => 'required|array',
         ];
     }
 
@@ -57,6 +62,12 @@ class DMController extends Controller
             $dm_data_new['dm_layout'] = "BlueDM"; // 目前預設為 "BlueDM"
             $dm_data_new['price_per_person'] = 0;
             $dm_data_new['if_show_logo'] = "true";
+            $dm_data_new['if_show_locations'] = "true";
+            $dm_data_new['if_show_signup'] = "true";
+            $dm_data_new['if_show_agent_info'] = "true";
+            $dm_data_new['locations'] = [];
+            $dm_data_new['imgs'] = [];
+
             $insert_one_to_dm = $this->requestService->insert_one('dm', $dm_data_new);
         }else{ //old
             $dm_data_new['_id'] = $dm_before['document']['_id'];
@@ -66,7 +77,7 @@ class DMController extends Controller
 
         if($dm_before===false){//是否第一次使用DM->更新團行程資料庫
             $edit_dm_activated["_id"] = $after_dm_data_new['document']['itinerary_group_id'];
-            $edit_dm_activated["dm_activated"] = "true";
+            $edit_dm_activated["is_display"] = "true";
             $this->requestService->update_one('itinerary_group', $edit_dm_activated);
         }
         return $after_dm_data_new['document'];

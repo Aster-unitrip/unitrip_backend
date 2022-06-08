@@ -20,6 +20,7 @@ use App\Http\Controllers\ComponentCarTypeController;
 use App\Http\Controllers\PassengerController;
 use App\Http\Controllers\DMController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\EmailController;
 
 
 
@@ -158,4 +159,11 @@ Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
     Route::post('/list', [ItineraryController::class, 'list']);
     Route::get('/{id}', [ItineraryController::class, 'get_by_id']);
     Route::post('/update', [ItineraryController::class, 'edit']);
+});
+
+// email
+Route::group(['middleware'=>'api', 'prefix'=>'email'], function($router){
+    Route::
+    Route::get('/', [EmailController::class, 'send']);
+
 });
