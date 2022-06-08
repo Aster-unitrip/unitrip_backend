@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use App\Services\RequestPService;
+use App\Services\ComponentLogService;
+
 
 use Validator;
 
@@ -13,10 +15,12 @@ class ComponentActivityController extends Controller
 {
     private $requestService;
 
-    public function __construct(RequestPService $requestService)
+    public function __construct(RequestPService $requestService, ComponentLogService $componentLogService)
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
+        $this->componentLogService = $componentLogService;
+
     }
 
     public function add(Request $request)
@@ -80,6 +84,15 @@ class ComponentActivityController extends Controller
         $validated['source'] = "ta"; //旅行社預設為ta
 
         $activity = $this->requestService->insert_one('activities', $validated);
+        $activity =  json_decode($activity->content(), true);
+
+
+        // 建立 Log
+        $activity = $this->requestService->get_one('activities', $activity['inserted_id']);
+        $activity =  json_decode($activity->content(), true);
+        $filter = $this->componentLogService->recordCreate('activities', $activity);
+        $create_components_log = $this->requestService->insert_one("components_log", $filter);
+
         return $activity;
     }
 
@@ -252,8 +265,9 @@ class ComponentActivityController extends Controller
             "description" => 1,
             "intro_summary" => 1,
             "updated_at" => 1,
-            "created_at" => 1
-
+            "created_at" => 1,
+            "is_display" => 1,
+            "activity_company_name" => 1,
         );
         $result = $this->requestService->aggregate_facet('activities', $projection, $filter, $page);
         // 相容舊格式
@@ -346,7 +360,7 @@ class ComponentActivityController extends Controller
 
     // 刪除不必要的 key，避免回傳不該傳的資料
     public function ensure_query_key($filter) {
-        $fields = ['address_city', 'address_town', 'name', 'categories', 'page', 'search_location', 'fee', 'stay_time'];
+        $fields = ['address_city', 'address_town', 'name', 'categories', 'page', 'search_location', 'fee', 'stay_time', 'activity_company_name'];
         $new_filter = array();
         foreach ($filter as $key => $value) {
             if (in_array($key, $fields)) {

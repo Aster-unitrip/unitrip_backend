@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\AttractionService;
 use App\Services\RequestPService;
+use App\Services\ComponentLogService;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 
@@ -15,11 +16,13 @@ class ComponentAttractionController extends Controller
     private $attractionService;
     private $requestService;
 
-    public function __construct(AttractionService $attractionService, RequestPService $requestPService)
+    public function __construct(AttractionService $attractionService, RequestPService $requestPService, ComponentLogService $componentLogService)
     {
         $this->middleware('auth');
         $this->attractionService = $attractionService;
         $this->requestService = $requestPService;
+        $this->componentLogService = $componentLogService;
+
     }
 
     // 旅行社使用者可以新增自己的子槽元件
@@ -70,6 +73,14 @@ class ComponentAttractionController extends Controller
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
         $attraction = $this->requestService->insert_one('attractions', $validated);
+        $attraction =  json_decode($attraction->content(), true);
+
+        // 建立 Log
+        $attraction = $this->requestService->get_one('attractions', $attraction['inserted_id']);
+        $attraction =  json_decode($attraction->content(), true);
+        $filter = $this->componentLogService->recordCreate('attractions', $attraction);
+        $create_components_log = $this->requestService->insert_one("components_log", $filter);
+
         return $attraction;
 
     }

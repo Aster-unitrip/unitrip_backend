@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\RequestPService;
 use Illuminate\Validation\Rule;
+use App\Services\ComponentLogService;
 use Illuminate\Support\Facades\Log;
 
 use Validator;
@@ -14,10 +15,12 @@ class ComponentRestaurantController extends Controller
 
     private $requestService;
 
-    public function __construct(RequestPService $requestService)
+    public function __construct(RequestPService $requestService, ComponentLogService $componentLogService)
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
+        $this->componentLogService = $componentLogService;
+
     }
 
     // 旅行社使用者可以新增自己的子槽元件
@@ -83,8 +86,16 @@ class ComponentRestaurantController extends Controller
         $validated['owned_by'] = $company_id;
         $validated['source'] = "ta"; //旅行社預設為ta
 
-        $restaurants = $this->requestService->insert_one('restaurants', $validated);
-        return $restaurants;
+        $restaurant = $this->requestService->insert_one('restaurants', $validated);
+        $restaurant =  json_decode($restaurant->content(), true);
+
+
+        // 建立 Log
+        $restaurant = $this->requestService->get_one('restaurants', $restaurant['inserted_id']);
+        $restaurant =  json_decode($restaurant->content(), true);
+        $filter = $this->componentLogService->recordCreate('restaurants', $restaurant);
+        $create_components_log = $this->requestService->insert_one("components_log", $filter);
+        return $restaurant;
 
     }
 
@@ -280,7 +291,7 @@ class ComponentRestaurantController extends Controller
 
     }
 
-    // 把元件從子槽複製到母槽，要排除 experience, ticket 欄位
+    // 把元件從子槽複製到母槽，餐廳 要排除 experience, meals, cost_per_person, driver_tour_memo 欄位
     // 母槽元件 ticket 只顯示票種不要票價
     // 須紀錄該元件是否有分享過
     // 先確認此元件屬不屬於他自己，而且必須是子槽資料
@@ -301,12 +312,12 @@ class ComponentRestaurantController extends Controller
             $component['experience'] = '';
             unset($component['_id']);
 
-            $attraction = $this->requestService->insert_one('restaurants', $component);
-            $attraction = json_decode($attraction->content(), true);
-            Log::info("Copied component to public", ['id' => $attraction['inserted_id'], 'user' => auth()->user()->email]);
+            $restaurant = $this->requestService->insert_one('restaurants', $component);
+            $restaurant = json_decode($restaurant->content(), true);
+            Log::info("Copied component to public", ['id' => $restaurant['inserted_id'], 'user' => auth()->user()->email]);
             return response()->json([
                 'message' => 'Successfully copied component to public',
-                'id' => $attraction['inserted_id']
+                'id' => $restaurant['inserted_id']
             ]);
         } else {
             return response()->json(['error' => 'You can not access this component'], 400);
