@@ -165,7 +165,6 @@ Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
 
 // email
 Route::group(['middleware'=>'api', 'prefix'=>'email'], function($router){
-    Route::
     Route::get('/', [EmailController::class, 'send']);
 
 });
