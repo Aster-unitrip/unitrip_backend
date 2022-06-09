@@ -62,10 +62,6 @@ class PassengerController extends Controller
         $filter["order_id"] = $id;
         $passenger_data = $this->requestService->aggregate_search('passengers', null, $filter, $page=0);
         return $passenger_data;
-
-
-
-
     }
 
     public function edit(Request $request){
@@ -78,10 +74,7 @@ class PassengerController extends Controller
         }
         $validated = $validator->validated();
 
-
-
         //array 中每一筆單的 order_id 都要是一樣的
-
         $owned_by = auth()->user()->company_id;
         $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
@@ -112,4 +105,16 @@ class PassengerController extends Controller
         }
     }
 
+    public function list(Request $request)
+    {
+        // 1-1 使用者公司必須是旅行社
+
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+    }
 }

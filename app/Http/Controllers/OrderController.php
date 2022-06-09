@@ -155,34 +155,6 @@ class OrderController extends Controller
         $validated['estimated_travel_end'] = $validated['estimated_travel_end']."T23:59:59.000+08:00";
 
         $cus_orders = $this->requestService->insert_one('cus_orders', $validated);
-
-        // 新增旅客代表人資料
-        $cus_orders_data = json_decode($cus_orders->content(), true);
-        $passenger_data['order_id'] = $cus_orders_data['inserted_id'];
-        $passenger_data['name'] = $validated['representative'];
-        $passenger_data['name_en'] = "";
-        $passenger_data['nationality'] = $validated['nationality'];
-        $passenger_data['company'] = "";
-        $passenger_data['gender'] = "";
-        $passenger_data['id_number'] = "";
-        $passenger_data['passport_number'] = "";
-        $passenger_data['birthday'] = "";
-        $passenger_data['is_vegetarian'] = null;
-        $passenger_data['phone'] = $validated['phone'];
-        $passenger_data['email'] = $validated['email'];
-        $passenger_data['job'] = "";
-        $passenger_data['needs'] = "";
-        $passenger_data['is_representative'] = 'true'; // 代表人
-        $address["city"] = "";
-        $address["town"] = "";
-        $address["address"] = "";
-        $address["detail"] = "";
-        $passenger_data['address'] = $address;
-        $passenger_data['owned_by'] = $validated['owned_by'];
-
-
-        $this->requestService->insert_one('passengers', $passenger_data);
-
         return $cus_orders;
 
     }

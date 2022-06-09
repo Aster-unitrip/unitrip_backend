@@ -145,6 +145,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'dm'], function($router){ //DM系�
 Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
     Route::get('/{id}', [PassengerController::class, 'get_by_id']); // 取得訂單ID的旅客資料
     Route::post('/', [PassengerController::class, 'edit']);
+    Route::post('/list', [PassengerController::class, 'list']);
+
 });
 
 // 出團預訂單
