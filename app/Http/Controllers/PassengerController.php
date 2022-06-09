@@ -92,26 +92,24 @@ class PassengerController extends Controller
         //     return response()->json(['error' => 'you are not an employee of this company.'], 400);
         // }
 
+        // 取得CRM 中旅客id，修改資料
+        $passenger_profile_id = $this->get_passenger_profile_id($validated);
+
 
         // 判斷新增或是修改
         if(array_key_exists("_id", $validated)){ //修改
-            $result = $this->requestService->update_one('passengers', $validated);
+            $passenger_data = $this -> ensure_passengers_key($validated, $passenger_profile_id);
+            $result = $this->requestService->update_one('passengers', $passenger_data);
         }
         else if(!array_key_exists("_id", $validated)){ //新增
-            // 新增於 passenger_profile 中
-            $data_add_to_passenger_profile = $this -> ensure_passenger_profile_key($validated);
-            $content = $this->requestService->insert_one('passenger_profile', $data_add_to_passenger_profile);
-            $data_add_to_passenger_profile = json_decode($content->getContent(), true);
-
             // 補上passenger_profile 該旅客id，新增於 passengers 中
-            $data_add_to_passenger = $this -> ensure_passengers_key($validated, $data_add_to_passenger_profile["inserted_id"]);
-            $result = $this->requestService->insert_one('passengers', $data_add_to_passenger);
+            $passenger_data = $this -> ensure_passengers_key($validated, $passenger_profile_id);
+            $result = $this->requestService->insert_one('passengers', $passenger_data);
         }
         return $result;
     }
 
-    public function list(Request $request)
-    {
+    public function list(Request $request){
         // 1-1 使用者公司必須是旅行社
 
         $owned_by = auth()->user()->company_id;
@@ -123,8 +121,35 @@ class PassengerController extends Controller
 
     }
 
-    // 刪除不必要的 key，避免回傳不該傳的資料
-    public function ensure_passenger_profile_key($data) {
+    public function is_first_time_user($data){
+        // 搜尋方式 : 搜尋該筆
+        $filter['name'] = $this->ensure_name_key($data['name']);
+        $filter['birthday'] = $data['birthday'];
+        $searchResult = $this->requestService->aggregate_search("passenger_profile", null, $filter, $page=0);
+        $searchResult = json_decode($searchResult->content(), true);
+        if(array_key_exists("count", $searchResult) && $searchResult['count'] > 0){ // 如果是第一筆訂單 則存入CRM
+            $result['status'] = false;
+            $result['passenger_profile_id'] = $searchResult['docs'][0]['_id'];
+        }else{ // 如果不是第一筆訂單 不理
+            $result['status'] =  true;
+        }
+        return $result;
+    }
+
+    public function get_passenger_profile_id($data){
+        $result = $this->is_first_time_user($data);
+        if($result['status'] === true){ // 如果是第一筆訂單 則存入CRM 並抓出旅客id
+            $data_add_to_passenger_profile = $this -> ensure_passenger_profile_key($data);
+            $content = $this->requestService->insert_one('passenger_profile', $data_add_to_passenger_profile);
+            $data_add_to_passenger_profile = json_decode($content->getContent(), true);
+            return $data_add_to_passenger_profile['inserted_id'];
+        }
+        else if($result['status'] === false){ // 如果不是第一筆訂單 抓出旅客id
+            return $result['passenger_profile_id'];
+        }
+    }
+
+    public function ensure_passenger_profile_key($data){
 
         // 修改姓名
         $data['name'] = $this->ensure_name_key($data['name']);
@@ -136,23 +161,32 @@ class PassengerController extends Controller
         $data['created_at'] = date('Y-m-d H:i:s');
         unset($data['order_id']);
         unset($data['is_representative']);
+        unset($data['_id']);
 
         return $data;
     }
 
-    // 刪除不必要的 key，避免回傳不該傳的資料
-    public function ensure_passengers_key($data, $inserted_id) {
-        $data['is_representative'] = false;
-        $data['owned_by'] = auth()->user()->company_id;
+    public function ensure_passengers_key($data, $inserted_id){
         $data['passenger_profile_id'] = $inserted_id;
         $data['updated_at'] = date('Y-m-d H:i:s');
-        $data['created_at'] = date('Y-m-d H:i:s');
+        // 新增用
+        if(!array_key_exists("is_representative", $data)){
+            $data['is_representative'] = false;
+        }
+        if(!array_key_exists("owned_by", $data)){
+            $data['owned_by'] = auth()->user()->company_id;
+        }
+        if(!array_key_exists("created_at", $data)){
+            $data['created_at'] = date('Y-m-d H:i:s');
+        }
+        $data['passenger_profile_id'] = $inserted_id;
+        $data['updated_at'] = date('Y-m-d H:i:s');
 
         return $data;
     }
 
     // 姓名轉換(過渡期)
-    public function ensure_name_key($name) {
+    public function ensure_name_key($name){
 
         if(gettype($name) === 'string') {
             $name_changed['first_name'] = $name;
