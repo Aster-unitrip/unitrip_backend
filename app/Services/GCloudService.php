@@ -13,10 +13,10 @@ class GCloudService
     public function index(Request $request)
     {
         // https://medium.com/@pawanjotkaurbaweja/uploading-images-to-google-storage-using-laravel-d9a4bc15b8aa
-        
+
         // Validate the request
         $rule = [
-            'type' => ['required', 'string', Rule::in(['attractions', 'hotels', 'plays', 'restaurants', 'staffs', 'transportations', 'rooms', 'meals'])],
+            'type' => ['required', 'string', Rule::in(['attractions', 'hotels', 'plays', 'restaurants', 'staffs', 'transportations', 'rooms', 'meals', 'accomentdations', 'activities'])],
             [
                 'img.*' => 'required|mimes:jpg,jpeg,png|max:3072'
                 ],[
@@ -38,7 +38,7 @@ class GCloudService
         $file_name = uniqid().'.'.$sub_filename;
 
         try
-        {    
+        {
             // Upload images to Google Cloud Storage
             $storage = new StorageClient();
             $bucket = $storage->bucket('unitrip_components');
@@ -60,7 +60,7 @@ class GCloudService
         {
             return response()->json(['error' => $e->getMessage()], 400);
         }
-        
+
     }
 
     public function removeImg(Request $request)
@@ -119,7 +119,7 @@ class GCloudService
         $file_name = uniqid().'.'.$sub_filename;
 
         try
-        {    
+        {
             // Upload images to Google Cloud Storage
             $storage = new StorageClient();
             $bucket = $storage->bucket('unitrip-dm');
