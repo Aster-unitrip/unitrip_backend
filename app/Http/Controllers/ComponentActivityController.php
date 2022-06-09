@@ -63,6 +63,7 @@ class ComponentActivityController extends Controller
             'bank_info.account_name' => 'nullable|string|max:20',
             'bank_info.account_number' => 'nullable|string|max:20',
             'is_enabled' => 'required|boolean',
+            'website' => 'string|max:300',
             // 'attraction_name' => 'string|max:20',
             // 'attraction_id' => 'string',
 
@@ -169,6 +170,7 @@ class ComponentActivityController extends Controller
             'bank_info.account_name' => 'nullable|string|max:20',
             'bank_info.account_number' => 'nullable|string|max:20',
             'is_enabled' => 'required|boolean',
+            'website' => 'string|max:300',
             // 'attraction_name' => 'string|max:20',
             // 'attraction_id' => 'string',
 
@@ -251,6 +253,9 @@ class ComponentActivityController extends Controller
         // Handle projection content
         $projection = array(
             "_id" => 1,
+            "address_city" => 1,
+            "address" => 1,
+            "address_town" => 1,
             "gather_at" => 1,
             "name" => 1,
             "attraction_name" => 1,
