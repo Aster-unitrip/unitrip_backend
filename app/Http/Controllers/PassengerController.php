@@ -39,7 +39,7 @@ class PassengerController extends Controller
         ];
     }
 
-    public function get_by_id($id)
+    public function get_by_order_passenger($id)
     {   //$id => 訂單id
         // 1-1 使用者公司必須是旅行社
 
@@ -88,13 +88,12 @@ class PassengerController extends Controller
         if(array_key_exists('count', $order_data) && $order_data['count'] === 0){
             return response()->json(['error' => '沒有這筆訂單(no order_id)']);
         }
-        // if($owned_by !== $order_data['owned_by']){
-        //     return response()->json(['error' => 'you are not an employee of this company.'], 400);
-        // }
+        if($owned_by !== $order_data['owned_by']){
+            return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
 
         // 取得CRM 中旅客id，修改資料
         $passenger_profile_id = $this->get_passenger_profile_id($validated);
-
 
         // 判斷新增或是修改
         if(array_key_exists("_id", $validated)){ //修改
@@ -118,6 +117,22 @@ class PassengerController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
+
+    }
+
+    public function get_by_id($id)
+    {   //$id => passenger_profile_id
+
+        // 使用者公司必須是旅行社
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+        $passenger_profile_data = $this->requestService->get_one('passenger_profile', $id);
+        return $passenger_profile_data;
 
     }
 

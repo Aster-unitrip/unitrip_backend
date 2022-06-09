@@ -142,12 +142,12 @@ Route::group(['middleware'=>'api', 'prefix'=>'dm'], function($router){ //DM系�
     Route::middleware('auth')->post('/setting', [DMController::class, 'edit_dm_setting']); // 更改DM設定 [是否上架]
 });
 
-// 旅客
+// 訂單的旅客
 Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
-    Route::get('/{id}', [PassengerController::class, 'get_by_id']); // 取得訂單ID的旅客資料
+    Route::get('/{id}', [PassengerController::class, 'get_by_order_passenger']); // 取得訂單ID的旅客資料
+    Route::get('/profile/{id}', [PassengerController::class, 'get_by_id']); // 取得passenger_profile的單一旅客資料
     Route::post('/', [PassengerController::class, 'edit']);
     Route::post('/list', [PassengerController::class, 'list']);
-
 });
 
 // 出團預訂單
