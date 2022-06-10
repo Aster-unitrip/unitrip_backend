@@ -14,7 +14,6 @@ class PassengerController extends Controller
 {
     private $requestService;
 
-
     public function __construct(RequestPService $requestService){
         $this->middleware('auth');
         $this->requestService = $requestService;
@@ -88,6 +87,8 @@ class PassengerController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
+        $validated['address']['detail'] = $validated['address']['city'].$validated['address']['town'].$validated['address']['address'];
+        $validated = $this->ensure_value_is_upper('passenger_profile',$validated);
         $passenger_profile_data = $this->requestService->update_one('passenger_profile', $validated);
         return $passenger_profile_data;
 
@@ -146,7 +147,8 @@ class PassengerController extends Controller
         }
 
         // 修改資料
-        $validated['address']['detail'] = $validated['address']['city'] + $validated['address']['town'] + $validated['address']['address'];
+        $validated['address']['detail'] = $validated['address']['city'].$validated['address']['town'].$validated['address']['address'];
+        $validated = $this->ensure_value_is_upper('order_passenger',$validated);
 
         // 取得CRM 中旅客id，修改資料
         $passenger_profile_id = $this->get_passenger_profile_id($validated);
@@ -164,15 +166,16 @@ class PassengerController extends Controller
         return $result;
     }
 
-    public function list(Request $request){
-        // 1-1 使用者公司必須是旅行社
+    public function passenger_profile_list(Request $request){
 
+        // 使用者公司必須是旅行社
         $owned_by = auth()->user()->company_id;
         $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
+
 
     }
 
@@ -249,6 +252,25 @@ class PassengerController extends Controller
         }
 
         return $name_changed;
+    }
+
+    public function ensure_value_is_upper($path, $value){ //將需要為大寫value轉成大寫
+        // mtp_number visa_number id_number passport_number
+        if($path === "order_passenger"){
+            $value['id_number'] = strtoupper($value['id_number']);
+        }
+        else if($path === "passenger_profile"){
+            $value['mtp_number'] = strtoupper($value['mtp_number']);
+            $value['visa_number'] = strtoupper($value['visa_number']);
+            $value['id_number'] = strtoupper($value['id_number']);
+        }
+
+        // foreach($value as $key => $val) {
+        //     if($key === 'mtp_number' || $key === 'visa_number' || $key === 'id_number' || $key === 'passport_number'){
+        //         $val = strtoupper($val);
+        //     }
+        // }
+        return $value;
     }
 
 }
