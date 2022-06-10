@@ -64,7 +64,7 @@ class ComponentActivityController extends Controller
             'bank_info.account_number' => 'nullable|string|max:20',
             'is_enabled' => 'required|boolean',
             'website' => 'string|max:300',
-            // 'attraction_name' => 'string|max:20',
+            'attraction_name' => 'string|max:20',
             // 'attraction_id' => 'string',
 
             'lng' => 'nullable|numeric',
@@ -83,7 +83,9 @@ class ComponentActivityController extends Controller
 
         $validated['owned_by'] = $company_id;
         $validated['source'] = "ta"; //旅行社預設為ta
-
+        if(!array_key_exists("attraction_name", $validated)){
+            $validated['attraction_name'] = null;
+        }
         $activity = $this->requestService->insert_one('activities', $validated);
         $activity =  json_decode($activity->content(), true);
 
@@ -171,7 +173,7 @@ class ComponentActivityController extends Controller
             'bank_info.account_number' => 'nullable|string|max:20',
             'is_enabled' => 'required|boolean',
             'website' => 'string|max:300',
-            // 'attraction_name' => 'string|max:20',
+            'attraction_name' => 'string|max:20',
             // 'attraction_id' => 'string',
 
             'lng' => 'nullable|numeric',
