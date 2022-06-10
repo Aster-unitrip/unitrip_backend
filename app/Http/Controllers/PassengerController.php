@@ -38,7 +38,7 @@ class PassengerController extends Controller
         ];
         $this->passenger_profile_rule = [
             '_id' => 'string',
-            'name' => 'required|string|max:30',
+            'name' => 'required|max:30',
             'name_en' => 'string|max:30',
             'nationality' => 'required|string',
             'company' => 'string|max:50',
