@@ -146,7 +146,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'dm'], function($router){ //DM系�
 Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
     Route::get('/{id}', [PassengerController::class, 'get_by_order_passenger']); // 取得訂單ID的旅客資料
     Route::get('/profile/{id}', [PassengerController::class, 'get_by_id']); // 取得passenger_profile的單一旅客資料
-    Route::post('/', [PassengerController::class, 'edit']);
+    Route::post('/profile', [PassengerController::class, 'edit_profile']);
+    Route::post('/', [PassengerController::class, 'edit_order_passenger']);
     Route::post('/list', [PassengerController::class, 'list']);
 });
 

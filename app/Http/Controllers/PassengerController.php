@@ -15,11 +15,10 @@ class PassengerController extends Controller
     private $requestService;
 
 
-    public function __construct(RequestPService $requestService)
-    {
+    public function __construct(RequestPService $requestService){
         $this->middleware('auth');
         $this->requestService = $requestService;
-        $this->rule = [
+        $this->order_passenger_rule = [
             '_id' => 'string',
             'order_id' => 'required|string',
             'name' => 'required|string|max:30',
@@ -37,12 +36,67 @@ class PassengerController extends Controller
             'needs' => 'string|max:500',
             'address' => 'array',
         ];
+        $this->passenger_profile_rule = [
+            '_id' => 'string',
+            'name' => 'required|string|max:30',
+            'name_en' => 'string|max:30',
+            'nationality' => 'required|string',
+            'company' => 'string|max:50',
+            'gender' => 'required|string|max:50',
+            'id_number' => 'string|max:50',
+            'passport_number' => 'string|max:50',
+            'birthday' => 'required|string|date',
+            'is_vegetarian' => ['nullable', new Boolean],
+            'email' => 'email',
+            'phone' => 'required|string',
+            'job' => 'string|max:50',
+            'needs' => 'string|max:500',
+            'address' => 'array',
+            'note' => 'string|max:500',
+            'mtp_number' => 'string|max:50',
+            'visa_number' => 'string|max:50',
+        ];
     }
 
-    public function get_by_order_passenger($id)
-    {   //$id => 訂單id
-        // 1-1 使用者公司必須是旅行社
+    public function get_by_id($id){   //$id => passenger_profile_id
 
+        // 使用者公司必須是旅行社
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+        $passenger_profile_data = $this->requestService->get_one('passenger_profile', $id);
+        return $passenger_profile_data;
+
+    }
+
+    public function edit_passenger_profile(Request $request){
+
+        $data = json_decode($request->getContent(), true);
+        $validator = Validator::make($data, $this->passenger_profile_rule);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $validated = $validator->validated();
+
+        $owned_by = auth()->user()->company_id;
+        $company_data = Company::find($owned_by);
+        $company_type = $company_data['company_type'];
+        if ($company_type !== 2){
+            return response()->json(['error' => 'company_type must be 2'], 400);
+        }
+
+
+
+
+    }
+
+    public function get_by_order_passenger($id){//$id => 訂單id
+
+        // 1-1 使用者公司必須是旅行社
         $owned_by = auth()->user()->company_id;
         $company_data = Company::find($owned_by);
         $company_type = $company_data['company_type'];
@@ -64,10 +118,10 @@ class PassengerController extends Controller
         return $passenger_data;
     }
 
-    public function edit(Request $request){
+    public function edit_order_passenger(Request $request){
 
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $this->rule);
+        $validator = Validator::make($data, $this->order_passenger_rule);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
@@ -91,6 +145,9 @@ class PassengerController extends Controller
         if($owned_by !== $order_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
+
+        // 修改資料
+        $validated['address']['detail'] = $validated['address']['city'] + $validated['address']['town'] + $validated['address']['address'];
 
         // 取得CRM 中旅客id，修改資料
         $passenger_profile_id = $this->get_passenger_profile_id($validated);
@@ -117,22 +174,6 @@ class PassengerController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-
-    }
-
-    public function get_by_id($id)
-    {   //$id => passenger_profile_id
-
-        // 使用者公司必須是旅行社
-        $owned_by = auth()->user()->company_id;
-        $company_data = Company::find($owned_by);
-        $company_type = $company_data['company_type'];
-        if ($company_type !== 2){
-            return response()->json(['error' => 'company_type must be 2'], 400);
-        }
-
-        $passenger_profile_data = $this->requestService->get_one('passenger_profile', $id);
-        return $passenger_profile_data;
 
     }
 
