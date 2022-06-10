@@ -19,7 +19,6 @@ class ComponentAccomendationController extends Controller
         $this->middleware('auth');
         $this->requestService = $requestService;
         $this->componentLogService = $componentLogService;
-
         $this->add_rule = [
             'name' => 'required|string|max:30',
             'website' => 'nullable|string|max:100',
@@ -75,9 +74,12 @@ class ComponentAccomendationController extends Controller
         $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
+        $validated['source'] = "ta";
+        if(!array_key_exists("total_rooms", $validated)){
+            $validated['total_rooms'] = null;
+        }
         $accomendation = $this->requestService->insert_one('accomendations', $validated);
         $accomendation =  json_decode($accomendation->content(), true);
-
 
         // 建立 Log
         $accomendation = $this->requestService->get_one('accomendations', $accomendation['inserted_id']);
