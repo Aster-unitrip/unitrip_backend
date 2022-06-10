@@ -64,7 +64,7 @@ class ComponentActivityController extends Controller
             'bank_info.account_number' => 'nullable|string|max:20',
             'is_enabled' => 'required|boolean',
             'website' => 'string|max:300',
-            'attraction_name' => 'string|max:20',
+            'attraction_name' => 'nullable|string|max:20',
             // 'attraction_id' => 'string',
 
             'lng' => 'nullable|numeric',
@@ -174,7 +174,7 @@ class ComponentActivityController extends Controller
             'bank_info.account_number' => 'nullable|string|max:20',
             'is_enabled' => 'required|boolean',
             'website' => 'string|max:300',
-            'attraction_name' => 'string|max:20',
+            'attraction_name' => 'nullable|string|max:20',
             // 'attraction_id' => 'string',
 
             'lng' => 'nullable|numeric',
