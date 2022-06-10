@@ -88,9 +88,8 @@ class PassengerController extends Controller
         if ($company_type !== 2){
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
-
-
-
+        $passenger_profile_data = $this->requestService->update_one('passenger_profile', $validated);
+        return $passenger_profile_data;
 
     }
 
