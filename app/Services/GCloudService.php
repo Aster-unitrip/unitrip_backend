@@ -16,7 +16,7 @@ class GCloudService
 
         // Validate the request
         $rule = [
-            'type' => ['required', 'string', Rule::in(['attractions', 'hotels', 'plays', 'restaurants', 'staffs', 'transportations', 'rooms', 'meals', 'accomentdations', 'activities'])],
+            'type' => ['required', 'string', Rule::in(['attractions', 'hotels', 'plays', 'restaurants', 'staffs', 'transportations', 'rooms', 'meals', 'accomendations', 'activities'])],
             [
                 'img.*' => 'required|mimes:jpg,jpeg,png|max:3072'
                 ],[
