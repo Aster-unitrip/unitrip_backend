@@ -18,6 +18,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ItineraryGroupController;
 use App\Http\Controllers\ComponentCarTypeController;
 use App\Http\Controllers\PassengerController;
+use App\Http\Controllers\CrmController;
 use App\Http\Controllers\DMController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\EmailController;
@@ -142,13 +143,18 @@ Route::group(['middleware'=>'api', 'prefix'=>'dm'], function($router){ //DM系�
     Route::middleware('auth')->post('/setting', [DMController::class, 'edit_dm_setting']); // 更改DM設定 [是否上架]
 });
 
-// 旅客
+// 訂單 旅客
 Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
-    Route::get('/profile/{id}', [PassengerController::class, 'get_by_id']); // 取得passenger_profile的單一旅客資料
-    Route::post('/profile', [PassengerController::class, 'edit_passenger_profile']); // 修改 passenger_profile 資料
-    Route::post('/profile/list', [PassengerController::class, 'passenger_profile_list']);
     Route::get('/{id}', [PassengerController::class, 'get_by_order_passenger']); // 取得訂單ID的旅客資料
-    Route::post('/', [PassengerController::class, 'edit_order_passenger']); // 修改 訂單底下 passenger 資料
+    Route::post('/', [PassengerController::class, 'edit_order_passenger']); // 修改訂單 passenger 資料
+});
+
+// CRM 旅客
+Route::group(['middleware'=>'api', 'prefix'=>'crm'], function($router){
+    Route::get('/passengers/{id}', [CrmController::class, 'get_by_id']); // 取得 passenger_profile 的單一旅客資料
+    Route::post('/passengers', [CrmController::class, 'edit_profile']); // 修改 passenger_profile 資料
+    Route::post('/profile/list', [CrmController::class, 'profile_list']); // 搜尋旅客管理
+    Route::post('/past-orders/list', [CrmController::class, 'past_orders_list']); // 該旅客過往訂單紀錄
 });
 
 // 出團預訂單
@@ -169,5 +175,4 @@ Route::group(['middleware'=>'api', 'prefix'=>'itinerary'], function($router){
 // email
 Route::group(['middleware'=>'api', 'prefix'=>'email'], function($router){
     Route::get('/', [EmailController::class, 'send']);
-
 });
