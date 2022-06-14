@@ -151,8 +151,8 @@ Route::group(['middleware'=>'api', 'prefix'=>'passengers'], function($router){
 
 // CRM 旅客
 Route::group(['middleware'=>'api', 'prefix'=>'crm'], function($router){
-    Route::get('/passengers/{id}', [CrmController::class, 'get_by_id']); // 取得 passenger_profile 的單一旅客資料
-    Route::post('/passengers', [CrmController::class, 'edit_profile']); // 修改 passenger_profile 資料
+    Route::get('/passenger/{id}', [CrmController::class, 'get_by_id']); // 取得 passenger_profile 的單一旅客資料
+    Route::post('/passenger', [CrmController::class, 'edit_profile']); // 修改 passenger_profile 單一旅客資料
     Route::post('/profile/list', [CrmController::class, 'profile_list']); // 搜尋旅客管理
     Route::post('/past-orders/list', [CrmController::class, 'past_orders_list']); // 該旅客過往訂單紀錄
 });

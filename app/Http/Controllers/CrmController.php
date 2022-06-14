@@ -53,6 +53,13 @@ class CrmController extends Controller
         }
 
         $passenger_profile_data = $this->requestService->get_one('passenger_profile', $id);
+        $passenger_profile_data =  json_decode($passenger_profile_data->content(), true);
+        if($passenger_profile_data['gender'] == 1){
+            $passenger_profile_data['gender'] = "male";
+        }
+        else{
+            $passenger_profile_data['gender'] = "female";
+        }
         return $passenger_profile_data;
 
     }
@@ -73,7 +80,10 @@ class CrmController extends Controller
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
         $validated['address']['detail'] = $validated['address']['city'].$validated['address']['town'].$validated['address']['address'];
+        // TODO: 待前端修改完刪除中文判斷
+        $validated['gender'] = $this->gender_transition($validated['gender']);
         $validated = $this->ensure_value_is_upper($validated);
+
         $passenger_profile_data = $this->requestService->update_one('passenger_profile', $validated);
         return $passenger_profile_data;
 
@@ -183,6 +193,22 @@ class CrmController extends Controller
         //     }
         // }
         return $value;
+    }
+
+    public function gender_transition($data) { // 性別轉換成資料庫儲存型態
+        if($data === 'male' || $data === '男'){
+            $data = 1;
+        }
+        else if($data === 'female' || $data === '女'){
+            $data = 2;
+        }
+        else if($data === 1){
+            $data === 'male';
+        }
+        else if($data === 2){
+            $data === 'female';
+        }
+        return $data;
     }
 
 }

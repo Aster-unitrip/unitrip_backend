@@ -51,13 +51,27 @@ class PassengerController extends Controller
         // 找團行程的company_id和使用者company_id
         $order = $this->requestService->get_one('cus_orders', $id);
         $order_data = json_decode($order->getContent(), true);
-        if($owned_by !== $order_data['owned_by']){
+
+        if(array_key_exists("owned_by", $order_data) && $owned_by !== $order_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
+        }
+        else if(!array_key_exists("owned_by", $order_data)){
+            return response()->json(['error' => 'This _id is not exist.'], 400);
         }
 
         //找到該訂單下所有使用者資訊
         $filter["order_id"] = $id;
         $passenger_data = $this->requestService->aggregate_search('passengers', null, $filter, $page=0);
+
+        $passenger_data =  json_decode($passenger_data->content(), true);
+        for($i = 0; $i < count($passenger_data['docs']); $i++){
+            if($passenger_data['docs'][$i]['gender'] == 1){
+                $passenger_data['docs'][$i]['gender'] = "male";
+            }
+            else{
+                $passenger_data['docs'][$i]['gender'] = "female";
+            }
+        }
         return $passenger_data;
     }
 
@@ -91,6 +105,8 @@ class PassengerController extends Controller
 
         // 修改資料
         $validated['address']['detail'] = $validated['address']['city'].$validated['address']['town'].$validated['address']['address'];
+        // TODO: 待前端修改完刪除中文判斷
+        $validated['gender'] = $this->gender_transition($validated['gender']);
         $validated = $this->ensure_value_is_upper($validated);
 
         // 取得CRM 中旅客id，修改資料
@@ -113,7 +129,15 @@ class PassengerController extends Controller
     public function is_first_time_user($data){
         // 搜尋方式 : 搜尋該筆
         $filter['name'] = $this->ensure_name_key($data['name']);
-        $filter['birthday'] = $data['birthday'];
+        // 判斷台灣旅客或其他旅客
+        // 台灣旅客以國籍判斷 其他旅客以生日判斷
+        if($data['nationality'] === "TW"){
+            $filter['id_number'] = $data['id_number'];
+        }
+        else{
+            $filter['birthday'] = $data['birthday'];
+        }
+
         $searchResult = $this->requestService->aggregate_search("passenger_profile", null, $filter, $page=0);
         $searchResult = json_decode($searchResult->content(), true);
         if(array_key_exists("count", $searchResult) && $searchResult['count'] > 0){ // 如果是第一筆訂單 則存入CRM
@@ -129,9 +153,10 @@ class PassengerController extends Controller
         $result = $this->is_first_time_user($data);
         if($result['status'] === true){ // 如果是第一筆訂單 則存入CRM 並抓出旅客id
             $data_add_to_passenger_profile = $this -> ensure_passenger_profile_key($data);
-            $content = $this->requestService->insert_one('passenger_profile', $data_add_to_passenger_profile);
-            $data_add_to_passenger_profile = json_decode($content->getContent(), true);
-            return $data_add_to_passenger_profile['inserted_id'];
+
+            $result = $this->requestService->insert_one('passenger_profile', $data_add_to_passenger_profile);
+            $result = json_decode($result->getContent(), true);
+            return $result['inserted_id'];
         }
         else if($result['status'] === false){ // 如果不是第一筆訂單 抓出旅客id
             return $result['passenger_profile_id'];
@@ -199,13 +224,17 @@ class PassengerController extends Controller
         if(array_key_exists("passport_number",$value)){
                 $value['passport_number'] = strtoupper($value['passport_number']);
         }
-
-        // foreach($value as $key => $val) {
-        //     if($key === 'mtp_number' || $key === 'visa_number' || $key === 'id_number' || $key === 'passport_number'){
-        //         $val = strtoupper($val);
-        //     }
-        // }
         return $value;
     }
 
+    public function gender_transition($data){ // 性別轉換成資料庫儲存型態
+        if($data === 'male' || $data === '男'){
+            $trans_data = 1;
+        }
+        else if($data === 'female' || $data === '女'){
+            $trans_data = 2;
+        }
+
+        return $trans_data;
+    }
 }
