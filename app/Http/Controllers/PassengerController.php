@@ -91,7 +91,7 @@ class PassengerController extends Controller
 
         // 修改資料
         $validated['address']['detail'] = $validated['address']['city'].$validated['address']['town'].$validated['address']['address'];
-        $validated = $this->ensure_value_is_upper('order_passenger',$validated);
+        $validated = $this->ensure_value_is_upper($validated);
 
         // 取得CRM 中旅客id，修改資料
         $passenger_profile_id = $this->get_passenger_profile_id($validated);
@@ -185,15 +185,19 @@ class PassengerController extends Controller
         return $name_changed;
     }
 
-    public function ensure_value_is_upper($path, $value){ //將需要為大寫value轉成大寫
+    public function ensure_value_is_upper($value){ //將需要為大寫value轉成大寫
         // mtp_number visa_number id_number passport_number
-        if($path === "order_passenger"){
-            $value['id_number'] = strtoupper($value['id_number']);
+        if(array_key_exists("id_number",$value)){
+                $value['id_number'] = strtoupper($value['id_number']);
         }
-        else if($path === "passenger_profile"){
-            $value['mtp_number'] = strtoupper($value['mtp_number']);
-            $value['visa_number'] = strtoupper($value['visa_number']);
-            $value['id_number'] = strtoupper($value['id_number']);
+        if(array_key_exists("mtp_number",$value)){
+                $value['mtp_number'] = strtoupper($value['mtp_number']);
+        }
+        if(array_key_exists("visa_number",$value)){
+                $value['visa_number'] = strtoupper($value['visa_number']);
+        }
+        if(array_key_exists("passport_number",$value)){
+                $value['passport_number'] = strtoupper($value['passport_number']);
         }
 
         // foreach($value as $key => $val) {
