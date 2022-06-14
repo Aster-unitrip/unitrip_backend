@@ -114,6 +114,8 @@ class CrmController extends Controller
                 );
             unset($filter['name']);
         }
+        // 搜尋順序
+        $filter['searchSort'] = array('created_at' => -1);
 
 
         // 查詢
