@@ -46,9 +46,9 @@ class ComponentCategoryController extends Controller
             if($component['is_display'] === true){
                 return response()->json(['error' => 'This component is public, you can not copy it.'], 400);
             }
-            if($component['owned_by'] !== auth()->user()->company_id){
-                return response()->json(['error' => 'This component is not yours, you can not copy it.'], 400);
-            }
+            // if($component['owned_by'] !== auth()->user()->company_id){
+            //     return response()->json(['error' => 'This component is not yours, you can not copy it.'], 400);
+            // }
         }else{
             return response()->json(['error' => 'You must input type and _id'], 400);
         }
@@ -67,9 +67,11 @@ class ComponentCategoryController extends Controller
 
         if($resultSearchLog === true){// 確認該元件是否屬於該公司
             $component = $this -> ensure_private2public_key($query['type'], $component);
+            return $component;
 
             $private2public = $this->requestService->insert_one($query['type'], $component);
             $private2public = json_decode($private2public->content(), true);
+            return $private2public;
             Log::info("Copied component to public", ['id' => $private2public['inserted_id'], 'user' => auth()->user()->email]);
 
             // 紀錄該元件是否已複製至母槽過

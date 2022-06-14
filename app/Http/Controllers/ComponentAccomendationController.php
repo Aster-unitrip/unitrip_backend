@@ -84,7 +84,7 @@ class ComponentAccomendationController extends Controller
         // 建立 Log
         $accomendation = $this->requestService->get_one('accomendations', $accomendation['inserted_id']);
         $accomendation =  json_decode($accomendation->content(), true);
-        $filter = $this->componentLogService->recordCreate('accomendations', $accomendation);
+        $filter = $this->c->recordCreate('accomendations', $accomendation);
         $create_components_log = $this->requestService->insert_one("components_log", $filter);
         return $accomendation;
 
