@@ -136,6 +136,12 @@ class ComponentAccomendationController extends Controller
             "intro_summary" => 1,
             "description" => 1,
         );
+        // 住宿名稱模糊搜尋
+        if(array_key_exists('name', $filter)){
+            // $filter['name'] = array('$regex' => $filter['name'], '$options' => 'i');
+            $filter['name'] = array('$regex' => $filter['name']);
+        }
+
         $result = $this->requestService->aggregate_facet('accomendations', $projection, $filter, $page);
         // 相容舊格式
         $current_data = $result->getData();
