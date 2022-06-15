@@ -280,7 +280,18 @@ class ComponentActivityController extends Controller
             "is_display" => 1,
             "activity_company_name" => 1,
         );
+        // 體驗名稱、體驗供應商模糊搜尋
+        if(array_key_exists('activity_company_name', $filter)){
+            $filter['activity_company_name'] = array('$regex' => $filter['activity_company_name']);
+        }
+        if(array_key_exists('name', $filter)){
+            // $filter['name'] = array('$regex' => $filter['name'], '$options' => 'i');
+            $filter['name'] = array('$regex' => $filter['name']);
+
+        }
         $result = $this->requestService->aggregate_facet('activities', $projection, $filter, $page);
+        return $result;
+
         // 相容舊格式
         $current_data = $result->getData();
         foreach($current_data->docs as $doc){
