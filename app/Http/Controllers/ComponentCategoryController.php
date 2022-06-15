@@ -159,8 +159,13 @@ class ComponentCategoryController extends Controller
         }
         // 餐廳 : cost_per_person, meals, driver_tour_memo
         if($type === 'restaurants'){
-            $component['cost_per_person'] = array();
-            $component['meals'] = array();
+            $component['cost_per_person'] = array(
+                'min_cost_per_person' => null,
+                'max_cost_per_person' => null
+            );
+            $component['meals'] = array(
+
+            );
             $component['driver_tour_memo'] = "";
         }
         // 住宿 : foc,  room
