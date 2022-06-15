@@ -67,6 +67,11 @@ class ComponentGuideController extends Controller
             $languages = $filter['languages'];
             $filter['languages'] = array('$in' => $languages);
         }
+        // 導遊名稱模糊搜尋
+        if(array_key_exists('name', $filter)){
+            // $filter['name'] = array('$regex' => $filter['name'], '$options' => 'i');
+            $filter['name'] = array('$regex' => $filter['name']);
+        }
 
         // Handle projection content
         $projection = array(
@@ -81,6 +86,7 @@ class ComponentGuideController extends Controller
             "private" => 1,
             "created_at" => 1
         );
+
         $result = $this->requestService->aggregate_facet('guides', $projection, $filter, $page);
         // 相容舊格式
         $current_data = $result->getData();
