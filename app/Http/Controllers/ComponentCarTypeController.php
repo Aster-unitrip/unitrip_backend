@@ -24,30 +24,9 @@ class ComponentCarTypeController extends Controller
     public function list(Request $request)
     {
         Log::info('User list transportation', ['user' => auth()->user()->email, 'request' => $request->all()]);
-        // Handle filter content
-        $filter = json_decode($request->getContent(), true);
-        if (array_key_exists('page', $filter)) {
-            $page = $filter['page'];
-            unset($filter['page']);
-            if ($page <= 0) {
-                return response()->json(['error' => 'page must be greater than 0'], 400);
-            }
-            else{
-                $page = $page - 1;
-            }
-        }
-        else{
-            $page = 0;
-        }
-        if(array_key_exists("base", $filter)){
-            $filter['address_city'] = $filter['base'];
-            unset($filter['base']);
-        }
 
-        // unset($filter['fee']);
         // Company_type: 1, Query public components belong to the company
         // Company_type: 2, Query all public components and private data belong to the company
-        $company_id = auth()->payload()->get('company_id');
         if (auth()->payload()->get('company_type') == 1){
             $filter = array(
                 'is_display' => true,
@@ -63,11 +42,17 @@ class ComponentCarTypeController extends Controller
             $query_private = true;
         }
         else if (auth()->payload()->get('company_type') == 3) {
-
         }
         else{
             Log::warning('Suspicious activity: ' . auth()->user()->email . ' tried to access transportation list', ['request' => $request->all(), 'user_id' => auth()->user()->id]);
             return response()->json(['error' => 'Wrong identity.'], 400);
+        }
+
+        // Handle filter content
+        $filter = json_decode($request->getContent(), true);
+        if(array_key_exists("base", $filter)){
+            $filter['address_city'] = $filter['base'];
+            unset($filter['base']);
         }
 
         // Handle projection content
@@ -140,7 +125,7 @@ class ComponentCarTypeController extends Controller
                 $filter['$or'] = array(
                     array('is_display' => true),
                     array('owned_by' => auth()->user()->company_id)
-//                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+                    // array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
                 );
             }
             else{
