@@ -47,7 +47,7 @@ class ComponentCategoryController extends Controller
                 return response()->json(['error' => 'This component is public, you can not copy it.'], 400);
             }
             if($component['owned_by'] !== auth()->user()->company_id){
-                return response()->json(['error' => 'This component is not yours, you can not copy it.'], 400);
+                // return response()->json(['error' => 'This component is not yours, you can not copy it.'], 400);
             }
         }else{
             return response()->json(['error' => 'You must input type and _id'], 400);
@@ -58,10 +58,13 @@ class ComponentCategoryController extends Controller
         $filter = $this->componentLogService->checkPrivateToPublic($component);
         $searchResultPrivateToPublic = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
         $searchResultPrivateToPublic = json_decode($searchResultPrivateToPublic->content(), true);
+        // return $searchResultPrivateToPublic;
         // (母到子)到母
         $filter = $this->componentLogService->checkPublicToPrivate($component);
+        return $filter;
         $searchResultPublicToPrivate = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
         $searchResultPublicToPrivate = json_decode($searchResultPublicToPrivate->content(), true);
+        return $searchResultPublicToPrivate;
 
         $resultSearchLog = $this->componentLogService->checkLogFilter($searchResultPrivateToPublic, $searchResultPublicToPrivate);
 

@@ -86,6 +86,7 @@ class ComponentRestaurantController extends Controller
         $validated['owned_by'] = $company_id;
         $validated['source'] = "ta"; //旅行社預設為ta
 
+        // return $validated;
         $restaurant = $this->requestService->insert_one('restaurants', $validated);
         $restaurant =  json_decode($restaurant->content(), true);
 
