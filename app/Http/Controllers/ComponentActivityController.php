@@ -290,7 +290,6 @@ class ComponentActivityController extends Controller
 
         }
         $result = $this->requestService->aggregate_facet('activities', $projection, $filter, $page);
-        return $result;
 
         // 相容舊格式
         $current_data = $result->getData();
