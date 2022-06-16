@@ -26,6 +26,20 @@ class ComponentLogService
         return $filter;
     }
 
+    public function isCreate($type, $data)
+    {
+        if($type === 'public'){
+            $filter['action'] = 'create_public';
+        }
+        else if($type === 'private'){
+            $filter['action'] = 'create_private';
+        }
+        $filter["target_company"] = auth()->user()->company_id;
+        $filter["target_id"]= $data['_id'];
+
+        return $filter;
+    }
+
     public function recordPrivateToPublic($input, $insert_id, $data)
     {
         $add_log_private2public['type'] = $input['type'];
@@ -84,17 +98,15 @@ class ComponentLogService
 
     }
 
-    public function checkLogFilter($searchResultPrivateToPublic, $searchResultPublicToPrivate){
+    public function checkLogFilter($searchResultPrivateToPublic, $searchResultPublicToPrivate, $searchResultIsCreate){
         if(array_key_exists('count', $searchResultPrivateToPublic) && $searchResultPrivateToPublic['count'] === 0){
             if(array_key_exists('count', $searchResultPublicToPrivate) && $searchResultPublicToPrivate['count'] === 0){
-                return true;
-            }
-            else{
-                return response()->json(['error' => 'You can not access this component.']);
+                if(array_key_exists('count', $searchResultIsCreate) && $searchResultIsCreate['count'] === 0){
+                    return true;
+                }
             }
         }
-        else{
-            return response()->json(['error' => 'You can not access this component.']);
-        }
+        // TODO 評估是否有log
+        return response()->json(['error' => 'You can not access this component.']);
     }
 }

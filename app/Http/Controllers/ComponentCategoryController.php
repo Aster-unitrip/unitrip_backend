@@ -47,23 +47,29 @@ class ComponentCategoryController extends Controller
                 return response()->json(['error' => 'This component is public, you can not copy it.'], 400);
             }
             if($component['owned_by'] !== auth()->user()->company_id){
-                return response()->json(['error' => 'This component is not yours, you can not copy it.'], 400);
+                // return response()->json(['error' => 'This component is not yours, you can not copy it.'], 400);
             }
         }else{
             return response()->json(['error' => 'You must input type and _id'], 400);
         }
-
         // 查詢
         // 母到(子到母)
-        $filter = $this->componentLogService->checkPrivateToPublic($component);
-        $searchResultPrivateToPublic = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
+        $filter_pri2pub = $this->componentLogService->checkPrivateToPublic($component);
+        $searchResultPrivateToPublic = $this->requestService->aggregate_search("components_log", null, $filter_pri2pub, $page=0);
         $searchResultPrivateToPublic = json_decode($searchResultPrivateToPublic->content(), true);
+
         // (母到子)到母
-        $filter = $this->componentLogService->checkPublicToPrivate($component);
-        $searchResultPublicToPrivate = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
+        $filter_pub2pri['action'] = "public2private";
+        $filter_pub2pri['target_company'] = auth()->user()->company_id;
+        $filter_pub2pri['target_id'] = $component['_id'];
+        $searchResultPublicToPrivate = $this->requestService->aggregate_search("components_log", null, $filter_pub2pri, $page=0);
         $searchResultPublicToPrivate = json_decode($searchResultPublicToPrivate->content(), true);
 
-        $resultSearchLog = $this->componentLogService->checkLogFilter($searchResultPrivateToPublic, $searchResultPublicToPrivate);
+        $filter_is_create = $this->componentLogService->isCreate("public", $component);
+        $searchResultIsCreate = $this->requestService->aggregate_search("components_log", null, $filter_is_create, $page=0);
+        $searchResultIsCreate = json_decode($searchResultIsCreate->content(), true);
+
+        $resultSearchLog = $this->componentLogService->checkLogFilter($searchResultPrivateToPublic, $searchResultPublicToPrivate, $searchResultIsCreate);
 
         if($resultSearchLog === true){// 確認該元件是否屬於該公司
             $component = $this -> ensure_private2public_key($query['type'], $component);
@@ -99,27 +105,34 @@ class ComponentCategoryController extends Controller
             }
             // 元件分享只可以為母到子
             if($component['is_display'] === false){
-                return response()->json(['error' => 'This component is private, you can not copy it.'], 400);
+                // return response()->json(['error' => 'This component is private, you can not copy it.'], 400);
             }
         }else{
             return response()->json(['error' => 'You must input type and _id'], 400);
         }
 
         // 查詢
-
         // 子到(母到子)
-        $filter = $this->componentLogService->checkPublicToPrivate($component);
-        $searchResultPublicToPrivate = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
+        $filter_pub2pri = $this->componentLogService->checkPublicToPrivate($component);
+        // return $filter_pub2pri;
+        $searchResultPublicToPrivate = $this->requestService->aggregate_search("components_log", null, $filter_pub2pri, $page=0);
         $searchResultPublicToPrivate = json_decode($searchResultPublicToPrivate->content(), true);
 
-        // (子到母)到母
-        $filter = $this->componentLogService->checkPrivateToPublic($component);
-        $searchResultPrivateToPublic = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
+        // (子到母)到母 且 是否新增過子
+        $filter_pri2pub['action'] = "private2public";
+        $filter_pri2pub['source_company'] = auth()->user()->company_id;
+        $filter_pri2pub['target_company'] = auth()->user()->company_id;
+        $filter_pri2pub['target_id'] = $component['_id'];
+        // $filter_pri2pub = $this->componentLogService->checkPrivateToPublic($component);
+        $searchResultPrivateToPublic = $this->requestService->aggregate_search("components_log", null, $filter_pri2pub, $page=0);
         $searchResultPrivateToPublic = json_decode($searchResultPrivateToPublic->content(), true);
 
+        $filter = $this->componentLogService->isCreate("private", $component);
+        $searchResultIsCreate = $this->requestService->aggregate_search("components_log", null, $filter, $page=0);
+        $searchResultIsCreate = json_decode($searchResultIsCreate->content(), true);
 
-
-        $resultSearchLog = $this->componentLogService->checkLogFilter($searchResultPublicToPrivate, $searchResultPrivateToPublic);
+        $resultSearchLog = $this->componentLogService->checkLogFilter($searchResultPublicToPrivate, $searchResultPrivateToPublic, $searchResultIsCreate);
+        // return $resultSearchLog;
 
         if($resultSearchLog === true){// 確認該元件是否屬於該公司
             $query['source_company'] = $component['owned_by'];
