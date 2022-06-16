@@ -131,7 +131,7 @@ class PassengerController extends Controller
         $filter['name'] = $this->ensure_name_key($data['name']);
         // 判斷台灣旅客或其他旅客
         // 台灣旅客以國籍判斷 其他旅客以生日判斷
-        if($data['nationality'] === "TW"){
+        if($data['nationality'] === "TW" && array_key_exists("id_number", $data)){
             $filter['id_number'] = $data['id_number'];
         }
         else{
