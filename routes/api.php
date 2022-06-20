@@ -81,6 +81,7 @@ Route::group(['middleware'=>'api', 'prefix'=>'misc'], function($router){
     Route::get('/city_town', [MiscController::class, 'cityTown']);
     Route::get('/bank_code', [MiscController::class, 'bankCode']);
     Route::get('/historic_level', [MiscController::class, 'historicLevel']);
+    Route::get('/travel_agency_type', [MiscController::class, 'travelAgencyType']);
     Route::get('/organizations', [MiscController::class, 'organization']);
     Route::get('/nationality', [MiscController::class, 'nationality']); //國籍
     Route::get('/order_source', [MiscController::class, 'order_source']); //訂單來源

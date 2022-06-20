@@ -15,6 +15,7 @@ class Company extends Model
 
     protected $fillable = [
         'title',
+        'travel_agency_name',
         'tax_id',
         'tel',
         'fax',

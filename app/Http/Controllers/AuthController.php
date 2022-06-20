@@ -33,34 +33,43 @@ class AuthController extends Controller
             'contact_name' => 'required|string|between:2,100',
             'email' => 'required|string|email|max:100',
             'password' => 'required|string|confirmed|min:6',
-            'contact_tel' => 'required|string|min:8,12',
+            'contact_tel' => 'nullable|string|min:8,12',
+            'contact_tel_extension' => 'nullable|string',
             'contact_address_city' => 'string|max:5',
             'contact_address_town' => 'string|max:5',
             'contact_address' => 'string|max:30',
-            'role_id' => 'required|string|min:1',
+            'role_id' => 'nullable|string|min:1',
             'title' => 'required|string|max:20',
-            'tax_id' => 'required|string|max:12',
+            'tax_id' => 'required|string|max:8',
             'fax' => 'string|max:15',
             'tel' => 'required|string|max:15',
             'address_city' => 'required|string|max:5',
             'address_town' => 'required|string|max:5',
             'address' => 'required|string|max:30',
-            'logo_path' => 'required|string|max:100',
+            'logo_path' => 'nullable|string|max:100',
             'website' => 'nullable|string|max:150',
             'owner' => 'required|string|max:10',
             'intro' => 'nullable|string|max:255',
-            'bank_name' => 'required|string|max:20',
-            'bank_code' => 'required|string|max:5',
-            'account_name' => 'required|string|max:10',
-            'account_number' => 'required|string|max:20',
-            'ta_register_num' => 'nullable|string|max:6',
-            'ta_category' => 'nullable|string|max:20',
+            'bank_name' => 'nullable|string|max:20',
+            'bank_code' => 'nullable|string|max:5',
+            'account_name' => 'nullable|string|max:10',
+            'account_number' => 'nullable|string|max:20',
+            // 'ta_register_num' => 'nullable|string|max:6',
+            // 'ta_category' => 'nullable|string|max:20',
         ];
 
-        $this->agencyRegisterRule = array_push($this->supplierRegisterRule, array(
+        // $this->agencyRegisterRule = array_push($this->supplierRegisterRule, array(
+        //     'ta_register_num' => 'required|string|max:6',
+        //     'ta_category' => 'required|string|max:10',
+        //     'tqaa_num' => 'required|string|max:5', //品保
+        //     'travel_agency_name' => 'required|string|max:50' //旅行社名稱
+        // ));
+        $this->agencyRegisterRule = $this->supplierRegisterRule + array(
             'ta_register_num' => 'required|string|max:6',
-            'ta_category' => 'required|string|max:20',
-        ));
+            'ta_category' => 'required|string|max:10',
+            'tqaa_num' => 'required|string|max:5', //品保
+            'travel_agency_name' => 'required|string|max:50' //旅行社名稱
+        );
 
         $this->updateRule = [
             'id' => 'required|integer',
@@ -123,7 +132,6 @@ class AuthController extends Controller
      */
     public function register(Request $request) {
         $company_type = $request->all()['company_type'];
-
         if ($company_type == 2)
         {
             $rule = $this->agencyRegisterRule;
@@ -138,10 +146,11 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 400);
         }
         $input_user['contact_name'] = $validator->validated()['contact_name'];
-        $input_user['role_id'] = $validator->validated()['role_id'];
+        $input_user['role_id'] = $validator->validated()['role_id']??"1";
         $input_user['email'] = $validator->validated()['email'];
         $input_user['password'] = $validator->validated()['password'];
         $input_user['contact_tel'] = $validator->validated()['contact_tel'];
+        $input_user['contact_tel_extension'] = $validator->validated()['contact_tel_extension'];
         $input_user['address_city'] = $validator->validated()['address_city'];
         $input_user['address_town'] = $validator->validated()['address_town'];
         $input_user['address'] = $validator->validated()['address'];

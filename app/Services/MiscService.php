@@ -7,6 +7,7 @@ class MiscService
     protected $cityTownFile;
     protected $bankCodeFile;
     protected $historicLevelFile;
+    protected $travelAgencyTypeFile;
     protected $nationalityFile;
     protected $orderSourceFile;
 
@@ -15,6 +16,7 @@ class MiscService
         $this->cityTownFile = storage_path('misc/cityTown.json');
         $this->bankCodeFile = storage_path('misc/bankCode.json');
         $this->historicLevelFile = storage_path('misc/historicLevel.json');
+        $this->travelAgencyTypeFile = storage_path('misc/travelAgencyType.json');
         $this->organizations = storage_path('misc/organizations.json');
         $this->nationalityFile = storage_path('misc/nationality.json');
         $this->orderSourceFile = storage_path('misc/orderSource.json');
@@ -35,6 +37,12 @@ class MiscService
     public function getHistoricLevel()
     {
         $jsonString = file_get_contents($this->historicLevelFile);
+        return json_decode($jsonString, true);
+    }
+
+    public function getTravelAgencyType()
+    {
+        $jsonString = file_get_contents($this->travelAgencyTypeFile);
         return json_decode($jsonString, true);
     }
 
