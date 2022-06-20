@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Auth\Events\Registered;
 
 use Validator;
 
@@ -173,6 +174,10 @@ class AuthController extends Controller
                 $input_user,
                 ['password' => bcrypt($request->password)]
             ));
+            // Send verify email
+            // https://stackoverflow.com/questions/65285530/laravel-8-rest-api-email-verification
+            event(new Registered($user));
+            Auth::login($user);
 
         }
         catch(\Exception $e){

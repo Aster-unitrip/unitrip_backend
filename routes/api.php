@@ -36,6 +36,17 @@ use App\Http\Controllers\EmailController;
 |
 */
 
+// Verify email
+// Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verifyEmail'])
+// ->middleware(['auth', 'signed'])
+// ->name('verification.verify');
+
+// // Resend link to verify email
+// Route::post('/email/verify/resend', function (Request $request) {
+//     $request->user()->sendEmailVerificationNotification();
+//     return back()->with('message', 'Verification link sent!');
+// })->middleware(['auth', 'signed'])->name('verification.send');
+
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
