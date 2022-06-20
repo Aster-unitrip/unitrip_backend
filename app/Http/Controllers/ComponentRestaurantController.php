@@ -20,16 +20,7 @@ class ComponentRestaurantController extends Controller
         $this->middleware('auth');
         $this->requestService = $requestService;
         $this->componentLogService = $componentLogService;
-
-    }
-
-    // 旅行社使用者可以新增自己的子槽元件
-    // 旅行社使用者可以選擇在同公司成員的搜尋結果裡顯示／隱藏子槽元件(is_enabled)
-    // 旅行社使用者可以選擇是否將元件新增至母槽(is_display)
-    public function add(Request $request)
-    {
-
-        $rule = [
+        $this->add_rule = [
             'name' => 'required|string|max:30',
             'experience' => 'nullable|string|max:500',
             'website' => 'nullable|string|max:100',
@@ -39,17 +30,17 @@ class ComponentRestaurantController extends Controller
             'address_city' => 'required|string|max:4',
             'address_town' => 'required|string|max:10',
             'address' => 'required|string|max:30',
-            'business_time' => 'nullable',//
+            'business_time' => 'nullable',
             'categories' => 'array',
             'cost_per_person' => 'nullable',
             'cost_per_person.min_cost_per_person' => 'nullable|integer|min:0',
             'cost_per_person.max_cost_per_person' => 'nullable|integer',
             'has_vegetarian_meal' => 'nullable|boolean',
             'latest_reserve_day' => 'nullable|integer',
-            'imgs' => 'nullable',
+            'imgs' => 'required|array',
             'intro_summary' => 'nullable|string',
             'description' => 'nullable|string',
-            'stay_time' => 'nullable|integer',//
+            'stay_time' => 'nullable|integer',
             'lng' => 'nullable|numeric',
             'lat' => 'nullable|numeric',
             // 餐型
@@ -74,9 +65,17 @@ class ComponentRestaurantController extends Controller
             'bank_info.account_name' => 'nullable|string|max:20',
             'bank_info.account_number' => 'nullable|string|max:20',
         ];
+        $this->edit_rule = $this->generate_edit_rule_from_add_rule($this->add_rule);
+    }
+
+    // 旅行社使用者可以新增自己的子槽元件
+    // 旅行社使用者可以選擇在同公司成員的搜尋結果裡顯示／隱藏子槽元件(is_enabled)
+    // 旅行社使用者可以選擇是否將元件新增至母槽(is_display)
+    public function add(Request $request)
+    {
 
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $rule);
+        $validator = Validator::make($data, $this->add_rule);
         if($validator->fails()){
             return response()->json(['error' => $validator->errors()], 400);
         }
@@ -88,6 +87,7 @@ class ComponentRestaurantController extends Controller
 
         $restaurant = $this->requestService->insert_one('restaurants', $validated);
         $restaurant =  json_decode($restaurant->content(), true);
+        return $restaurant;
 
 
         // 建立 Log
@@ -206,55 +206,9 @@ class ComponentRestaurantController extends Controller
     // 若需母子槽異動，要使用 move_from_private_to_public 或 move_from_public_to_private
     public function edit(Request $request)
     {
-        $rule = [
-            '_id' => 'required|string',
-            'experience' => 'nullable|string|max:500',
-            'name' => 'required|string|max:30',
-            'website' => 'nullable|string|max:100',
-            'tel' => 'required|string|max:20',
-            'fax' => 'nullable|string|max:10',
-            'email' => 'nullable|string|max:30',
-            'address_city' => 'required|string|max:4',
-            'address_town' => 'required|string|max:10',
-            'address' => 'required|string|max:30',
-            'business_time' => 'nullable',//
-            'categories' => 'nullable|array',
-            'cost_per_person' => 'nullable',
-            'cost_per_person.min_cost_per_person' => 'nullable|integer|min:0',
-            'cost_per_person.max_cost_per_person' => 'nullable|integer',
-            'has_vegetarian_meal' => 'nullable|boolean',
-            'latest_reserve_day' => 'nullable|integer',
-            'imgs' => 'nullable',
-            'intro_summary' => 'nullable|string',
-            'description' => 'nullable|string',
-            'stay_time' => 'nullable|integer',//
-            'lng' => 'nullable|numeric',
-            'lat' => 'nullable|numeric',
-            // 餐型
-            'meals' => 'nullable',
-            'meals.name' => 'nullable|string|max:30',
-            'meals.imgs' => 'nullable|array',//
-            'meals.type' => 'nullable|string|max:10',
-            'meals.supply_people' => 'nullable|integer',
-            'meals.status' => 'nullable|string|max:10',
-            'meals.content' => 'nullable|string|max:100',
-            'meals.memo' => 'nullable|string|max:50',
-            'meals.price' => 'nullable|integer|min:0',
-            'refund_rule' => 'nullable|string|max:300',
-            'memo' => 'nullable|string|max:300',
-            'driver_tour_memo' => 'nullable|string|max:50',
-            'is_display' => 'required|boolean',
-            'is_enabled' => 'required|boolean',
-            'bank_info' => 'array',
-            'bank_info.sort' => 'nullable|string|max:20',
-            'bank_info.bank_name' => 'nullable|string|max:20',
-            'bank_info.bank_code' => 'nullable|string|max:20',
-            'bank_info.account_name' => 'nullable|string|max:20',
-            'bank_info.account_number' => 'nullable|string|max:20',
-        ];
 
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $rule);
+        $validator = Validator::make($data, $this->edit_rule);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
@@ -265,6 +219,10 @@ class ComponentRestaurantController extends Controller
 
         $record = $this->requestService->get_one('restaurants', $validated['_id']);
         $content = json_decode($record->content(), true);
+
+        if(array_key_exists('count', $content) && $content['count'] === 0){
+            return response()->json(['error' => 'This _id is not correct.']);
+        }
 
         if(auth()->payload()->get('company_type') == 1){  // 供應商
             if($content['is_display'] == true && $content['owned_by'] == $company_id){ // 母槽
@@ -444,4 +402,13 @@ class ComponentRestaurantController extends Controller
         return $new_filter;
     }
 
+    protected function generate_edit_rule_from_add_rule($rule)
+    {
+        $add_rule = [
+            "_id" => 'required|string'
+        ];
+        $rule += $add_rule;
+        // unset($rule['is_display']);
+        return $rule;
+    }
 }

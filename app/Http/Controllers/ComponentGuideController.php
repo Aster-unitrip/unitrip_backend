@@ -84,7 +84,8 @@ class ComponentGuideController extends Controller
             "fee" => 1,
             "cell_phone" => 1,
             "private" => 1,
-            "created_at" => 1
+            "created_at" => 1,
+            "is_display" =>1
         );
 
         $result = $this->requestService->aggregate_facet('guides', $projection, $filter, $page);

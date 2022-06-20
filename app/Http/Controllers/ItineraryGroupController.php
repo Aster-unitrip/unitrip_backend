@@ -1140,8 +1140,8 @@ class ItineraryGroupController extends Controller
                     }
                 }
                 else if($validated['booking_status'] === '已退訂'){
-                    if($validated['payment_status'] !== '已棄單，已退款' && $validated['payment_status'] !== '已棄單，免退款'){
-                        return response()->json(['error' => '預定狀態[已退訂]，付款狀態不可為[未付款]、[已付訂金]、[已付全額]、[已棄單，待退款]。'] , 400);
+                    if($validated['payment_status'] !== '已棄單，已退款' && $validated['payment_status'] !== '已棄單，免退款' && $validated['payment_status'] !== '已棄單，待退款'){
+                        return response()->json(['error' => '預定狀態[已退訂]，付款狀態不可為[未付款]、[已付訂金]、[已付全額]。'] , 400);
                     }
                 }
             }

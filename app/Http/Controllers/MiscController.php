@@ -40,6 +40,11 @@ class MiscController extends Controller
         return $this->miscService->getHistoricLevel();
     }
 
+    public function travelAgencyType()
+    {
+        return $this->miscService->getTravelAgencyType();
+    }
+
     public function organization()
     {
         return $this->miscService->getOrganization();
@@ -133,5 +138,5 @@ class MiscController extends Controller
         }
     }
 
-    
+
 }

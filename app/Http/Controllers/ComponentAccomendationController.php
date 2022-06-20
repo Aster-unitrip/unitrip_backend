@@ -34,7 +34,7 @@ class ComponentAccomendationController extends Controller
             'lng' => 'nullable|numeric',
             'lat' => 'nullable|numeric',
             'map_url' => 'nullable|string',
-            'imgs' => 'nullable',
+            'imgs' => 'required|array',
             'intro_summary' => 'nullable|string|max:150',
             'refund_rule' => 'nullable|string|max:300',
             'memo' => 'nullable|string|max:4096',
@@ -84,7 +84,7 @@ class ComponentAccomendationController extends Controller
         // 建立 Log
         $accomendation = $this->requestService->get_one('accomendations', $accomendation['inserted_id']);
         $accomendation =  json_decode($accomendation->content(), true);
-        $filter = $this->c->recordCreate('accomendations', $accomendation);
+        $filter = $this->componentLogService->recordCreate('accomendations', $accomendation);
         $create_components_log = $this->requestService->insert_one("components_log", $filter);
         return $accomendation;
 
@@ -203,10 +203,15 @@ class ComponentAccomendationController extends Controller
         }
         $validated = $validator->validated();
         $company_id = auth()->user()->company_id;
+
         // Override owned_by
         $validated['owned_by'] = $company_id;
         $record = $this->requestService->get_one('accomendations', $validated['_id']);
         $content =  json_decode($record->content(), true);
+        if(array_key_exists("count", $content) && $content['count'] === 0){
+            return response()->json(['error' => 'Component id must to correct.']);
+        }
+
         // Supplier
         if (auth()->payload()->get('company_type') == 1) {
             if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
@@ -215,7 +220,7 @@ class ComponentAccomendationController extends Controller
                 return response()->json(['error' => 'You can not access this accomendation'], 400);
             }
         // Travel agency
-        } else if (auth()->payload()->get('company_type') == 2) {
+        }else if (auth()->payload()->get('company_type') == 2) {
             if ($content['is_display'] == false && $content['owned_by'] == $company_id) {
                 $accomendation = $this->requestService->update_one('accomendations', $validated);
             } else if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
@@ -224,7 +229,7 @@ class ComponentAccomendationController extends Controller
                 return response()->json(['error' => 'You can not access this accomendation'], 400);
             }
         // System admin
-        } else if (auth()->payload()->get('company_type') == 3) {
+        }else if (auth()->payload()->get('company_type') == 3) {
             $accomendation = $this->requestService->update_one('accomendations', $validated);
         } else {
             return response()->json(['error' => 'Wrong identity.'], 400);
@@ -314,7 +319,7 @@ class ComponentAccomendationController extends Controller
                 $filter['$or'] = array(
                     array('is_display' => true),
                     array('owned_by' => auth()->user()->company_id)
-//                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+                    //array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
                 );
             }
             else{
@@ -350,7 +355,7 @@ class ComponentAccomendationController extends Controller
             "_id" => 'required|string'
         ];
         $rule += $add_rule;
-        unset($rule['is_display']);
+        // unset($rule['is_display']);
         return $rule;
     }
 }
