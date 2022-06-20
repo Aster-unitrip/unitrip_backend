@@ -22,15 +22,7 @@ class ComponentAttractionController extends Controller
         $this->attractionService = $attractionService;
         $this->requestService = $requestPService;
         $this->componentLogService = $componentLogService;
-
-    }
-
-    // 旅行社使用者可以新增自己的子槽元件
-    // 旅行社使用者可以選擇在同公司成員的搜尋結果裡顯示／隱藏子槽元件(is_enabled)
-    // 旅行社使用者可以選擇是否將元件新增至母槽(is_display)
-    public function add(Request $request)
-    {
-        $rule = [
+        $this->add_rule = [
             'name' => 'required|string|max:30',
             'website' => 'nullable|string|max:100',
             'tel' => 'required|string|max:20',
@@ -63,8 +55,18 @@ class ComponentAttractionController extends Controller
             'bank_info.account_name' => 'nullable|string|max:20',
             'bank_info.account_number' => 'nullable|string|max:20',
         ];
+        $this->edit_rule = $this->generate_edit_rule_from_add_rule($this->add_rule);
+
+    }
+
+    // 旅行社使用者可以新增自己的子槽元件
+    // 旅行社使用者可以選擇在同公司成員的搜尋結果裡顯示／隱藏子槽元件(is_enabled)
+    // 旅行社使用者可以選擇是否將元件新增至母槽(is_display)
+    public function add(Request $request)
+    {
+
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $rule);
+        $validator = Validator::make($data, $this->add_rule);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
@@ -188,42 +190,9 @@ class ComponentAttractionController extends Controller
     // 若需母子槽異動，要使用 move_from_private_to_public 或 move_from_public_to_private
     public function edit(Request $request)
     {
-        $rule = [
-            '_id' => 'required|string|max:24',
-            'name' => 'required|string|max:30',
-            'website' => 'nullable|string|max:100',
-            'tel' => 'required|string|max:20',
-            'fax' => 'nullable|string|max:12',
-            'historic_level' => 'nullable|string|max:6',
-            'org_name' => 'string|max:20',
-            'categories' => 'array',
-            'address_city' => 'required|string|max:4',
-            'address_town' => 'required|string|max:10',
-            'address' => 'required|string|max:30',
-            'lng' => 'nullable|numeric',
-            'lat' => 'nullable|numeric',
-            'business_time' => 'nullable',
-            'stay_time' => 'nullable|integer',
-            'intro_summary' => 'nullable|string|max:150',
-            'description' => 'nullable|string|max:300',
-            'ticket' => 'nullable',
-            'memo' => 'nullable|string|max:4096',
-            'parking' => 'nullable|string|max:500',
-            'attention' => 'nullable|string|max:500',
-            'experience' => 'nullable|st ring|max:500',
-            'is_display' => 'required|boolean', //新增
-            'is_enabled' => 'required|boolean',
-            'imgs' => 'nullable',
-            'source' => ['required', Rule::in(['unitrip', 'supplier', 'gov', 'kkday', 'ota', 'ta'])],
-            'bank_info' => 'array',
-            'bank_info.sort' => 'nullable|string|max:20',
-            'bank_info.bank_name' => 'nullable|string|max:20',
-            'bank_info.bank_code' => 'nullable|string|max:20',
-            'bank_info.account_name' => 'nullable|string|max:20',
-            'bank_info.account_number' => 'nullable|string|max:20',
-        ];
+
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $rule);
+        $validator = Validator::make($data, $this->edit_rule);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
@@ -390,5 +359,15 @@ class ComponentAttractionController extends Controller
             }
         }
         return $new_filter;
+    }
+
+    protected function generate_edit_rule_from_add_rule($rule)
+    {
+        $add_rule = [
+            "_id" => 'required|string'
+        ];
+        $rule += $add_rule;
+        unset($rule['is_display']);
+        return $rule;
     }
 }

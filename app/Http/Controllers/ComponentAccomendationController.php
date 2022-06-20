@@ -34,7 +34,7 @@ class ComponentAccomendationController extends Controller
             'lng' => 'nullable|numeric',
             'lat' => 'nullable|numeric',
             'map_url' => 'nullable|string',
-            'imgs' => 'nullable',
+            'imgs' => 'required|array',
             'intro_summary' => 'nullable|string|max:150',
             'refund_rule' => 'nullable|string|max:300',
             'memo' => 'nullable|string|max:4096',
@@ -314,7 +314,7 @@ class ComponentAccomendationController extends Controller
                 $filter['$or'] = array(
                     array('is_display' => true),
                     array('owned_by' => auth()->user()->company_id)
-//                    array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
+                    //array('is_enabled' => true, 'owned_by' => auth()->user()->company_id)
                 );
             }
             else{
