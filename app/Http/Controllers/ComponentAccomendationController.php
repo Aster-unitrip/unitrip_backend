@@ -203,10 +203,15 @@ class ComponentAccomendationController extends Controller
         }
         $validated = $validator->validated();
         $company_id = auth()->user()->company_id;
+
         // Override owned_by
         $validated['owned_by'] = $company_id;
         $record = $this->requestService->get_one('accomendations', $validated['_id']);
         $content =  json_decode($record->content(), true);
+        if(array_key_exists("count", $content) && $content['count'] === 0){
+            return response()->json(['error' => 'Component id must to correct.']);
+        }
+
         // Supplier
         if (auth()->payload()->get('company_type') == 1) {
             if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
@@ -215,7 +220,7 @@ class ComponentAccomendationController extends Controller
                 return response()->json(['error' => 'You can not access this accomendation'], 400);
             }
         // Travel agency
-        } else if (auth()->payload()->get('company_type') == 2) {
+        }else if (auth()->payload()->get('company_type') == 2) {
             if ($content['is_display'] == false && $content['owned_by'] == $company_id) {
                 $accomendation = $this->requestService->update_one('accomendations', $validated);
             } else if ($content['is_display'] == true && $content['owned_by'] == $company_id) {
@@ -224,7 +229,7 @@ class ComponentAccomendationController extends Controller
                 return response()->json(['error' => 'You can not access this accomendation'], 400);
             }
         // System admin
-        } else if (auth()->payload()->get('company_type') == 3) {
+        }else if (auth()->payload()->get('company_type') == 3) {
             $accomendation = $this->requestService->update_one('accomendations', $validated);
         } else {
             return response()->json(['error' => 'Wrong identity.'], 400);
@@ -350,7 +355,7 @@ class ComponentAccomendationController extends Controller
             "_id" => 'required|string'
         ];
         $rule += $add_rule;
-        unset($rule['is_display']);
+        // unset($rule['is_display']);
         return $rule;
     }
 }
