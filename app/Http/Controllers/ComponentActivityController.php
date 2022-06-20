@@ -350,7 +350,7 @@ class ComponentActivityController extends Controller
             "_id" => 'required|string'
         ];
         $rule += $add_rule;
-        unset($rule['is_display']);
+        // unset($rule['is_display']);
         return $rule;
     }
 
