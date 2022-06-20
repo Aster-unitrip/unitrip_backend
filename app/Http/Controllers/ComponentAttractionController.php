@@ -77,6 +77,8 @@ class ComponentAttractionController extends Controller
         $attraction = $this->requestService->insert_one('attractions', $validated);
         $attraction =  json_decode($attraction->content(), true);
 
+
+
         // 建立 Log
         $attraction = $this->requestService->get_one('attractions', $attraction['inserted_id']);
         $attraction =  json_decode($attraction->content(), true);
@@ -367,7 +369,7 @@ class ComponentAttractionController extends Controller
             "_id" => 'required|string'
         ];
         $rule += $add_rule;
-        unset($rule['is_display']);
+        // unset($rule['is_display']);
         return $rule;
     }
 }
