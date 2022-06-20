@@ -20,12 +20,7 @@ class ComponentActivityController extends Controller
         $this->middleware('auth');
         $this->requestService = $requestService;
         $this->componentLogService = $componentLogService;
-
-    }
-
-    public function add(Request $request)
-    {
-        $rule = [
+        $this->add_rule = [
             'activity_company_name' => 'required|string|max:30',
             'name' => 'required|string|max:30',
             'tel' => 'required|string|max:20',
@@ -73,8 +68,15 @@ class ComponentActivityController extends Controller
             'experience' => 'nullable|string|max:500',
             'is_display' => 'required|boolean'
         ];
+        $this->edit_rule = $this->generate_edit_rule_from_add_rule($this->add_rule);
+
+    }
+
+    public function add(Request $request)
+    {
+
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $rule);
+        $validator = Validator::make($data, $this->add_rule);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
@@ -134,57 +136,8 @@ class ComponentActivityController extends Controller
 
     public function edit(Request $request)
     {
-        $rule = [
-            '_id' => 'required|string|max:24',
-            'activity_company_name' => 'required|string|max:30',
-            'name' => 'required|string|max:30',
-            'tel' => 'required|string|max:20',
-            'fax' => 'nullable|string|max:15',
-            'email' => 'nullable|string|max:30',
-            'address_city' => 'required|string|max:4',
-            'address_town' => 'required|string|max:10',
-            'address' => 'required|string|max:30',
-            'gather_at' => 'required',
-            'dismiss_at' => 'required',
-            'activity_location' => 'string|max:300',
-            'languages' => 'array',
-            'categories' => 'array',
-            'pax_size_threshold' => 'nullable|integer',
-            'stay_time' => 'nullable|numeric',
-            'imgs' => 'nullable',
-            'intro_summary' => 'nullable|string|max:150',
-            'description' => 'nullable|string|max:500',
-            'activity_items' => 'nullable',
-            'activity_items.sort' => 'nullable|integer|max:5',
-            'activity_items.name' => 'nullable|string|max:30',
-            'activity_items.price' => 'nullable|integer|min:0',
-            'activity_items.memo' => 'nullable|string|max:50',
-            'price_include' => 'required',
-            'price_exclude' => 'required',
-            'attention' => 'nullable',
-            'detail_before_buy' => 'string|max:300',
-            'additional_fee' => 'string|max:300',
-            'refund' => 'string|max:300',
-            'note' => 'string|max:300',
-            'bank_info' => 'array',
-            'bank_info.sort' => 'nullable|integer|max:20',
-            'bank_info.bank_name' => 'nullable|string|max:20',
-            'bank_info.bank_code' => 'nullable|string|max:20',
-            'bank_info.account_name' => 'nullable|string|max:20',
-            'bank_info.account_number' => 'nullable|string|max:20',
-            'is_enabled' => 'required|boolean',
-            'website' => 'string|max:300',
-            'attraction_name' => 'nullable|string|max:20',
-            // 'attraction_id' => 'string',
-
-            'lng' => 'nullable|numeric',
-            'lat' => 'nullable|numeric',
-            'source' => 'nullable|string|max:10',
-            'experience' => 'nullable|string|max:500',
-            'is_display' => 'required|boolean'
-        ];
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $rule);
+        $validator = Validator::make($data, $this->edit_rule);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
@@ -391,5 +344,14 @@ class ComponentActivityController extends Controller
         return $new_filter;
     }
 
+    protected function generate_edit_rule_from_add_rule($rule)
+    {
+        $add_rule = [
+            "_id" => 'required|string'
+        ];
+        $rule += $add_rule;
+        // unset($rule['is_display']);
+        return $rule;
+    }
 
 }

@@ -49,11 +49,11 @@ class ComponentCarTypeController extends Controller
         }
 
         // Handle filter content
-        $filter = json_decode($request->getContent(), true);
         if(array_key_exists("base", $filter)){
             $filter['address_city'] = $filter['base'];
             unset($filter['base']);
         }
+
 
         // Handle projection content
         $projection = array(
