@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Foundation\Auth\ThrottlesLogins;
 
 use Validator;
 
@@ -19,6 +20,8 @@ class AuthController extends Controller
 {
     private $companyService;
     private $userService;
+
+    use ThrottlesLogins;
     /**
      * Create a new AuthController instance.
      *
@@ -102,29 +105,46 @@ class AuthController extends Controller
         ];
     }
 
+
     /**
      * Get a JWT via given credentials.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request){
-    	$validator = Validator::make($request->all(), [
+
+    public function login(Request $request)
+    {
+
+        //check if the user has too many login attempts.
+        if ($this->hasTooManyLoginAttempts($request)){
+            //Fire the lockout event.
+            $this->fireLockoutEvent($request);
+
+            //redirect the user back after lockout.
+            Log::info('User failed to login too many times.', ['id' => $request->email]);
+            return $this->sendLockoutResponse($request);
+        }
+
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string|min:6',
         ]);
 
+        //attempt login.
         if ($validator->fails()) {
             Log::info('User failed to login', ['id' => $request->email]);
             return response()->json($validator->errors(), 422);
         }
 
-        if (! $token = auth()->attempt($validator->validated())) {
-            Log::info('User failed to login', ['id' => $request->email]);
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-        Log::info('User logged in', ['id' => auth()->user()->email]);
-        return $this->createNewToken($token);
+        //keep track of login attempts from the user.
+        $this->incrementLoginAttempts($request);
+
+        //Authentication failed
+        Log::info('User failed to login', ['id' => $request->email]);
+        return response()->json(['error' => 'Unauthorized'], 401);
+        // return $this->loginFailed();
     }
+
 
     /**
      * Register a User.
@@ -290,13 +310,13 @@ class AuthController extends Controller
             );
         }
         catch(\Exception $e){
-/*             if ($user) {
-                $user->delete();
-            }
-            if ($company) {
-                $company->delete();
-            }
-            return response()->json(['error' => $e->getMessage()], 400); */
+            // if ($user) {
+            //     $user->delete();
+            // }
+            // if ($company) {
+            //     $company->delete();
+            // }
+            // return response()->json(['error' => $e->getMessage()], 400);
         }
 
         return response()->json([
@@ -319,4 +339,10 @@ class AuthController extends Controller
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
     }
+
+    public function username()
+    {
+        return 'email';
+    }
+
 }
