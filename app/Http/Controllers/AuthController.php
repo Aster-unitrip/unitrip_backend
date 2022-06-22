@@ -12,6 +12,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
+use Illuminate\Validation\ValidationException;
+
 
 
 use Validator;
@@ -115,35 +117,33 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        $this->validateLogin($request);
 
         //check if the user has too many login attempts.
-        if ($this->hasTooManyLoginAttempts($request)){
+        if (method_exists($this, 'hasTooManyLoginAttempts') && $this->hasTooManyLoginAttempts($request)){
             //Fire the lockout event.
             $this->fireLockoutEvent($request);
 
             //redirect the user back after lockout.
-            Log::info('User failed to login too many times.', ['id' => $request->email]);
+            Log::warning('User failed to login too many times.', ['id' => $request->email]);
             return $this->sendLockoutResponse($request);
         }
 
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
+        $email = $request->email;
+        $password = $request->password;
 
         //attempt login.
-        if ($validator->fails()) {
-            Log::info('User failed to login', ['id' => $request->email]);
-            return response()->json($validator->errors(), 422);
+        if ($token = Auth::attempt(['email' => $email,'password' => $password])) {
+            Log::info('User logged in', ['id' => auth()->user()->email]);
+            return $this->createNewToken($token);
         }
-
-        //keep track of login attempts from the user.
-        $this->incrementLoginAttempts($request);
-
-        //Authentication failed
-        Log::info('User failed to login', ['id' => $request->email]);
-        return response()->json(['error' => 'Unauthorized'], 401);
-        // return $this->loginFailed();
+        else{
+            //keep track of login attempts from the user.
+            $this->incrementLoginAttempts($request);
+            Log::info('User failed to login', ['id' => $request->email]);
+            // return response()->json($request->errors(), 422);
+            return $this->sendFailedLoginResponse($request);
+        }
     }
 
 
@@ -341,9 +341,61 @@ class AuthController extends Controller
         ]);
     }
 
+/**
+     * Validate the user login request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function validateLogin(Request $request)
+    {
+        $request->validate([
+            $this->username() => 'required|string',
+            'password' => 'required|string',
+        ]);
+    }
+
     public function username()
     {
         return 'email';
+    }
+
+    /**
+     * Get the failed login response instance.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function sendFailedLoginResponse(Request $request)
+    {
+        throw ValidationException::withMessages([
+            $this->username() => [trans('auth.failed')],
+        ]);
+    }
+
+    /**
+     * Send the response after the user was authenticated.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    protected function sendLoginResponse(Request $request)
+    {
+        $request->session()->regenerate();
+
+        $this->clearLoginAttempts($request);
+
+        if ($response = $this->authenticated($request, $this->guard()->user())) {
+            return $response;
+        }
+
+        return $request->wantsJson()
+                    ? new JsonResponse([], 204)
+                    : redirect()->intended($this->redirectPath());
     }
 
 }
