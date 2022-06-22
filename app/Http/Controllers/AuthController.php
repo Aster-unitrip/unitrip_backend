@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 
 use Validator;
@@ -20,7 +21,8 @@ class AuthController extends Controller
 {
     private $companyService;
     private $userService;
-
+    
+    use RegistersUsers;
     use ThrottlesLogins;
     /**
      * Create a new AuthController instance.
