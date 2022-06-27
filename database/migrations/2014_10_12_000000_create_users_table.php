@@ -30,8 +30,8 @@ class CreateUsersTable extends Migration
         });
         DB::table('users')->insert(
             [
-                [ 
-                    'contact_name' => 'parker', 
+                [
+                    'contact_name' => 'parker',
                     'contact_tel' => '02-1111111',
                     'role_id' => "[1, 2]",
                     'email' => 'parker@gmail.com',
@@ -44,11 +44,25 @@ class CreateUsersTable extends Migration
                     'company_id' => 1,
                     "updated_at" => date("Y-m-d H:i:s"),
                     "created_at" => date("Y-m-d H:i:s")
-                ],[ 
-                    'contact_name' => 'jin', 
+                ],[
+                    'contact_name' => 'jin',
                     'contact_tel' => '02-22222222',
                     'role_id' => "[1, 2]",
                     'email' => 'jin@gmail.com',
+                    'email_verified_at' => null,
+                    'password' => '$2y$10$rEqaE6/FR6ch3hXpOITUouB3pn03xFC96lM96Vbk7s8lpnxrB0Ju.',
+                    'remember_token' => null,
+                    'address_city' => '台北市',
+                    'address_town' => '中正區',
+                    'address' => '重慶南路二段2號',
+                    'company_id' => 2,
+                    "updated_at" => date("Y-m-d H:i:s"),
+                    "created_at" => date("Y-m-d H:i:s")
+                ],[
+                    'contact_name' => 'aster',
+                    'contact_tel' => '02-22222222',
+                    'role_id' => "[1, 2]",
+                    'email' => 'aster@unitrip.asia',
                     'email_verified_at' => null,
                     'password' => '$2y$10$rEqaE6/FR6ch3hXpOITUouB3pn03xFC96lM96Vbk7s8lpnxrB0Ju.',
                     'remember_token' => null,

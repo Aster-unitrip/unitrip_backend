@@ -47,6 +47,13 @@ use App\Http\Controllers\EmailController;
 //     return back()->with('message', 'Verification link sent!');
 // })->middleware(['auth', 'signed'])->name('verification.send');
 
+Route::group(['middleware' => 'api', 'prefix' => 'mail'], function ($router) {
+    Route::get('/reset/{mail_encryption}/{token}', [EmailController::class, 'get_token']);
+    Route::post('/url-link', [EmailController::class, 'mail']);
+    Route::post('/reset-password', [EmailController::class, 'reset_password']);
+
+});
+
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);

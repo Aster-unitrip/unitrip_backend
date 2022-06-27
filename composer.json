@@ -7,7 +7,9 @@
     "require": {
         "php": "^7.3|^8.0",
         "doctrine/dbal": "^3.3",
+        "firebase/php-jwt": "v5.5.1",
         "fruitcake/laravel-cors": "^2.0",
+        "google/cloud-recaptcha-enterprise": "^1.2",
         "google/cloud-storage": "^1.25",
         "guzzlehttp/guzzle": "^7.0.1",
         "josiasmontag/laravel-recaptchav3": "^1.0",
@@ -15,6 +17,7 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
+        "paragonie/sodium_compat": "^1.17",
         "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {
