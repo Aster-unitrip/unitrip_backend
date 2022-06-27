@@ -36,6 +36,8 @@ class DMController extends Controller
             'if_show_agent_info'=> ['required', new Boolean],
             'locations'=>'required|array',
             'imgs' => 'required|array',
+            'theme_color' => 'required|string',
+            'meta_description' => 'required|string|max:150'
         ];
     }
 
@@ -67,6 +69,8 @@ class DMController extends Controller
             $dm_data_new['if_show_agent_info'] = "true";
             $dm_data_new['locations'] = [];
             $dm_data_new['imgs'] = [];
+            $dm_data_new['theme_color'] = 'orange';
+            $dm_data_new['meta_description'] = '';
 
             $insert_one_to_dm = $this->requestService->insert_one('dm', $dm_data_new);
         }else{ //old
