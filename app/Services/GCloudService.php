@@ -199,10 +199,7 @@ class GCloudService
         }
 
         $img = $request->file('img');
-        // 用公司 id 似乎不太直觀，但沒有公司英文名稱，且用公司中文名稱也不太好。只好先這樣將就
-        $foldername = auth()->user()->company_id;
-        $sub_filename = $img->getClientOriginalExtension();
-        $file_name = uniqid().'.'.$sub_filename;
+        $file_name = $img->getClientOriginalName();
 
         try
         {
@@ -211,11 +208,11 @@ class GCloudService
             $bucket = $storage->bucket('unitrip_company_logo');      
             // gcs://unitrip-dm/1/raw/xxxxxxxx.jpg          原始檔
             // gcs://unitrip-dm/1/thumbnail/xxxxxxxx.jpg   縮小檔
-            $googleCloudStoragePath = $foldername.'/'.'raw'.'/'.$file_name;
+            $googleCloudStoragePath = 'raw'.'/'.$file_name;
             $bucket->upload(file_get_contents($img), [
                 'name' => $googleCloudStoragePath,
             ]);
-            Log::info('User successfully uploaded dm image', ['user' => $request->email, 'img_url'=>'https://storage.googleapis.com/unitrip_company_logo/'.$googleCloudStoragePath]);
+            Log::info('User successfully uploaded logo image', ['img_url'=>'https://storage.googleapis.com/unitrip_company_logo/'.$googleCloudStoragePath]);
             return response()->json([
                 "status" => "success",
                 "message" => "image successfully saved. ",
@@ -237,12 +234,11 @@ class GCloudService
         // Delete object
         $storage = new StorageClient();
         $bucket = $storage->bucket('unitrip_company_logo');
-        $foldername = auth()->user()->company_id;
-        $googleCloudStoragePath = $foldername.'/'.'raw'.'/'.$imgData['filename'];
+        $googleCloudStoragePath = '/'.'raw'.'/'.$imgData['filename'];
         $object = $bucket->object($googleCloudStoragePath);
         try {
             $object->delete();
-            Log::info('User successfully removed component image', ['user' => $request->email, 'img_url'=>$googleCloudStoragePath]);
+            Log::info('User successfully removed component image', ['img_url'=>$googleCloudStoragePath]);
             return response()->json([
                 "status" => "success",
                 "message" => "image successfully deleted: ".$imgData['filename'],
