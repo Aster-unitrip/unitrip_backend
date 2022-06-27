@@ -11,7 +11,7 @@ class ImgController extends Controller
 
     public function __construct(GCloudService $gCloudService)
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
         $this->gCloudService = $gCloudService;
 
     }
