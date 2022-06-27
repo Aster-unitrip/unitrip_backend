@@ -199,7 +199,6 @@ class GCloudService
         }
 
         $img = $request->file('img');
-        $bucket = $storage->bucket('unitrip_company_logo');
         // 用公司 id 似乎不太直觀，但沒有公司英文名稱，且用公司中文名稱也不太好。只好先這樣將就
         $foldername = auth()->user()->company_id;
         $sub_filename = $img->getClientOriginalExtension();
@@ -208,7 +207,8 @@ class GCloudService
         try
         {
             // Upload images to Google Cloud Storage
-            $storage = new StorageClient();      
+            $storage = new StorageClient();
+            $bucket = $storage->bucket('unitrip_company_logo');      
             // gcs://unitrip-dm/1/raw/xxxxxxxx.jpg          原始檔
             // gcs://unitrip-dm/1/thumbnail/xxxxxxxx.jpg   縮小檔
             $googleCloudStoragePath = $foldername.'/'.'raw'.'/'.$file_name;
