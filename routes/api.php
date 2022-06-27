@@ -68,12 +68,15 @@ Route::group(['middleware'=>'api', 'prefix'=>'components'], function($router){
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'img'], function($router){
-    Route::post('/upload', [ImgController::class, 'index']);
-    Route::post('/remove', [ImgController::class, 'remove']);
-    Route::post('/dm_upload', [ImgController::class, 'dmUpload']);
-    Route::post('/dm_remove', [ImgController::class, 'dm_remove']);
     Route::post('/logo_upload', [ImgController::class, 'logo_upload']);
     Route::post('/logo_remove', [ImgController::class, 'logo_remove']);
+
+    Route::group(['middleware'=>'auth'], function(){
+        Route::post('/upload', [ImgController::class, 'index']);
+        Route::post('/remove', [ImgController::class, 'remove']);
+        Route::post('/dm_upload', [ImgController::class, 'dmUpload']);
+        Route::post('/dm_remove', [ImgController::class, 'dm_remove']);
+    });
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'attractions'], function($router) {
