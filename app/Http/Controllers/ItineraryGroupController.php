@@ -22,9 +22,6 @@ class ItineraryGroupController extends Controller
         $this->requestStatesService = $requestStatesService;
         $this->requestCostService = $requestCostService;
 
-
-
-
         // TODO新增欄位已很久無更新
         $this->rule = [
             'order_id' => 'required|string',
@@ -50,6 +47,7 @@ class ItineraryGroupController extends Controller
             'itinerary_group_note' => 'string'
 
         ];
+
         $this->edit_rule = [
             '_id'=>'string|max:24', //required
             'owned_by'=>'required|integer',
@@ -73,8 +71,11 @@ class ItineraryGroupController extends Controller
             'exclude_description' => 'required|string',
             'itinerary_group_cost' => 'required|numeric',
             'itinerary_group_price' => 'required|numeric',
-            'itinerary_group_note' => 'string'
+            'itinerary_group_note' => 'string',
+            'estimated_travel_start' => 'required|string',
+            'estimated_travel_end' => 'required|string',
         ];
+
         $this->operator_rule = [
             '_id' => 'required|string|max:24',
             'type' => 'required|string',
@@ -95,74 +96,6 @@ class ItineraryGroupController extends Controller
             "payment_status" => 'required|string',
             "_id" => 'required|string'
         ];
-    }
-
-    public function add(Request $request)
-    {
-
-        $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $this->rule);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
-        }
-        $company_id = auth()->user()->company_id;
-        $validated = $validator->validated();
-        $validated['owned_by'] = $company_id;
-
-
-        // TODO(US-390) 檢查行程內容
-/*         try{
-            $is = new ItineraryGroupService($validated);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
-        } */
-
-        // 建立前，判斷行程代碼是否重複 : 同公司不存在相同行程代碼，為空則不理
-        if(array_key_exists('code', $validated)){
-            $filter["code"] = $validated['code'];
-            $filter["owned_by"] = $validated['owned_by'];
-            $validated['operator_note'] = null;
-
-            $result_code = $this->requestService->aggregate_search('itinerary_group', null, $filter, $page=0);
-            $result_code_data = json_decode($result_code->getContent(), true);
-            return $result_code_data;
-
-            if($result_code_data["count"] > 0) return response()->json(['error' => '同間公司不可有重複的行程代碼'], 400);
-        }else $validated['code'] = null;
-
-
-        // 建立團行程，並回傳 團行程id
-        $result = $this->requestService->insert_one('itinerary_group', $validated); // 回傳是否建立成功
-        $result_data = json_decode($result->getContent(), true);
-
-        // 找出團行程的 order_id，去修改 order itinerary_group_id、cus_group_code
-        $itinerary_group = $this->requestService->get_one('itinerary_group', $result_data['inserted_id']);
-        $itinerary_group_data = json_decode($itinerary_group->getContent(), true);
-        $order = $this->requestService->get_one('cus_orders', $itinerary_group_data["order_id"]);
-        $order_data = json_decode($order->getContent(), true);
-
-        //處理created_at:2022-03-09T17:52:30 -> 20220309_
-        $created_at_date = substr($order_data["created_at"], 0, 10);
-        $created_at_time = substr($order_data["created_at"], 11);
-        $created_at_date = preg_replace('/-/', "", $created_at_date);
-        $created_at_time = preg_replace('/:/', "", $created_at_time);
-
-
-        $fixed["itinerary_group_id"] = $itinerary_group_data['_id'];
-
-
-        //CUS_"行程代碼"_"旅行社員工id"_"客製團訂單日期"_"客製團訂單時間"_"行程天數"_"第幾團"
-        if(array_key_exists('code', $itinerary_group_data)){
-            $fixed["cus_group_code"] = "CUS_".$itinerary_group_data['code']."_".$order_data["owned_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
-        }else if(!array_key_exists('code', $itinerary_group_data) && $validated['code'] !== null){
-            $fixed["cus_group_code"] = "CUS_".$order_data["owned_by_id"]."_".$created_at_date."_".$created_at_time."_".$itinerary_group_data['total_day']."_1";
-        }
-
-        $fixed["_id"] = $order_data["_id"];
-        $result = $this->requestService->update_one('cus_orders', $fixed);
-        return $result;
-
     }
 
     public function edit(Request $request)
@@ -215,7 +148,6 @@ class ItineraryGroupController extends Controller
             return response()->json(['error' => '請補上 [order_id] 這個欄位。'], 400);
         }
 
-
         if(!array_key_exists('_id', $validated)){
             // 3.1(新增團行程)
             // code 新建時 同公司不可有
@@ -230,7 +162,6 @@ class ItineraryGroupController extends Controller
             $validated['travel_end'] = $validated['travel_end']."T23:59:59.000+08:00";
             // travel_end 不可小於 travel_end
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) < 0){
-
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'], 400);
             }
             // 處理分割項目，順便處理價錢
