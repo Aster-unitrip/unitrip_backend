@@ -10,7 +10,6 @@ class RequestReservationNameService
     public function get_reservation_data($data){
 
         $cus_group_code = $data['cus_group_code'];
-        return $data;
 
         // 先處理所需資料就好 剩下的之後拉
 

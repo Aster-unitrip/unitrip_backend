@@ -423,7 +423,7 @@ class ItineraryGroupController extends Controller
             $fixed["amount"] = $validated['itinerary_group_price'];
 
             $result = $this->requestService->update_one('cus_orders', $fixed);
-            return $result;
+            return $itinerary_group_update_data;
         }
     }
 
