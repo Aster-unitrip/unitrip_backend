@@ -22,32 +22,6 @@ class ItineraryGroupController extends Controller
         $this->requestStatesService = $requestStatesService;
         $this->requestCostService = $requestCostService;
 
-        // TODO新增欄位已很久無更新
-        $this->rule = [
-            'order_id' => 'required|string',
-            'name' => 'required|string|max:30',
-            'summary' => 'nullable|string|max:150',
-            'code' => 'nullable|string|max:20',
-            'travel_start' => 'required|date',
-            'travel_end' => 'required|date',
-            'total_day' => 'required|integer|between:1,30',
-            'areas' => 'nullable|array',
-            'people_threshold' => 'required|integer|min:1',
-            'people_full' => 'required|integer|max:100',
-            'sub_categories' => 'nullable|array',
-            'itinerary_content' => 'required|array|min:1',
-            'guides' => 'present|array',
-            'transportations' => 'present|array',
-            'misc' => 'present|array',
-            'accounting' => 'required|array',
-            'itinerary_group_cost' => 'required|numeric',
-            'itinerary_group_price' => 'required|numeric',
-            'include_description' => 'required|string',
-            'exclude_description' => 'required|string',
-            'itinerary_group_note' => 'string'
-
-        ];
-
         $this->edit_rule = [
             '_id'=>'string|max:24', //required
             'owned_by'=>'required|integer',
