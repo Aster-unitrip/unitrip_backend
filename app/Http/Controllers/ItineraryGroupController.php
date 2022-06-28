@@ -310,7 +310,6 @@ class ItineraryGroupController extends Controller
             $validated['travel_start'] = $validated['travel_start']."T00:00:00.000+08:00";
             $validated['travel_end'] = $validated['travel_end']."T23:59:59.000+08:00";
 
-
             if(strtotime($validated['travel_end']) - strtotime($validated['travel_start']) < 0){
                 return response()->json(['error' => '旅行結束時間不可早於旅行開始時間'. strtotime($validated['travel_end']) - strtotime($validated['travel_start'])], 400);
             }
@@ -433,9 +432,15 @@ class ItineraryGroupController extends Controller
                     $amount_validated['total'] += $amount['total'];
                 }
             }
+
             if($amount_validated['total'] !== $validated['itinerary_group_cost']){
                 return response()->json(['error' => "驗算總值成本: ".$amount_validated['total']."，前端傳來總值成本: ".$validated['itinerary_group_cost']."；所有元件加總不等於總直成本(itinerary_group_cost)"], 400);
             }
+
+            // 取得 created_at
+            $itinerary_group_old_data = $this->requestService->get_one('itinerary_group', $validated['_id']);
+            $itinerary_group_old_data = json_decode($itinerary_group_old_data->getContent(), true);
+            $validated['created_at'] = $itinerary_group_old_data['created_at'];
 
             $itinerary_group_update_data = $this->requestService->update('itinerary_group', $validated);
 
