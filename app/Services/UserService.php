@@ -24,5 +24,4 @@ class UserService
     {
         return $this->user->where('email', $email)->first();
     }
-
 }

@@ -59,7 +59,7 @@ class ItineraryGroupController extends Controller
             'code' => 'nullable|string|max:20',
             'travel_start' => 'required|date',
             'travel_end' => 'required|date',
-            'total_day' => 'required|integer|max:7',
+            'total_day' => 'required|integer|between:1,30',
             'areas' => 'nullable|array',
             'people_threshold' => 'required|integer|min:1',
             'people_full' => 'required|integer|max:100',

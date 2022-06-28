@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Crypt;
 
 class TestEmail extends Mailable
 {
@@ -31,15 +32,20 @@ class TestEmail extends Mailable
     public function build()
     {
         $address = 'service@unitrip.asia';
-        $subject = 'This is a demo!';
+        $subject = '【UniTrip系統】忘記密碼確認信';
         $name = '樂多科技';
-
-        return $this->view('emails.template')
+        $encrypted_email = Crypt::encrypt($this->data['email']);
+        return $this->view('emails.reset_password_zh')
                     ->from($address, $name)
 //                    ->cc($address, $name)
 //                    ->bcc($address, $name)
 //                    ->replyTo($address, $name)
                     ->subject($subject)
-                    ->with([ 'test_message' => $this->data['message'] ]);
+                    ->with([
+                        'email' => $this->data['email'],
+                        'contact_name' => $this->data['contact_name'],
+                        'reset_url' => "https://dev.unitrip.asia/api/mail/reset/".$encrypted_email."/".$this->data['signature'],
+
+                    ]);
     }
 }
