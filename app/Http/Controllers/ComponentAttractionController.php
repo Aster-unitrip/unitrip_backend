@@ -74,17 +74,18 @@ class ComponentAttractionController extends Controller
         $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
+        if(!array_key_exists("position", $validated)){
+            $validated['position'] = null;
+        }
         $attraction = $this->requestService->insert_one('attractions', $validated);
         $attraction =  json_decode($attraction->content(), true);
-
-
 
         // 建立 Log
         $attraction = $this->requestService->get_one('attractions', $attraction['inserted_id']);
         $attraction =  json_decode($attraction->content(), true);
         $filter = $this->componentLogService->recordCreate('attractions', $attraction);
         $create_components_log = $this->requestService->insert_one("components_log", $filter);
-
+        Log::info('User add attraction', ['user' => auth()->user()->email, 'request' => $request->all()]);
         return $attraction;
 
     }

@@ -74,7 +74,6 @@ class ComponentActivityController extends Controller
 
     public function add(Request $request)
     {
-
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->add_rule);
         if ($validator->fails()) {
@@ -88,7 +87,9 @@ class ComponentActivityController extends Controller
         if(!array_key_exists("attraction_name", $validated)){
             $validated['attraction_name'] = null;
         }
-
+        if(!array_key_exists("position", $validated)){
+            $validated['position'] = null;
+        }
         $activity = $this->requestService->insert_one('activities', $validated);
         $activity =  json_decode($activity->content(), true);
 
@@ -98,7 +99,7 @@ class ComponentActivityController extends Controller
         $activity =  json_decode($activity->content(), true);
         $filter = $this->componentLogService->recordCreate('activities', $activity);
         $create_components_log = $this->requestService->insert_one("components_log", $filter);
-
+        Log::info('User add activity', ['user' => auth()->user()->email, 'request' => $request->all()]);
         return $activity;
     }
 

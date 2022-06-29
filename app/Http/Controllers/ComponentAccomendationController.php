@@ -62,7 +62,6 @@ class ComponentAccomendationController extends Controller
     // 旅行社使用者可以選擇是否將元件新增至母槽(is_display)
     public function add(Request $request)
     {
-        Log::info('User add accomendation', ['user' => auth()->user()->email, 'request' => $request->all()]);
         $data = json_decode($request->getContent(), true);
         $validator = Validator::make($data, $this->add_rule);
         if ($validator->fails()) {
@@ -78,6 +77,9 @@ class ComponentAccomendationController extends Controller
         if(!array_key_exists("total_rooms", $validated)){
             $validated['total_rooms'] = null;
         }
+        if(!array_key_exists("position", $validated)){
+            $validated['position'] = null;
+        }
         $accomendation = $this->requestService->insert_one('accomendations', $validated);
         $accomendation =  json_decode($accomendation->content(), true);
 
@@ -86,6 +88,7 @@ class ComponentAccomendationController extends Controller
         $accomendation =  json_decode($accomendation->content(), true);
         $filter = $this->componentLogService->recordCreate('accomendations', $accomendation);
         $create_components_log = $this->requestService->insert_one("components_log", $filter);
+        Log::info('User add accomendation', ['user' => auth()->user()->email, 'request' => $request->all()]);
         return $accomendation;
 
     }

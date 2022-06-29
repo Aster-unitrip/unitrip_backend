@@ -85,9 +85,12 @@ class ComponentRestaurantController extends Controller
         $validated['owned_by'] = $company_id;
         $validated['source'] = "ta"; //旅行社預設為ta
 
+        if(!array_key_exists("position", $validated)){
+            $validated['position'] = null;
+        }
+
         $restaurant = $this->requestService->insert_one('restaurants', $validated);
         $restaurant =  json_decode($restaurant->content(), true);
-        return $restaurant;
 
 
         // 建立 Log
@@ -95,6 +98,7 @@ class ComponentRestaurantController extends Controller
         $restaurant =  json_decode($restaurant->content(), true);
         $filter = $this->componentLogService->recordCreate('restaurants', $restaurant);
         $create_components_log = $this->requestService->insert_one("components_log", $filter);
+        Log::info('User add restaurant', ['user' => auth()->user()->email, 'request' => $request->all()]);
         return $restaurant;
 
     }
