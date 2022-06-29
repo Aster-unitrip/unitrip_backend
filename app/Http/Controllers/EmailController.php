@@ -55,6 +55,9 @@ class EmailController extends Controller
         else if($check_email_time - strtotime($result['created_at']) > 3600) {
             return response()->json(['error' => "URL連結已超過1小時，請重新送出忘記密碼申請"]);
         }
+        else if($result['is_password_change'] == true){
+            return response()->json(['error' => "URL連結已提出申請過，若需更改，請重新提出申請"]);
+        }
         return $result;
     }
 
@@ -64,6 +67,7 @@ class EmailController extends Controller
         $rule = [
             'email' => 'required|string|email|max:100',
             'password' => 'required|string|confirmed|min:6',
+            'token' => 'required|string'
         ];
         $validator = Validator::make($request->all(), $rule);
 
@@ -73,8 +77,9 @@ class EmailController extends Controller
         else{
             $validated = $validator->validated();
             $validated['password'] = bcrypt($validated["password"]);
-            $this->passwordResetService->update($validated);
-            return response()->json(['success' => "修改完成!請重新登入"]);
+            $this->passwordResetService->update_user($validated);
+            $result = $this->modifyPassword($validated);
+            return $result;
         }
     }
 
@@ -83,5 +88,11 @@ class EmailController extends Controller
         str_shuffle($pattern);
         $signature = substr(str_shuffle($pattern),0,40);
         return $signature;
+    }
+    public function modifyPassword($validated){
+        $filter = ["email" =>  $validated['email'], "signature" => $validated['token']];
+        $result = $this->passwordResetService->getEmailAndToken($filter);
+        $modifyData = ["signature" =>  $result['signature'], "is_password_change" => true];
+        return $this->passwordResetService->update_is_password_change($modifyData);
     }
 }
