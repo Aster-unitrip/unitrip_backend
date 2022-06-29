@@ -76,7 +76,7 @@ class CreateUsersTable extends Migration
                     'contact_name' => 'coda',
                     'contact_tel' => '02-22222222',
                     'role_id' => "[1, 2]",
-                    'email' => 'coda@gmail.com',
+                    'email' => 'coda@unitrip.asia',
                     'email_verified_at' => null,
                     'password' => '$2y$10$rEqaE6/FR6ch3hXpOITUouB3pn03xFC96lM96Vbk7s8lpnxrB0Ju.',
                     'remember_token' => null,

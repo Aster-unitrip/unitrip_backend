@@ -37,7 +37,7 @@ class EmailController extends Controller
             $this->passwordResetService->create($data);
 
             $data['contact_name'] = $userdata['contact_name'];
-
+            $mail_url_base =env('MAIL_URL_BASE');
             // 傳 email
             Mail::to($email)->send(new TestEmail($data));
         }
