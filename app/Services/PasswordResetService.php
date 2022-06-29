@@ -37,12 +37,21 @@ class PasswordResetService
         // where('email', $filter['email']);
     }
 
-    public function update($request)
+    public function update_user($request)
     { // 此處用email作為判斷
         $user = $this->user->where('email', $request['email'])->first();
         unset($user['id']);
         $user->update($request);
         return $user;
+    }
+
+    public function update_is_password_change($request)
+    {
+        $user = $this->model->where('signature', $request['signature'])->first();
+        unset($user['signature']);
+        $user['is_password_change'] = $request['is_password_change'];
+        $user->update($request);
+        return response()->json(['success' => "修改完成!請重新登入"]);
     }
 
 }
