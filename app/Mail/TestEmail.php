@@ -34,6 +34,7 @@ class TestEmail extends Mailable
         $address = 'service@unitrip.asia';
         $subject = '【UniTrip系統】忘記密碼確認信';
         $name = '樂多科技';
+        $mail_url_base =env('MAIL_URL_BASE');
         $encrypted_email = Crypt::encrypt($this->data['email']);
         return $this->view('emails.reset_password_zh')
                     ->from($address, $name)
@@ -44,7 +45,7 @@ class TestEmail extends Mailable
                     ->with([
                         'email' => $this->data['email'],
                         'contact_name' => $this->data['contact_name'],
-                        'reset_url' => "https://dev.unitrip.asia/api/mail/reset/".$encrypted_email."/".$this->data['signature'],
+                        'reset_url' => $mail_url_base."/#/reset_password?/".$encrypted_email."/".$this->data['signature'],
 
                     ]);
     }

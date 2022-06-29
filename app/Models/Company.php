@@ -23,7 +23,7 @@ class Company extends Model
         'address_town',
         'address',
         'logo_path',
-        'website',
+        // 'website',
         'owner',
         'intro',
         'bank_name',
