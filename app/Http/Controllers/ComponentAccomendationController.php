@@ -135,6 +135,7 @@ class ComponentAccomendationController extends Controller
             'created_at' => 1,
             "intro_summary" => 1,
             "description" => 1,
+            "position"=> 1,
         );
         // 住宿名稱模糊搜尋
         if(array_key_exists('name', $filter)){

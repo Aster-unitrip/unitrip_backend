@@ -128,6 +128,7 @@ class ComponentAttractionController extends Controller
                 "intro_summary" => 1,
                 "description" => 1,
                 "experience" => 1,
+                "position"=> 1,
                 "is_display" => 1,
                 "source" => 1,
                 "updated_at" => 1,

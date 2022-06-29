@@ -232,6 +232,7 @@ class ComponentActivityController extends Controller
             "created_at" => 1,
             "is_display" => 1,
             "activity_company_name" => 1,
+            "position"=> 1,
         );
         // 體驗名稱、體驗供應商模糊搜尋
         if(array_key_exists('activity_company_name', $filter)){

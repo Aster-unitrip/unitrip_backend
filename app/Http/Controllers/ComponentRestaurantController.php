@@ -143,6 +143,7 @@ class ComponentRestaurantController extends Controller
                 "experience" => 1,
                 "is_display" => 1,
                 "source" => 1,
+                "position"=> 1,
                 "cost_per_person" => 1,
                 "updated_at" => 1,
                 "created_at" => 1
