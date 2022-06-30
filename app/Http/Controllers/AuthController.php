@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Validation\ValidationException;
+use App\Services\RequestPService;
 
 
 
@@ -30,9 +31,10 @@ class AuthController extends Controller
      *
      * @return void
      */
-    public function __construct(CompanyService $companyService, UserService $userService)
+    public function __construct(CompanyService $companyService, UserService $userService, RequestPService $requestPService)
     {
         $this->middleware('auth:api', ['except' => ['login', 'register', 'refresh']]);
+        $this->requestService = $requestPService;
         $this->companyService = $companyService;
         $this->userService = $userService;
         $this->supplierRegisterRule = [
@@ -108,7 +110,6 @@ class AuthController extends Controller
         ];
     }
 
-
     /**
      * Get a JWT via given credentials.
      *
@@ -145,7 +146,6 @@ class AuthController extends Controller
             return $this->sendFailedLoginResponse($request);
         }
     }
-
 
     /**
      * Register a User.
@@ -216,7 +216,6 @@ class AuthController extends Controller
         ], 201);
     }
 
-
     /**
      * Log the user out (Invalidate the token).
      *
@@ -249,6 +248,45 @@ class AuthController extends Controller
         $profile['company'] = $this->companyService->getById($company_id);
         return response()->json($profile);
     }
+
+    /**
+     * Get the opendata_travel_agencies.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function register_data($com_no) {
+
+        // 先去mongo找
+        $travel_agencies = $this->requestService->find_one('opendata_travel_agencies', null, 'com_no', $com_no);
+        if(!$travel_agencies){
+            return response()->json(['error' => "沒有這筆公司資訊"]);
+        }
+        else{
+            // 更改名稱對照sql
+            $result = $this->old_data_to_register_field($travel_agencies["document"]);
+            return $result;
+        }
+
+
+    }
+
+    public function old_data_to_register_field($old_data) {
+        $tra_data['ta_category'] = $old_data['ta_category'];
+        $tra_data['travel_agency_name'] = $old_data['c_name'];
+        $tra_data['ta_register_num'] = $old_data['com_no'];
+        // 另外區分address
+        list($address_city, $address_town, $address) = explode(",", $old_data['address']);
+        $tra_data['address_city'] = $address_city;
+        $tra_data['address_town'] = $address_town;
+        $tra_data['address'] = $address;
+        $tra_data['tel'] = $old_data['tel'];
+        $tra_data['fax'] = $old_data['fax'];
+        $tra_data['owner'] = $old_data['manager'];
+        $tra_data['website'] = $old_data['website'];
+        $tra_data['title'] = $old_data['formal_name'];
+        return $tra_data;
+    }
+
 
     /**
      * Get the token array structure.

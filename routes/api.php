@@ -61,6 +61,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::get('/user-profile', [AuthController::class, 'userProfile']);
     Route::post('/update-profile', [AuthController::class, 'updateProfile']);
+    Route::get('/register-data/{com_no}', [AuthController::class, 'register_data']);
 });
 
 Route::group(['middleware'=>'api', 'prefix'=>'companies'], function($router){

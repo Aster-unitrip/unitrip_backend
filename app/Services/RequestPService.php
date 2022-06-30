@@ -134,8 +134,8 @@ class RequestPService
                 ),
             );
         }
-
         $postdata = json_encode($data);
+        // dd($postdata);
         $options = array(
             'http' => array(
                 'method' => 'POST',
@@ -285,8 +285,6 @@ class RequestPService
         );
         //dd($data);
         $postdata = json_encode($data);
-        //return $postdata;
-
         $options = array(
             'http' => array(
                 'method' => 'POST',

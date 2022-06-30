@@ -13,8 +13,8 @@ class CompanyTypeController extends Controller
     {
         $this->middleware('auth');
     }
-    
-    
+
+
     public function index(){
         $companyTypes = CompanyType::all();
         return response()->json($companyTypes);
