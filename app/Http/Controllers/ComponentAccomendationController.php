@@ -42,7 +42,7 @@ class ComponentAccomendationController extends Controller
             'check_out' => 'nullable|string|max:10',
             "breakfast_served_time" => "nullable",
             'foc' => 'nullable|string|max:200',
-            'is_comp_room' => 'required|boolean', // TODO check
+            'is_comp_room' => 'nullable|boolean', // TODO check
             'service_content' => 'nullable|string|max:200',
             'facility' => 'nullable|string|max:200',
             'is_display' => 'required|boolean',
@@ -81,6 +81,9 @@ class ComponentAccomendationController extends Controller
         }
         if(!array_key_exists("position", $validated)){
             $validated['position'] = null;
+        }
+        if(!array_key_exists("is_comp_room", $validated)){
+            $validated['is_comp_room'] = false;
         }
         $accomendation = $this->requestService->insert_one('accomendations', $validated);
         $accomendation =  json_decode($accomendation->content(), true);

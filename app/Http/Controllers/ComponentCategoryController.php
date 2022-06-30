@@ -195,7 +195,7 @@ class ComponentCategoryController extends Controller
         $component['is_enabled'] = true;
         $component['source'] = 'ta';
         $component['owned_by'] = auth()->user()->company_id;
-        $component['last_updated_on'] = null;
+        $component['last_updated_on'] = "unitrip";
         $component['updated_at'] = date('Y-m-d H:i:s');
         $component['created_at'] = date('Y-m-d H:i:s');
         unset($component['_id']);
