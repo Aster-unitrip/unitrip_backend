@@ -42,6 +42,7 @@ class ComponentAccomendationController extends Controller
             'check_out' => 'nullable|string|max:10',
             "breakfast_served_time" => "nullable",
             'foc' => 'nullable|string|max:200',
+            'is_comp_room' => 'required|boolean', // TODO check
             'service_content' => 'nullable|string|max:200',
             'facility' => 'nullable|string|max:200',
             'is_display' => 'required|boolean',
@@ -73,6 +74,7 @@ class ComponentAccomendationController extends Controller
         $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         $validated['source'] = "ta";
         if(!array_key_exists("total_rooms", $validated)){
             $validated['total_rooms'] = null;
@@ -210,6 +212,7 @@ class ComponentAccomendationController extends Controller
 
         // Override owned_by
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         $record = $this->requestService->get_one('accomendations', $validated['_id']);
         $content =  json_decode($record->content(), true);
         if(array_key_exists("count", $content) && $content['count'] === 0){

@@ -83,6 +83,7 @@ class ComponentRestaurantController extends Controller
         $validated = $validator->validated();
 
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         $validated['source'] = "ta"; //旅行社預設為ta
 
         if(!array_key_exists("position", $validated)){
@@ -221,6 +222,8 @@ class ComponentRestaurantController extends Controller
         $validated = $validator->validated();
         $company_id = auth()->user()->company_id;
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
+
 
         $record = $this->requestService->get_one('restaurants', $validated['_id']);
         $content = json_decode($record->content(), true);
@@ -257,58 +260,6 @@ class ComponentRestaurantController extends Controller
 
         return $restaurant;
 
-    }
-
-    // 把元件從子槽複製到母槽，餐廳 要排除 experience, meals, cost_per_person, driver_tour_memo 欄位
-    // 母槽元件 ticket 只顯示票種不要票價
-    // 須紀錄該元件是否有分享過
-    // 先確認此元件屬不屬於他自己，而且必須是子槽資料
-    // TODO: 紀錄該元件是否已複製至母槽過
-    public function copy_from_private_to_public(Request $request) {
-        $query = json_decode($request->getContent(), true);
-        $component = $this->requestService->get_one('restaurants', $query['_id']);
-        $component = json_decode($component->content(), true);
-        // TODO: 要處理沒找到元件的使用情境
-        // 確認該元件是否屬於該公司
-        if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
-            $component['is_display'] = true;
-            foreach($component['ticket'] as $key => $value){
-                if ($key != 'free' & array_key_exists('price', $component['ticket'])) {
-                    $key['price'] = 0;
-                }
-            }
-            $component['experience'] = '';
-            unset($component['_id']);
-
-            $restaurant = $this->requestService->insert_one('restaurants', $component);
-            $restaurant = json_decode($restaurant->content(), true);
-            Log::info("Copied component to public", ['id' => $restaurant['inserted_id'], 'user' => auth()->user()->email]);
-            return response()->json([
-                'message' => 'Successfully copied component to public',
-                'id' => $restaurant['inserted_id']
-            ]);
-        } else {
-            return response()->json(['error' => 'You can not access this component'], 400);
-        }
-    }
-
-    // 把元件從母槽複製子槽
-    // 複製進子槽不必考慮權限
-    public function copy_from_public_to_private(Request $request) {
-        $query = json_decode($request->getContent(), true);
-        $component = $this->requestService->get_one('restaurants', $query['_id']);
-        $component = json_decode($component->content(), true);
-        unset($component['_id']);
-        // 修改擁有公司
-        $component['owned_by'] = auth()->user()->company_id;
-        $component['is_display'] = false;
-        $attraction = $this->requestService->insert_one('restaurants', $component);
-        $attraction = json_decode($attraction->content(), true);
-        Log::info("Copied component to private", ['id' => $attraction['inserted_id'], 'user' => auth()->user()->email]);
-        return response()->json([
-            'message' => 'Successfully copied component to private',
-            'id' => $attraction['inserted_id']
-        ]);
     }
 
     private function travel_agency_search(Request $request) {

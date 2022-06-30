@@ -83,6 +83,7 @@ class ComponentActivityController extends Controller
         $validated = $validator->validated();
 
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         $validated['source'] = "ta"; //旅行社預設為ta
         if(!array_key_exists("attraction_name", $validated)){
             $validated['attraction_name'] = null;
@@ -145,6 +146,7 @@ class ComponentActivityController extends Controller
         $validated = $validator->validated();
         $company_id = auth()->user()->company_id;
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         if(!array_key_exists("attraction_name", $validated)){
             $validated['attraction_name'] = null;
         }
