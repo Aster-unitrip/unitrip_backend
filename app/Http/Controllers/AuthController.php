@@ -33,7 +33,7 @@ class AuthController extends Controller
      */
     public function __construct(CompanyService $companyService, UserService $userService, RequestPService $requestPService)
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register', 'refresh']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'refresh', 'register_data']]);
         $this->requestService = $requestPService;
         $this->companyService = $companyService;
         $this->userService = $userService;
@@ -44,6 +44,7 @@ class AuthController extends Controller
             'password' => 'required|string|confirmed|min:6',
             'contact_tel' => 'nullable|string|min:8,12',
             'contact_tel_extension' => 'nullable|string',
+            'job_title' => 'nullable|string|max:25', // 供應商 窗口職稱 / 旅行社 使用者職稱
             'contact_address_city' => 'string|max:5',
             'contact_address_town' => 'string|max:5',
             'contact_address' => 'string|max:30',
@@ -86,6 +87,7 @@ class AuthController extends Controller
             'contact_tel' => 'required|string|min:8,12',
             'role_id' => 'required|string|min:1',
             'email' => 'required|string|email|max:100',
+            'job_title' => 'nullable|string|max:25', // 供應商 窗口職稱 / 旅行社 使用者職稱
             //'password' => 'required|string|confirmed|min:6',
             'address_city' => 'string|max:5',
             'address_town' => 'string|max:5',
@@ -176,6 +178,7 @@ class AuthController extends Controller
         $input_user['address_city'] = $validator->validated()['address_city'];
         $input_user['address_town'] = $validator->validated()['address_town'];
         $input_user['address'] = $validator->validated()['address'];
+        $input_user['job_title'] = $validator->validated()['job_title'];
 
         try{
             $if_company_exists = $this->companyService->getCompanyByTaxId($validator->validated()['tax_id']);
