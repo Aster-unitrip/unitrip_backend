@@ -51,6 +51,7 @@ class GCloudService
         {
             // Upload images to Google Cloud Storage
             $storage = new StorageClient();
+            $bucket = $storage->bucket('unitrip_components');
             $googleCloudStoragePath = $foldername.'/'.'raw'.'/'.$file_name;
             $bucket->upload(file_get_contents($img), [
                 'name' => $googleCloudStoragePath,
@@ -205,7 +206,7 @@ class GCloudService
         {
             // Upload images to Google Cloud Storage
             $storage = new StorageClient();
-            $bucket = $storage->bucket('unitrip_company_logo');      
+            $bucket = $storage->bucket('unitrip_company_logo');
             // gcs://unitrip-dm/1/raw/xxxxxxxx.jpg          原始檔
             // gcs://unitrip-dm/1/thumbnail/xxxxxxxx.jpg   縮小檔
             $googleCloudStoragePath = 'raw'.'/'.$file_name;
