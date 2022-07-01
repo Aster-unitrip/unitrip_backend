@@ -156,7 +156,7 @@ class ComponentRestaurantController extends Controller
         // 餐廳名稱模糊搜尋
         if(array_key_exists('name', $filter)){
             // $filter['name'] = array('$regex' => $filter['name'], '$options' => 'i');
-            $filter['name'] = array('$regex' => $filter['name']);
+            $filter['name'] = array('$regex' => trim($filter['name']));
         }
         $result = $this->requestService->aggregate_facet('restaurants', $projection, $filter, $page);
 

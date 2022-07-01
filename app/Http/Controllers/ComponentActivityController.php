@@ -239,11 +239,11 @@ class ComponentActivityController extends Controller
         );
         // 體驗名稱、體驗供應商模糊搜尋
         if(array_key_exists('activity_company_name', $filter)){
-            $filter['activity_company_name'] = array('$regex' => $filter['activity_company_name']);
+            $filter['activity_company_name'] = array('$regex' => trim($filter['activity_company_name']));
         }
         if(array_key_exists('name', $filter)){
             // $filter['name'] = array('$regex' => $filter['name'], '$options' => 'i');
-            $filter['name'] = array('$regex' => $filter['name']);
+            $filter['name'] = array('$regex' => trim($filter['name']));
 
         }
         $result = $this->requestService->aggregate_facet('activities', $projection, $filter, $page);

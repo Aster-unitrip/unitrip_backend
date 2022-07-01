@@ -54,6 +54,11 @@ class ComponentCarTypeController extends Controller
             unset($filter['base']);
         }
 
+        // Handle passenger_seats
+        if (array_key_exists('passenger_seats', $filter)) {
+            $filter['passenger_seats'] = array('$gte' => 0, '$lte' => $filter['passenger_seats']);
+        }
+
 
         // Handle projection content
         $projection = array(
