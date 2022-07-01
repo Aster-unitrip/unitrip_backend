@@ -205,6 +205,7 @@ class PassengerController extends Controller
         if(gettype($name) === 'string') {
             $name_changed['first_name'] = $name;
             $name_changed['last_name'] = "";
+            $name_changed['full_name'] = $name; //
         }
 
         return $name_changed;
