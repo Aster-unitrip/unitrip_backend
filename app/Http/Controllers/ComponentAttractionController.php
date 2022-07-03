@@ -82,12 +82,18 @@ class ComponentAttractionController extends Controller
         $attraction =  json_decode($attraction->content(), true);
 
         // 建立 Log
-        $attraction = $this->requestService->get_one('attractions', $attraction['inserted_id']);
-        $attraction =  json_decode($attraction->content(), true);
-        $filter = $this->componentLogService->recordCreate('attractions', $attraction);
-        $create_components_log = $this->requestService->insert_one("components_log", $filter);
-        Log::info('User add attraction', ['user' => auth()->user()->email, 'request' => $request->all()]);
-        return $attraction;
+        if($attraction){
+            $attraction = $this->requestService->get_one('attractions', $attraction['inserted_id']);
+            $attraction =  json_decode($attraction->content(), true);
+            $filter = $this->componentLogService->recordCreate('attractions', $attraction);
+            $create_components_log = $this->requestService->insert_one("components_log", $filter);
+            Log::info('User add attraction', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return $attraction;
+        }else{
+            Log::info('User add attraction failed', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return response()->json(['error' => 'add attraction failed'], 400);
+        }
+
 
     }
 

@@ -95,12 +95,18 @@ class ComponentRestaurantController extends Controller
 
 
         // 建立 Log
-        $restaurant = $this->requestService->get_one('restaurants', $restaurant['inserted_id']);
-        $restaurant =  json_decode($restaurant->content(), true);
-        $filter = $this->componentLogService->recordCreate('restaurants', $restaurant);
-        $create_components_log = $this->requestService->insert_one("components_log", $filter);
-        Log::info('User add restaurant', ['user' => auth()->user()->email, 'request' => $request->all()]);
-        return $restaurant;
+        if($restaurant){
+            $restaurant = $this->requestService->get_one('restaurants', $restaurant['inserted_id']);
+            $restaurant =  json_decode($restaurant->content(), true);
+            $filter = $this->componentLogService->recordCreate('restaurants', $restaurant);
+            $create_components_log = $this->requestService->insert_one("components_log", $filter);
+            Log::info('User add restaurant', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return $restaurant;
+        }else{
+            Log::info('User add restaurant failed', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return response()->json(['error' => 'add restaurant failed'], 400);
+        }
+
 
     }
 
