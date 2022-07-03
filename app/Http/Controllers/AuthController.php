@@ -14,6 +14,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Validation\ValidationException;
 use App\Services\RequestPService;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -41,7 +42,7 @@ class AuthController extends Controller
             'company_type' => ['required', 'integer', Rule::in([1,2])],
             'contact_name' => 'required|string|between:2,100',
             'email' => 'required|string|email|max:100',
-            'password' => 'required|string|confirmed|min:6',
+            'password' => 'required|string|confirmed|min:8',
             'contact_tel' => 'nullable|string|min:8,12',
             'contact_tel_extension' => 'nullable|string',
             'job_title' => 'nullable|string|max:25', // 供應商 窗口職稱 / 旅行社 使用者職稱
@@ -68,12 +69,6 @@ class AuthController extends Controller
             // 'ta_category' => 'nullable|string|max:20',
         ];
 
-        // $this->agencyRegisterRule = array_push($this->supplierRegisterRule, array(
-        //     'ta_register_num' => 'required|string|max:6',
-        //     'ta_category' => 'required|string|max:10',
-        //     'tqaa_num' => 'required|string|max:5', //品保
-        //     'travel_agency_name' => 'required|string|max:50' //旅行社名稱
-        // ));
         $this->agencyRegisterRule = $this->supplierRegisterRule + array(
             'ta_register_num' => 'required|string|max:6',
             'ta_category' => 'required|string|max:10',
@@ -88,7 +83,7 @@ class AuthController extends Controller
             'role_id' => 'required|string|min:1',
             'email' => 'required|string|email|max:100',
             'job_title' => 'nullable|string|max:25', // 供應商 窗口職稱 / 旅行社 使用者職稱
-            //'password' => 'required|string|confirmed|min:6',
+            //'password' => 'required|string|confirmed|min:8',
             'address_city' => 'string|max:5',
             'address_town' => 'string|max:5',
             'address' => 'string|max:30',
@@ -180,39 +175,37 @@ class AuthController extends Controller
         $input_user['address'] = $validator->validated()['address'];
         $input_user['job_title'] = $validator->validated()['job_title'];
 
-        try{
-            $if_company_exists = $this->companyService->getCompanyByTaxId($validator->validated()['tax_id']);
-            if(!$if_company_exists){
+        $if_company_exists = $this->companyService->getCompanyByTaxId($validator->validated()['tax_id']);
+        $if_user_exist = $this->userService->getUserByEmail($validator->validated()['email']);
+
+        if($if_company_exists){
+            return response()->json(['error' => "Company already exist, please login first."], 400);
+        }
+        else if($if_user_exist){
+            return response()->json(['error' => 'User already exists'], 400);
+        }
+        else if(!$if_company_exists && !$if_user_exist){
+            DB::beginTransaction();
+            try{
                 $company = $this->companyService->create($validator->validated());
                 $company_id = $company->id;
-            }else{
-                $company_id = $if_company_exists->id;
+                $input_user['company_id'] = $company_id;
+                $user = User::create(array_merge(
+                    $input_user,
+                    ['password' => bcrypt($request->password)]
+                ));
+                DB::commit();
+                // Send verify email
+                // https://stackoverflow.com/questions/65285530/laravel-8-rest-api-email-verification
+                event(new Registered($user));
+                Auth::login($user);
             }
-
-            $if_user_exist = $this->userService->getUserByEmail($validator->validated()['email']);
-            if ($if_user_exist) {
-                return response()->json(['error' => 'User already exists'], 400);
+            catch(\Exception $e){
+                DB::rollBack();
+                return response()->json(['error' => $e->getMessage()], 400);
             }
-            $input_user['company_id'] = $company_id;
-            $user = User::create(array_merge(
-                $input_user,
-                ['password' => bcrypt($request->password)]
-            ));
-            // Send verify email
-            // https://stackoverflow.com/questions/65285530/laravel-8-rest-api-email-verification
-            event(new Registered($user));
-            Auth::login($user);
+        }
 
-        }
-        catch(\Exception $e){
-            // if ($user) {
-            //     $user->delete();
-            // }
-            // if ($company) {
-            //     $company->delete();
-            // }
-            return response()->json(['error' => $e->getMessage()], 400);
-        }
         Log::info('User registered', ['id' => $input_user['email']]);
         return response()->json([
             'message' => 'User successfully registered',
