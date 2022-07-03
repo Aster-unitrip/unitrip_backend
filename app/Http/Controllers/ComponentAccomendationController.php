@@ -89,12 +89,19 @@ class ComponentAccomendationController extends Controller
         $accomendation =  json_decode($accomendation->content(), true);
 
         // 建立 Log
-        $accomendation = $this->requestService->get_one('accomendations', $accomendation['inserted_id']);
-        $accomendation =  json_decode($accomendation->content(), true);
-        $filter = $this->componentLogService->recordCreate('accomendations', $accomendation);
-        $create_components_log = $this->requestService->insert_one("components_log", $filter);
-        Log::info('User add accomendation', ['user' => auth()->user()->email, 'request' => $request->all()]);
-        return $accomendation;
+        if($accomendation){
+            $accomendation = $this->requestService->get_one('accomendations', $accomendation['inserted_id']);
+            $accomendation =  json_decode($accomendation->content(), true);
+            $filter = $this->componentLogService->recordCreate('accomendations', $accomendation);
+            $create_components_log = $this->requestService->insert_one("components_log", $filter);
+            Log::info('User add accomendation', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return $accomendation;
+        }else{
+            Log::info('User add accomendation failed', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return response()->json(['error' => 'add accomendation failed'], 400);
+        }
+
+
 
     }
 

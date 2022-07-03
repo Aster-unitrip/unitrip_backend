@@ -94,14 +94,19 @@ class ComponentActivityController extends Controller
         $activity = $this->requestService->insert_one('activities', $validated);
         $activity =  json_decode($activity->content(), true);
 
-
         // 建立 Log
-        $activity = $this->requestService->get_one('activities', $activity['inserted_id']);
-        $activity =  json_decode($activity->content(), true);
-        $filter = $this->componentLogService->recordCreate('activities', $activity);
-        $create_components_log = $this->requestService->insert_one("components_log", $filter);
-        Log::info('User add activity', ['user' => auth()->user()->email, 'request' => $request->all()]);
-        return $activity;
+        if($activity){
+            $activity = $this->requestService->get_one('activities', $activity['inserted_id']);
+            $activity =  json_decode($activity->content(), true);
+            $filter = $this->componentLogService->recordCreate('activities', $activity);
+            $create_components_log = $this->requestService->insert_one("components_log", $filter);
+            Log::info('User add activity', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return $activity;
+        }else{
+            Log::info('User add activity failed', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return response()->json(['error' => 'add activity failed'], 400);
+        }
+
     }
 
     public function get_by_id($id)
