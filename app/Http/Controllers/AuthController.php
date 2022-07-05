@@ -197,7 +197,9 @@ class AuthController extends Controller
                 DB::commit();
                 // Send verify email
                 // https://stackoverflow.com/questions/65285530/laravel-8-rest-api-email-verification
-                $user->notify(event(new Registered($user)));
+                // $user->notify(event(new Registered($user)));
+                event(new Registered($user));
+
 
                 Auth::login($user);
             }

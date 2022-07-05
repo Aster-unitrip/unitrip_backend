@@ -373,13 +373,10 @@
                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td>
-                                            <p>{{ $contact_name }}，您好:</p>
-                                            <p>如果不是您申請忘記密碼，請忽略此信</p>
-                                            <p>若您忘記密碼，請於一小時內，點選下面連結更換新密碼</p>
-                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0"
-                                                class="btn btn-primary">
+                                            <p>您好:</p>
+                                            <p>請您點選下面連結開通帳號</p>
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                                                 <tbody>
-                                                    <p>若超過時限請重新申請，已確保用戶帳號安全</p>
                                                     <tr>
                                                         <p>{{ $reset_url }}</p>
                                                     </tr>
