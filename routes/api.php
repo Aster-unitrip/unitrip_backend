@@ -22,7 +22,10 @@ use App\Http\Controllers\CrmController;
 use App\Http\Controllers\DMController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\VerifyEmailController;
 
+use App\Models\User;
+use Illuminate\Auth\Events\Verified;
 
 
 /*
@@ -35,8 +38,7 @@ use App\Http\Controllers\EmailController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-// Verify email
+// // Verify email
 // Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verifyEmail'])
 // ->middleware(['auth', 'signed'])
 // ->name('verification.verify');
@@ -47,11 +49,24 @@ use App\Http\Controllers\EmailController;
 //     return back()->with('message', 'Verification link sent!');
 // })->middleware(['auth', 'signed'])->name('verification.send');
 
+// Verify email
+// Route::get('api/mail/verify/{id}/{hash}', [VerifyEmailController::class, 'verifyEmail'])
+//     ->middleware(['signed'])
+//     ->name('verification.verify');
+
+// Resend link to verify email
+
+Route::group(['middleware' => ['auth:sanctum']], function ($router) {
+    Route::post('/api/mail/verify/resend', [VerifyEmailController::class, 'verifyEmail'])->name('verification.send');
+});
+
 Route::group(['middleware' => 'api', 'prefix' => 'mail'], function ($router) {
     Route::get('/reset/{mail_encryption}/{token}', [EmailController::class, 'get_token']);
     Route::post('/url-link', [EmailController::class, 'mail']);
     Route::post('/reset-password', [EmailController::class, 'reset_password']);
-
+    Route::get('/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
+        ->middleware(['signed'])
+        ->name('verification.verify');
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
