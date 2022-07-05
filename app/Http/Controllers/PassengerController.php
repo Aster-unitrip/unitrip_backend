@@ -20,7 +20,7 @@ class PassengerController extends Controller
         $this->order_passenger_rule = [
             '_id' => 'string',
             'order_id' => 'required|string',
-            'name' => 'required|string|max:30',
+            'name' => 'required|max:30',
             'name_en' => 'string|max:30',
             'nationality' => 'required|string',
             'company' => 'string|max:50',
@@ -105,6 +105,8 @@ class PassengerController extends Controller
 
         // 修改資料
         $validated['address']['detail'] = $validated['address']['city'].$validated['address']['town'].$validated['address']['address'];
+        $validated['name']['full_name'] = trim($validated['name']['first_name']).trim($validated['name']['last_name']);
+
         // TODO: 待前端修改完刪除中文判斷
         $validated['gender'] = $this->gender_transition($validated['gender']);
         $validated = $this->ensure_value_is_upper($validated);
@@ -127,8 +129,6 @@ class PassengerController extends Controller
 
 
     public function is_first_time_user($data){
-        // 搜尋方式 : 搜尋該筆
-        $filter['name'] = $this->ensure_name_key($data['name']);
         // 判斷台灣旅客或其他旅客
         // 台灣旅客以國籍判斷 其他旅客以生日判斷
         if($data['nationality'] === "TW" && array_key_exists("id_number", $data)){
@@ -165,8 +165,6 @@ class PassengerController extends Controller
 
     public function ensure_passenger_profile_key($data){
 
-        // 修改姓名
-        $data['name'] = $this->ensure_name_key($data['name']);
         $data['note'] = ""; // 備註
         $data['mtp_number'] = ""; //台胞證
         $data['visa_number'] = ""; // 簽證號碼
@@ -197,18 +195,6 @@ class PassengerController extends Controller
         $data['updated_at'] = date('Y-m-d H:i:s');
 
         return $data;
-    }
-
-    // 姓名轉換(過渡期)
-    public function ensure_name_key($name){
-
-        if(gettype($name) === 'string') {
-            $name_changed['first_name'] = $name;
-            $name_changed['last_name'] = "";
-            $name_changed['full_name'] = $name; //
-        }
-
-        return $name_changed;
     }
 
     public function ensure_value_is_upper($value){ //將需要為大寫value轉成大寫
