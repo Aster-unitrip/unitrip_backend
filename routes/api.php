@@ -49,24 +49,14 @@ use Illuminate\Auth\Events\Verified;
 //     return back()->with('message', 'Verification link sent!');
 // })->middleware(['auth', 'signed'])->name('verification.send');
 
-// Verify email
-// Route::get('api/mail/verify/{id}/{hash}', [VerifyEmailController::class, 'verifyEmail'])
-//     ->middleware(['signed'])
-//     ->name('verification.verify');
-
-// Resend link to verify email
-
-Route::group(['middleware' => ['auth:sanctum']], function ($router) {
-    Route::post('/api/mail/verify/resend', [VerifyEmailController::class, 'verifyEmail'])->name('verification.send');
-});
-
 Route::group(['middleware' => 'api', 'prefix' => 'mail'], function ($router) {
     Route::get('/reset/{mail_encryption}/{token}', [EmailController::class, 'get_token']);
     Route::post('/url-link', [EmailController::class, 'mail']);
     Route::post('/reset-password', [EmailController::class, 'reset_password']);
-    Route::get('/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
+    Route::get('/verify/{id}/{hash}', [VerifyEmailController::class, 'verifyEmail'])
         ->middleware(['signed'])
         ->name('verification.verify');
+    Route::post('/verify/resend', [VerifyEmailController::class, 'resendNotification'])->name('verification.send');
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
