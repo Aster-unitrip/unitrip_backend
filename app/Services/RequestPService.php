@@ -393,7 +393,7 @@ class RequestPService
             array_push($query_filter, array('$project' => $projection));
         }
         // 排序 預設為按照新增日期
-        array_push($query_filter, array('$sort' => array('created_at' => 1)));
+        array_push($query_filter, array('$sort' => array('created_at' => -1)));
 
         $second_query_filter = $query_filter;
 
