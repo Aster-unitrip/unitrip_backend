@@ -422,13 +422,13 @@ class OrderController extends Controller
 
         //[訂單編號]、[代表人]、[參團編號]使用模糊搜尋
         if(array_key_exists('representative', $filter)){
-            $filter['representative'] = array('$regex' => $filter['representative']);
+            $filter['representative'] = array('$regex' => trim($filter['representative']));
         }
         if(array_key_exists('order_number', $filter)){
-            $filter['order_number'] = array('$regex' => $filter['order_number']);
+            $filter['order_number'] = array('$regex' => trim($filter['order_number']));
         }
         if(array_key_exists('cus_group_code', $filter)){
-            $filter['cus_group_code'] = array('$regex' => $filter['cus_group_code']);
+            $filter['cus_group_code'] = array('$regex' => trim($filter['cus_group_code']));
         }
 
         $result = $this->requestService->aggregate_search('cus_orders', null, $filter, $page);

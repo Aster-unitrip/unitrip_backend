@@ -74,6 +74,7 @@ class ComponentAttractionController extends Controller
         $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         if(!array_key_exists("position", $validated)){
             $validated['position'] = null;
         }
@@ -81,12 +82,18 @@ class ComponentAttractionController extends Controller
         $attraction =  json_decode($attraction->content(), true);
 
         // 建立 Log
-        $attraction = $this->requestService->get_one('attractions', $attraction['inserted_id']);
-        $attraction =  json_decode($attraction->content(), true);
-        $filter = $this->componentLogService->recordCreate('attractions', $attraction);
-        $create_components_log = $this->requestService->insert_one("components_log", $filter);
-        Log::info('User add attraction', ['user' => auth()->user()->email, 'request' => $request->all()]);
-        return $attraction;
+        if($attraction){
+            $attraction = $this->requestService->get_one('attractions', $attraction['inserted_id']);
+            $attraction =  json_decode($attraction->content(), true);
+            $filter = $this->componentLogService->recordCreate('attractions', $attraction);
+            $create_components_log = $this->requestService->insert_one("components_log", $filter);
+            Log::info('User add attraction', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return $attraction;
+        }else{
+            Log::info('User add attraction failed', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return response()->json(['error' => 'add attraction failed'], 400);
+        }
+
 
     }
 
@@ -138,7 +145,7 @@ class ComponentAttractionController extends Controller
         // 景點名稱模糊搜尋
         if(array_key_exists('name', $filter)){
             // $filter['name'] = array('$regex' => $filter['name'], '$options' => 'i');
-            $filter['name'] = array('$regex' => $filter['name']);
+            $filter['name'] = array('$regex' => trim($filter['name']));
         }
 
         $result = $this->requestService->aggregate_facet('attractions', $projection, $filter, $page);
@@ -203,6 +210,7 @@ class ComponentAttractionController extends Controller
         $validated = $validator->validated();
         $company_id = auth()->user()->company_id;
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         $record = $this->requestService->get_one('attractions', $validated['_id']);
         $content =  json_decode($record->content(), true);
         if (auth()->payload()->get('company_type') == 1) {
@@ -227,58 +235,6 @@ class ComponentAttractionController extends Controller
         // $attraction = $this->requestService->update_one('attractions', $validated);
         return $attraction;
 
-    }
-
-    // 把元件從子槽複製到母槽，要排除 experience, ticket 欄位
-    // 母槽元件 ticket 只顯示票種不要票價
-    // 須紀錄該元件是否有分享過
-    // 先確認此元件屬不屬於他自己，而且必須是子槽資料
-    // TODO: 紀錄該元件是否已複製至母槽過
-    public function copy_from_private_to_public(Request $request) {
-        $query = json_decode($request->getContent(), true);
-        $component = $this->requestService->get_one('attractions', $query['_id']);
-        $component = json_decode($component->content(), true);
-        // TODO: 要處理沒找到元件的使用情境
-        // 確認該元件是否屬於該公司
-        if ($component['is_display'] == false && $component['owned_by'] == auth()->user()->company_id) {
-            $component['is_display'] = true;
-            foreach($component['ticket'] as $key => $value){
-                if ($key != 'free' & array_key_exists('price', $component['ticket'])) {
-                    $key['price'] = 0;
-                }
-            }
-            $component['experience'] = '';
-            unset($component['_id']);
-
-            $attraction = $this->requestService->insert_one('attractions', $component);
-            $attraction = json_decode($attraction->content(), true);
-            Log::info("Copied component to public", ['id' => $attraction['inserted_id'], 'user' => auth()->user()->email]);
-            return response()->json([
-                'message' => 'Successfully copied component to public',
-                'id' => $attraction['inserted_id']
-            ]);
-        } else {
-            return response()->json(['error' => 'You can not access this component'], 400);
-        }
-    }
-
-    // 把元件從母槽複製子槽
-    // 複製進子槽不必考慮權限
-    public function copy_from_public_to_private(Request $request) {
-        $query = json_decode($request->getContent(), true);
-        $component = $this->requestService->get_one('attractions', $query['_id']);
-        $component = json_decode($component->content(), true);
-        unset($component['_id']);
-        // 修改擁有公司
-        $component['owned_by'] = auth()->user()->company_id;
-        $component['is_display'] = false;
-        $attraction = $this->requestService->insert_one('attractions', $component);
-        $attraction = json_decode($attraction->content(), true);
-        Log::info("Copied component to private", ['id' => $attraction['inserted_id'], 'user' => auth()->user()->email]);
-        return response()->json([
-            'message' => 'Successfully copied component to private',
-            'id' => $attraction['inserted_id']
-        ]);
     }
 
     private function travel_agency_search(Request $request) {

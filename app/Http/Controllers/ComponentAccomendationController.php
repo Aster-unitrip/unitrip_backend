@@ -42,6 +42,7 @@ class ComponentAccomendationController extends Controller
             'check_out' => 'nullable|string|max:10',
             "breakfast_served_time" => "nullable",
             'foc' => 'nullable|string|max:200',
+            'is_comp_room' => 'nullable|boolean', // TODO check
             'service_content' => 'nullable|string|max:200',
             'facility' => 'nullable|string|max:200',
             'is_display' => 'required|boolean',
@@ -73,6 +74,7 @@ class ComponentAccomendationController extends Controller
         $company_id = auth()->user()->company_id;
         $validated = $validator->validated();
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         $validated['source'] = "ta";
         if(!array_key_exists("total_rooms", $validated)){
             $validated['total_rooms'] = null;
@@ -80,16 +82,26 @@ class ComponentAccomendationController extends Controller
         if(!array_key_exists("position", $validated)){
             $validated['position'] = null;
         }
+        if(!array_key_exists("is_comp_room", $validated)){
+            $validated['is_comp_room'] = false;
+        }
         $accomendation = $this->requestService->insert_one('accomendations', $validated);
         $accomendation =  json_decode($accomendation->content(), true);
 
         // 建立 Log
-        $accomendation = $this->requestService->get_one('accomendations', $accomendation['inserted_id']);
-        $accomendation =  json_decode($accomendation->content(), true);
-        $filter = $this->componentLogService->recordCreate('accomendations', $accomendation);
-        $create_components_log = $this->requestService->insert_one("components_log", $filter);
-        Log::info('User add accomendation', ['user' => auth()->user()->email, 'request' => $request->all()]);
-        return $accomendation;
+        if($accomendation){
+            $accomendation = $this->requestService->get_one('accomendations', $accomendation['inserted_id']);
+            $accomendation =  json_decode($accomendation->content(), true);
+            $filter = $this->componentLogService->recordCreate('accomendations', $accomendation);
+            $create_components_log = $this->requestService->insert_one("components_log", $filter);
+            Log::info('User add accomendation', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return $accomendation;
+        }else{
+            Log::info('User add accomendation failed', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return response()->json(['error' => 'add accomendation failed'], 400);
+        }
+
+
 
     }
 
@@ -143,7 +155,7 @@ class ComponentAccomendationController extends Controller
         // 住宿名稱模糊搜尋
         if(array_key_exists('name', $filter)){
             // $filter['name'] = array('$regex' => $filter['name'], '$options' => 'i');
-            $filter['name'] = array('$regex' => $filter['name']);
+            $filter['name'] = array('$regex' => trim($filter['name']));
         }
 
         $result = $this->requestService->aggregate_facet('accomendations', $projection, $filter, $page);
@@ -210,6 +222,7 @@ class ComponentAccomendationController extends Controller
 
         // Override owned_by
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         $record = $this->requestService->get_one('accomendations', $validated['_id']);
         $content =  json_decode($record->content(), true);
         if(array_key_exists("count", $content) && $content['count'] === 0){

@@ -83,6 +83,7 @@ class ComponentActivityController extends Controller
         $validated = $validator->validated();
 
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         $validated['source'] = "ta"; //旅行社預設為ta
         if(!array_key_exists("attraction_name", $validated)){
             $validated['attraction_name'] = null;
@@ -93,14 +94,19 @@ class ComponentActivityController extends Controller
         $activity = $this->requestService->insert_one('activities', $validated);
         $activity =  json_decode($activity->content(), true);
 
-
         // 建立 Log
-        $activity = $this->requestService->get_one('activities', $activity['inserted_id']);
-        $activity =  json_decode($activity->content(), true);
-        $filter = $this->componentLogService->recordCreate('activities', $activity);
-        $create_components_log = $this->requestService->insert_one("components_log", $filter);
-        Log::info('User add activity', ['user' => auth()->user()->email, 'request' => $request->all()]);
-        return $activity;
+        if($activity){
+            $activity = $this->requestService->get_one('activities', $activity['inserted_id']);
+            $activity =  json_decode($activity->content(), true);
+            $filter = $this->componentLogService->recordCreate('activities', $activity);
+            $create_components_log = $this->requestService->insert_one("components_log", $filter);
+            Log::info('User add activity', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return $activity;
+        }else{
+            Log::info('User add activity failed', ['user' => auth()->user()->email, 'request' => $request->all()]);
+            return response()->json(['error' => 'add activity failed'], 400);
+        }
+
     }
 
     public function get_by_id($id)
@@ -145,6 +151,7 @@ class ComponentActivityController extends Controller
         $validated = $validator->validated();
         $company_id = auth()->user()->company_id;
         $validated['owned_by'] = $company_id;
+        $validated['last_updated_on'] = auth()->user()->contact_name;
         if(!array_key_exists("attraction_name", $validated)){
             $validated['attraction_name'] = null;
         }
@@ -237,11 +244,11 @@ class ComponentActivityController extends Controller
         );
         // 體驗名稱、體驗供應商模糊搜尋
         if(array_key_exists('activity_company_name', $filter)){
-            $filter['activity_company_name'] = array('$regex' => $filter['activity_company_name']);
+            $filter['activity_company_name'] = array('$regex' => trim($filter['activity_company_name']));
         }
         if(array_key_exists('name', $filter)){
             // $filter['name'] = array('$regex' => $filter['name'], '$options' => 'i');
-            $filter['name'] = array('$regex' => $filter['name']);
+            $filter['name'] = array('$regex' => trim($filter['name']));
 
         }
         $result = $this->requestService->aggregate_facet('activities', $projection, $filter, $page);

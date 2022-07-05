@@ -80,6 +80,8 @@ class CrmController extends Controller
             return response()->json(['error' => 'company_type must be 2'], 400);
         }
         $validated['address']['detail'] = $validated['address']['city'].$validated['address']['town'].$validated['address']['address'];
+        $validated['name']['full_name'] = trim($validated['name']['first_name']).trim($validated['name']['last_name']);
+        
         // TODO: 待前端修改完刪除中文判斷
         $validated['gender'] = $this->gender_transition($validated['gender']);
         $validated = $this->ensure_value_is_upper($validated);
@@ -119,8 +121,10 @@ class CrmController extends Controller
         // 模糊搜尋
         if(array_key_exists('name', $filter)){
             $filter['$or'] = array(
-                    array('name.first_name' => array('$regex' => $filter['name'])),
-                    array('name.last_name' => array('$regex' => $filter['name']))
+                    array('name.first_name' => array('$regex' => trim($filter['name']))),
+                    array('name.last_name' => array('$regex' => trim($filter['name']))),
+                    array('name.full_name' => array('$regex' => trim($filter['name'])))
+
                 );
             unset($filter['name']);
         }
@@ -174,24 +178,19 @@ class CrmController extends Controller
 
     public function ensure_value_is_upper($value){ //將需要為大寫value轉成大寫
         // mtp_number visa_number id_number passport_number
+        // 順便處理空格問題
         if(array_key_exists("id_number",$value)){
-                $value['id_number'] = strtoupper($value['id_number']);
+            $value['id_number'] = trim(strtoupper($value['id_number']));
         }
         if(array_key_exists("mtp_number",$value)){
-                $value['mtp_number'] = strtoupper($value['mtp_number']);
+            $value['mtp_number'] = trim(strtoupper($value['mtp_number']));
         }
         if(array_key_exists("visa_number",$value)){
-                $value['visa_number'] = strtoupper($value['visa_number']);
+            $value['visa_number'] = trim(strtoupper($value['visa_number']));
         }
         if(array_key_exists("passport_number",$value)){
-                $value['passport_number'] = strtoupper($value['passport_number']);
+            $value['passport_number'] = trim(strtoupper($value['passport_number']));
         }
-
-        // foreach($value as $key => $val) {
-        //     if($key === 'mtp_number' || $key === 'visa_number' || $key === 'id_number' || $key === 'passport_number'){
-        //         $val = strtoupper($val);
-        //     }
-        // }
         return $value;
     }
 
