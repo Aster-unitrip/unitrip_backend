@@ -14,7 +14,7 @@ class AddJobTitleFieldToUserTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('job_title')->nullable()->comment('供應商:窗口職稱 / 旅行社:使用者職稱');
+            $table->string('job_title')->after('contact_name')->nullable()->comment('供應商:窗口職稱 / 旅行社:使用者職稱');
         });
     }
 

@@ -66,7 +66,7 @@ class EmailController extends Controller
         //傳送帳號/密碼/確認密碼
         $rule = [
             'email' => 'required|string|email|max:100',
-            'password' => 'required|string|confirmed|min:6',
+            'password' => 'required|string|confirmed|min:8',
             'token' => 'required|string'
         ];
         $validator = Validator::make($request->all(), $rule);
