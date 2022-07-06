@@ -38,15 +38,15 @@ class TestEmail extends Mailable
         $encrypted_email = Crypt::encrypt($this->data['email']);
         return $this->view('emails.reset_password_zh')
                     ->from($address, $name)
-//                    ->cc($address, $name)
-//                    ->bcc($address, $name)
-//                    ->replyTo($address, $name)
+                    // ->cc($address, $name)
+                    // ->bcc($address, $name)
+                    // ->replyTo($address, $name)
                     ->subject($subject)
                     ->with([
                         'email' => $this->data['email'],
                         'contact_name' => $this->data['contact_name'],
                         'reset_url' => $mail_url_base."/#/reset_password?/".$encrypted_email."/".$this->data['signature'],
-
                     ]);
     }
+
 }

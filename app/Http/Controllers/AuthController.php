@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\Registered;
+use App\Notifications\Activate_account;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Validation\ValidationException;
 use App\Services\RequestPService;
@@ -197,8 +198,9 @@ class AuthController extends Controller
                 DB::commit();
                 // Send verify email
                 // https://stackoverflow.com/questions/65285530/laravel-8-rest-api-email-verification
-                // $user->notify(event(new Registered($user)));
-                event(new Registered($user));
+                // event(new Registered($user));
+                // event(new Activate_account($user));
+                $user->notify(new Activate_account($user));
 
 
                 Auth::login($user);
