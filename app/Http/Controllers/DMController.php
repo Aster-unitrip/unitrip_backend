@@ -75,9 +75,6 @@ class DMController extends Controller
             $insert_one_to_dm = $this->requestService->insert_one('dm', $dm_data_new);
         }else{ //old
             $dm_data_new['_id'] = $dm_before['document']['_id'];
-            if(!array_key_exists("imgs", $dm_data_new)){
-                return response()->json(['error' => "請放入大圖輪播圖片!"]);
-            }
             $update_one_to_dm = $this->requestService->update_one('dm', $dm_data_new);
         }
         $after_dm_data_new = $this->requestService->find_one('dm', null, 'itinerary_group_id', $id);
@@ -143,7 +140,9 @@ class DMController extends Controller
         if($owned_by !== $cus_dm_edit_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
-
+        if(!array_key_exists("imgs", $validated)){
+            return response()->json(['error' => "請放入大圖輪播圖片!"]);
+        }
         $update_one_to_dm = $this->requestService->update_one('dm', $validated);
         return $update_one_to_dm;
     }
