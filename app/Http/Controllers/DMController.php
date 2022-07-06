@@ -140,7 +140,7 @@ class DMController extends Controller
         if($owned_by !== $cus_dm_edit_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
-        if(!array_key_exists("imgs", $validated)){
+        if(!array_key_exists("url", $validated['imgs'])){
             return response()->json(['error' => "請放入大圖輪播圖片!"]);
         }
         $update_one_to_dm = $this->requestService->update_one('dm', $validated);
