@@ -35,9 +35,8 @@ class EmailController extends Controller
                 'signature' => $this->randomkeys()
             ];
             $this->passwordResetService->create($data);
-
             $data['contact_name'] = $userdata['contact_name'];
-            $mail_url_base =env('MAIL_URL_BASE');
+
             // 傳 email
             Mail::to($email)->send(new TestEmail($data));
         }
@@ -89,6 +88,7 @@ class EmailController extends Controller
         $signature = substr(str_shuffle($pattern),0,40);
         return $signature;
     }
+
     public function modifyPassword($validated){
         $filter = ["email" =>  $validated['email'], "signature" => $validated['token']];
         $result = $this->passwordResetService->getEmailAndToken($filter);
