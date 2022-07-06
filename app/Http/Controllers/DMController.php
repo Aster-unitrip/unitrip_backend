@@ -35,7 +35,7 @@ class DMController extends Controller
             'if_show_signup'=> ['required', new Boolean],
             'if_show_agent_info'=> ['required', new Boolean],
             'locations'=>'required|array',
-            'imgs' => 'required|array',
+            'imgs' => 'array',
             'theme_color' => 'required|string',
             'meta_description' => 'required|string|max:150'
         ];
@@ -75,6 +75,9 @@ class DMController extends Controller
             $insert_one_to_dm = $this->requestService->insert_one('dm', $dm_data_new);
         }else{ //old
             $dm_data_new['_id'] = $dm_before['document']['_id'];
+            if(!array_key_exists("imgs", $dm_data_new)){
+                return response()->json(['error' => "請放入大圖輪播圖片!"]);
+            }
             $update_one_to_dm = $this->requestService->update_one('dm', $dm_data_new);
         }
         $after_dm_data_new = $this->requestService->find_one('dm', null, 'itinerary_group_id', $id);
