@@ -35,7 +35,7 @@ class DMController extends Controller
             'if_show_signup'=> ['required', new Boolean],
             'if_show_agent_info'=> ['required', new Boolean],
             'locations'=>'required|array',
-            'imgs' => 'required|array',
+            'imgs' => 'array',
             'theme_color' => 'required|string',
             'meta_description' => 'required|string|max:150'
         ];
@@ -140,7 +140,9 @@ class DMController extends Controller
         if($owned_by !== $cus_dm_edit_data['owned_by']){
             return response()->json(['error' => 'you are not an employee of this company.'], 400);
         }
-
+        if(!array_key_exists("url", $validated['imgs'])){
+            return response()->json(['error' => "請放入大圖輪播圖片!"]);
+        }
         $update_one_to_dm = $this->requestService->update_one('dm', $validated);
         return $update_one_to_dm;
     }
