@@ -15,45 +15,6 @@ class ItineraryController extends Controller
     {
         $this->middleware('auth');
         $this->requestService = $requestService;
-        $this->rule = [
-            'name' => 'required|string|max:30',
-            'summary' => 'nullable|string|max:150',
-            'code' => 'nullable|string|max:20',
-            'total_day' => 'required|integer|between:1,30',
-            'areas' => 'nullable|array',
-            'people_threshold' => 'required|integer|min:1',
-            'people_full' => 'required|integer|max:100',
-            'sub_categories' => 'nullable|array',
-            'itinerary_content' => 'required|array|min:1',
-            // 'pricing_detail.subtotal' => 'required|integer|min:0',
-            'guides' => 'present|array',
-            'transportations' => 'present|array',
-            'misc' => 'present|array',
-            'accounting' => 'required|array',
-            'include_description' => 'nullable|string|max:150',
-            'exclude_description' => 'nullable|string|max:150',
-        ];
-        $this->edit_rule = [
-            '_id'=>'required|string|max:24',
-            'name' => 'required|string|max:30',
-            'summary' => 'nullable|string|max:150',
-            'code' => 'nullable|string|max:20',
-            'total_day' => 'required|integer|max:7',
-            'areas' => 'nullable|array',
-            'people_threshold' => 'required|integer|min:1',
-            'people_full' => 'required|integer|max:100',
-            'sub_categories' => 'nullable|array',
-            'itinerary_content' => 'required|array|min:1',
-            'guides' => 'present|array',
-            'transportations' => 'present|array',
-            'misc' => 'present|array',
-            'accounting' => 'required|array',
-            'include_description' => 'nullable|string|max:150',
-            'exclude_description' => 'nullable|string|max:150',
-            'owned_by'=>'required|integer',
-            'created_at'=>'required|date',
-        ];
-
         $this->add_rule = [
             'name' => 'required|string|max:30',
             'code' => 'nullable|string|max:20',
@@ -98,10 +59,9 @@ class ItineraryController extends Controller
             'itinerary_group_cost' => 'required|numeric',
             'itinerary_group_price' => 'required|numeric',
             'itinerary_group_note' => 'string',
-            'estimated_travel_start' => 'required|string',
-            'estimated_travel_end' => 'required|string',
+            'owned_by'=>'required|integer',
+            'created_at'=>'required|date',
         ];
-
         $this->operator_rule = [
             '_id'=>'required|string|max:24',
             'itinerary_content' => 'required|array|min:1',
@@ -115,7 +75,7 @@ class ItineraryController extends Controller
     {
 
         $data = json_decode($request->getContent(), true);
-        $validator = Validator::make($data, $this->rule);
+        $validator = Validator::make($data, $this->add_rule);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
